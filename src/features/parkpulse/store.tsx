@@ -115,7 +115,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     },
     declineImport: async () => { await declineFn(); setImportOffer(false); },
   };
-  return <Context.Provider value={store}><ParkingPlanProvider>{children}</ParkingPlanProvider></Context.Provider>;
+  return <Context.Provider value={store}><ParkingPlanProvider session={state.session}>{children}</ParkingPlanProvider></Context.Provider>;
 }
 
 export function useDemo() { const ctx = useContext(Context); if (!ctx) throw new Error('ParkPulse-Demo ist nicht verfügbar'); return ctx; }
