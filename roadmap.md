@@ -5,7 +5,7 @@
 - [x] Fix registration error messages (weak/leaked password etc.) and verify flow.
 
 # Stellplatzübersicht
-- [ ] Wallbox-Filter für alle Ebenen und Kombinationen korrigieren, Ladeleistungen anzeigen und Speicherung testen.
+- [x] Wallbox-Filter für alle Ebenen und Kombinationen korrigiert; 114 Tests bestanden und P3/B02 in aktiver Session gespeichert sowie nach Neuladen bestätigt.
 - [x] Mehr Plätze, ausgewogene Ausgangsbelegung, Kennzahlen und Schutz aktueller Sessionpositionen.
 - [x] 84 Tests bestanden; Vorschau und veröffentlichte Version verglichen, Kontodaten gelesen und Speicherung geprüft; Veröffentlichungsschritte erklärt.
 - [x] Fahrzeugfilter, Bedürfnisse, Kategorien und fiktive Stellplatzeigenschaften ergänzen.
