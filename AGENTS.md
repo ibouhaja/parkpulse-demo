@@ -13,3 +13,5 @@
 - Demo persistence uses browser localStorage after hydration only; no server, authentication, payment or external data integrations are needed.
 
 - Session state transitions are pure functions; the provider synchronously saves guarded transitions before navigation, preserving pending checkout and upgrading older local records.
+
+- Checkout records the completed session and receipt atomically with loyalty and benefit consumption; migration initializes new loyalty fields once without changing frozen legacy sessions.

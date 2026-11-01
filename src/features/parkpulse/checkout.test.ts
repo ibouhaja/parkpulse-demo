@@ -1,7 +1,7 @@
 import { describe,it,expect } from 'vitest';
 import { initialState,type DemoState } from './data';
 import { checkoutAmounts,restoreState,transition } from './session';
-function pending(fee=4,id='s1',base:DemoState=initialState){const s=transition(base,{type:'start',facilityId:'quartier',id,now:1000});return {...s,session:s.session?{...s.session,status:'checkout-pending' as const,endedAt:2000,finalDurationMs:3600001,finalFee:fee}:null};}
+function pending(fee=4,id='s1',base:DemoState=initialState):DemoState{const s=transition(base,{type:'start',facilityId:'quartier',id,now:1000});return {...s,session:s.session?{...s.session,status:'checkout-pending' as const,endedAt:2000,finalDurationMs:3600001,finalFee:fee}:null};}
 const finish=(s:DemoState,payment:'success'|'failure'|'free'='success')=>transition(s,{type:'complete',sessionId:s.session?.id??'s1',payment,now:3000});
 describe('Checkout and loyalty rules',()=>{
  it('initializes five stamps and no voucher',()=>{expect(initialState.stamps).toBe(5);expect(initialState.vouchers).toEqual([]);});
