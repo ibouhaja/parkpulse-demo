@@ -1,3 +1,4 @@
+import { preferencesFilters } from './preferences';
 import { tariffs, tariffDescription } from './tariffs';
 import { earnedPoints } from './points';
 import { useState,useEffect } from 'react';
@@ -16,19 +17,23 @@ import { CityMap } from './city-map';
 import type { Reservation } from './reservation-rules';
 
 export function MapHome(){
- const {plans,simulate}=useParkingPlan();const {state,signedIn,arrive}=useDemo();const {reservations,refresh,available}=useReservations();
+ const {plans,simulate}=useParkingPlan();const {state,signedIn,arrive,preferences,userId,profileReady}=useDemo();const {reservations,refresh,available}=useReservations();
  const book=useServerFn(bookReservation);const cancel=useServerFn(cancelReservation);const navigate=useNavigate();
- const [filters,setFilters]=useState(defaultFilters);const [query,setQuery]=useState('');const [min20,setMin20]=useState(false);const [shopping,setShopping]=useState(false);const [cheapest,setCheapest]=useState(false);const [vehicleOpen,setVehicleOpen]=useState(false);
+ const [filterState,setFilters]=useState<{owner:string|null;value:typeof defaultFilters}>({owner:null,value:defaultFilters});
+ const accountFilters=signedIn&&profileReady?preferencesFilters(preferences):defaultFilters;
+ const filters=filterState.owner===userId?filterState.value:accountFilters;
+ const updateFilters=(next:typeof defaultFilters|((f:typeof defaultFilters)=>typeof defaultFilters))=>setFilters({owner:userId,value:typeof next==='function'?next(filters):next});
+ useEffect(()=>{setFilters({owner:userId,value:accountFilters});},[userId,preferences,profileReady]);const [query,setQuery]=useState('');const [min20,setMin20]=useState(false);const [shopping,setShopping]=useState(false);const [cheapest,setCheapest]=useState(false);const [vehicleOpen,setVehicleOpen]=useState(false);
  const [selected,setSelected]=useState<string|null>('quartier');const [expanded,setExpanded]=useState(false);const [booking,setBooking]=useState(false);const [position,setPosition]=useState('');const [date,setDate]=useState('');const [time,setTime]=useState('');const [hours,setHours]=useState(2);const [message,setMessage]=useState('');const [busy,setBusy]=useState(false);const [routeId,setRouteId]=useState<string|null>(null);
  useEffect(()=>{const d=new Date(Date.now()+3600000);const local=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString();setDate(local.slice(0,10));setTime(local.slice(11,16));},[]);
- const items=mapFacilities(plans,filters,query,min20,shopping,cheapest);const p=items.find(p=>p.id===selected);const a=p?facilityAvailability(plans[p.id]?.spots??[],filters):null;
+ const items=signedIn&&!profileReady?[]:mapFacilities(plans,filters,query,min20,shopping,cheapest);const p=items.find(p=>p.id===selected);const a=p?facilityAvailability(plans[p.id]?.spots??[],filters):null;
  const offer=p?facilityOffers[p.id]:null;const activeBookings=reservations.filter(r=>r.status==='booked'||r.status==='arrived');const routed=reservations.find(r=>r.id===routeId);
  const spots=p?(plans[p.id]?.spots??[]).filter(s=>!s.occupied&&!s.unknown&&matchesSpot(s,filters)):[];
  const plannedStart=Date.parse(`${date}T${time}`);const price=p?reservationPrice(hours,p.id,Number.isFinite(plannedStart)?plannedStart:Date.now()):null;const potential=shopping&&!state.shop2Used&&offer?.shopping?Math.min(2,price??0):0;
  const select=(id:string)=>{setSelected(id);setBooking(false);setPosition('');setMessage('');};
- const need=(key:keyof typeof filters.needs)=>setFilters(f=>({...f,needs:{...f.needs,[key]:!f.needs[key]}}));
+ const need=(key:keyof typeof filters.needs)=>updateFilters(f=>({...f,needs:{...f.needs,[key]:!f.needs[key]}}));
  const run=async(fn:()=>Promise<void>)=>{if(busy)return;setBusy(true);setMessage('');try{await fn();}catch(e){setMessage(e instanceof Error?e.message:'Die Aktion konnte nicht gespeichert werden.');}finally{setBusy(false);}};
- const showRoute=(r:Reservation)=>{setRouteId(r.id);setSelected(r.facility_id);setQuery('');setFilters(defaultFilters);setMin20(false);setShopping(false);setCheapest(false);setBooking(false);};
+ const showRoute=(r:Reservation)=>{setRouteId(r.id);setSelected(r.facility_id);setQuery('');updateFilters(defaultFilters);setMin20(false);setShopping(false);setCheapest(false);setBooking(false);};
  return <section className="map-home">
  <header className="map-home-heading"><div><span className="eyebrow">DEMOSTADT · DEIN NÄCHSTES ZIEL</span><h1>ParkPulse<span>.</span></h1><p>Dein Platz. Dein Preis. Dein nächster Bonus.</p></div><Button asChild variant="outline"><Link to="/reservierungen"><CalendarDays/>Meine Reservierungen{activeBookings.length>0&&<span>{activeBookings.length}</span>}</Link></Button></header>
  <div className="map-experience">
@@ -43,12 +48,12 @@ export function MapHome(){
  <Button variant={cheapest?'default':'outline'} aria-pressed={cheapest} onClick={()=>setCheapest(!cheapest)}>Günstigster Preis</Button>
  <Button variant={shopping?'default':'outline'} aria-pressed={shopping} onClick={()=>setShopping(!shopping)}><Tag/>Shopping</Button>
  </div>
- {vehicleOpen&&<div className="map-vehicle-options"><label>Fahrzeugtyp<select value={filters.vehicle} onChange={e=>{const v=e.target.value as VehicleType;setFilters(f=>({...f,vehicle:v,...vehicleDefaults[v]}));}}>{Object.entries(vehicleLabels).map(([v,label])=><option key={v} value={v}>{label}</option>)}</select></label><label>Fahrzeughöhe (m)<input type="number" min="0.1" max="5" step="0.05" value={filters.height} onChange={e=>setFilters(f=>({...f,height:Number(e.target.value)}))}/></label></div>}
+ {vehicleOpen&&<div className="map-vehicle-options"><label>Fahrzeugtyp<select value={filters.vehicle} onChange={e=>{const v=e.target.value as VehicleType;updateFilters(f=>({...f,vehicle:v,...vehicleDefaults[v]}));}}>{Object.entries(vehicleLabels).map(([v,label])=><option key={v} value={v}>{label}</option>)}</select></label><label>Fahrzeughöhe (m)<input type="number" min="0.1" max="5" step="0.05" value={filters.height} onChange={e=>updateFilters(f=>({...f,height:Number(e.target.value)}))}/></label></div>}
  </div>
  <CityMap items={items} plans={plans} filters={filters} selected={p?.id??null} onSelect={select} route={!!routed}/>
  <div className="map-results-badge"><span className="status-dot"/>{items.length} Parkmöglichkeiten · passende freie Plätze{cheapest&&<small>Nach Stundentarif sortiert</small>}</div>
  <Button className="map-simulate" variant="outline" size="sm" onClick={()=>facilities.forEach(p=>simulate(p.id))}><SlidersHorizontal/>Belegung simulieren</Button>
- {!items.length&&<div className="map-empty"><Search/><h2>Kein passender freier Stellplatz</h2><p>Probiere andere Bedürfnisse oder ein kleineres Fahrzeug.</p><Button onClick={()=>{setFilters(defaultFilters);setMin20(false);setShopping(false);setQuery('');}}>Filter zurücksetzen</Button></div>}
+ {!items.length&&(!signedIn||profileReady)&&<div className="map-empty"><Search/><h2>Kein passender freier Stellplatz</h2><p>Probiere andere Bedürfnisse oder ein kleineres Fahrzeug.</p><Button onClick={()=>{updateFilters(defaultFilters);setMin20(false);setShopping(false);setQuery('');}}>Filter zurücksetzen</Button></div>}
  {p&&a&&<aside className={`facility-sheet ${expanded?'is-expanded':''}`} aria-label="Parkhaus-Detailkarte">
  <Button variant="ghost" className="sheet-handle" aria-label={expanded?'Details einklappen':'Details ausklappen'} onClick={()=>setExpanded(!expanded)}>{expanded?<ChevronDown/>:<ChevronUp/>}</Button>
  <div className="sheet-scroll"><div className="sheet-title"><div className="sheet-parking">P</div><div><h2>{p.name}</h2><p><MapPin size={12}/>{p.address}</p></div><Button variant="ghost" size="icon" aria-label="Parkhausdetails schließen" onClick={()=>{setSelected(null);setBooking(false);}}><X/></Button></div>

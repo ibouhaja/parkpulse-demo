@@ -1,0 +1,17 @@
+import {describe,it,expect} from 'vitest';
+import {defaultPreferences,normalizePreferences,preferencesFilters,vehiclePreferences} from './preferences';
+import {createParkingPlan,matchesSpot} from './parking-plan';
+import {initialState} from './data';
+import {rewardsSummary} from './rewards-summary';
+describe('Account vehicle preferences',()=>{
+ it.each(['car','ev','suv','van','camper'] as const)('supports %s and survives JSON reload',vehicle=>{const p=vehiclePreferences(vehicle);expect(normalizePreferences(JSON.parse(JSON.stringify(p)))).toEqual(p);expect(p.vehicle).toBe(vehicle);});
+ it('keeps all simultaneous needs rather than only the last selection',()=>{const p=normalizePreferences({...defaultPreferences,needs:{wallbox:true,family:true,women:true,accessible:true}});expect(preferencesFilters(p).needs).toEqual({wallbox:true,family:true,women:true,accessible:true});});
+ it('uses only true booleans and valid dimension bounds from untrusted metadata',()=>{expect(normalizePreferences({vehicle:'admin',height:-2,width:10,needs:{wallbox:'true',family:1,women:true}})).toEqual({...defaultPreferences,needs:{wallbox:false,family:false,women:true,accessible:false}});});
+ it('filters free family charging positions with user height and width',()=>{const p={...vehiclePreferences('ev'),height:1.8,width:2.2,needs:{wallbox:true,family:true,women:false,accessible:true}};const spots=createParkingPlan('quartier').filter(s=>!s.occupied&&matchesSpot(s,preferencesFilters(p)));expect(spots.length).toBeGreaterThan(0);expect(spots.every(s=>s.charging&&s.category==='family'&&s.accessible&&s.width>=2.2)).toBe(true);});
+ it('motorhome uses large-vehicle rules without changing the 3D model union',()=>{expect(preferencesFilters(vehiclePreferences('camper'))).toMatchObject({vehicle:'van',height:3.1,width:2.3,length:7,weight:3500});expect(createParkingPlan('quartier').filter(s=>matchesSpot(s,preferencesFilters(vehiclePreferences('camper'))))).toHaveLength(0);expect(createParkingPlan('stadtgarten').some(s=>matchesSpot(s,preferencesFilters(vehiclePreferences('camper'))))).toBe(true);});
+ it('does not mutate another account or guest defaults',()=>{const guest=JSON.stringify(defaultPreferences);const a=normalizePreferences({vehicle:'ev',needs:{wallbox:true}});const b=normalizePreferences({vehicle:'suv',needs:{family:true}});a.needs.family=true;expect(b.needs).toEqual({wallbox:false,family:true,women:false,accessible:false});expect(JSON.stringify(defaultPreferences)).toBe(guest);});
+});
+describe('Personal rewards popup totals',()=>{
+ it('separates earned points, current balance, voucher states and next progress',()=>{const s={...initialState,pointsBalance:698,pointsHistory:[{id:'e',date:'2026-11-01',points:1698,kind:'earned' as const},{id:'r',date:'2026-11-01',points:-1000,kind:'redeemed' as const}],vouchers:[{id:'v',value:10,earnedSessionId:'old'},{id:'u',value:10,earnedSessionId:'before',usedSessionId:'paid'}]};const summary=rewardsSummary(s);expect(summary.earned).toBe(1698);expect(summary.balance).toBe(698);expect(summary.remaining).toBe(302);expect(summary.progress).toBe(698);expect(summary.available.map(v=>v.id)).toEqual(['v']);expect(summary.used.map(v=>v.id)).toEqual(['u']);expect(s.stamps).toBe(5);});
+ it('shows the next full reward at exact 1000-point boundaries',()=>{expect(rewardsSummary({...initialState,pointsBalance:1000})).toMatchObject({next:2000,remaining:1000,progress:0});});
+});
