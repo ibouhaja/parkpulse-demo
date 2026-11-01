@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useMemo, useRef, useState, Component, type ReactNode } from 'react';
 import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
 import { Environment, Lightformer, OrbitControls, useGLTF } from '@react-three/drei';
-import { Box3, CanvasTexture, Color, Group, InstancedMesh, Matrix4, Mesh, MeshStandardMaterial, Object3D, SRGBColorSpace, Vector3 } from 'three';
+import { Box3, CanvasTexture, Color, Group, InstancedMesh, Mesh, MeshStandardMaterial, Object3D, SRGBColorSpace, Vector3 } from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { Eye, RotateCcw, Play, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -129,9 +129,9 @@ function Floor({ spots, selected, colors, onSelect }: { spots: ParkingSpot[]; se
 }
 
 class SceneBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
-  state = { failed: false };
+  override state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
-  render() { return this.state.failed ? <p role="alert" className="parking-3d-error">Die 3D-Ansicht konnte nicht geladen werden. Bitte nutze den 2D-Parkhausplan oder lade die Seite neu.</p> : this.props.children; }
+  override render() { return this.state.failed ? <p role="alert" className="parking-3d-error">Die 3D-Ansicht konnte nicht geladen werden. Bitte nutze den 2D-Parkhausplan oder lade die Seite neu.</p> : this.props.children; }
 }
 
 export default function Parking3DScene(props: Props) {
