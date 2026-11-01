@@ -30,7 +30,7 @@ export function sanitizeAction(input: unknown, now: number, fallbackId: string):
         : null;
     case 'complete':
       if (typeof a.sessionId !== 'string' || !(a.payment === 'success' || a.payment === 'failure' || a.payment === 'free')) return null;
-      return { type: 'complete', sessionId: a.sessionId, payment: a.payment, method: a.method === 'paypal' ? 'paypal' : 'card', now };
+      return { type: 'complete', sessionId: a.sessionId, payment: a.payment, method: (['paypal', 'klarna', 'visa', 'bitcoin'] as const).find((m) => m === a.method) ?? 'card', now };
     default:
       return null;
   }

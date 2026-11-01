@@ -8,7 +8,7 @@ export function checkoutAmounts(state: DemoState) {
  const discount=s?.discount==='SHOP2'&&!state.shop2Used?Math.min(2,original):s?.discount==='voucher'&&voucher?Math.min(10,voucher.value,original):0;
  return {original,discount,payable:Math.max(0,original-discount)};
 }
-export type Action = {type:'start';facilityId:string;id:string;now:number}|{type:'advance';hours:1|3;now:number}|{type:'location';level:string;bay:string;sessionId?:string|undefined}|{type:'end';now:number}|{type:'discount';discount:'none'|'SHOP2'|'voucher';voucherId?:string|undefined}|{type:'complete';sessionId:string;payment:'success'|'failure'|'free';method?:'card'|'paypal'|undefined;now:number};
+export type Action = {type:'start';facilityId:string;id:string;now:number}|{type:'advance';hours:1|3;now:number}|{type:'location';level:string;bay:string;sessionId?:string|undefined}|{type:'end';now:number}|{type:'discount';discount:'none'|'SHOP2'|'voucher';voucherId?:string|undefined}|{type:'complete';sessionId:string;payment:'success'|'failure'|'free';method?:import('./data').PayMethod|undefined;now:number};
 export function transition(state: DemoState, action: Action): DemoState {
  const session=state.session;
  if(action.type==='start'){const p=facilities.find(p=>p.id===action.facilityId);if(session||!p||state.history.some(h=>h.id===action.id))return state;return {...state,session:{id:action.id,facilityId:p.id,facilityName:p.name,startedAt:action.now,effectiveDemoTime:action.now,demoOffsetMs:0,level:'',bay:'',status:'active',discount:'none'}};}

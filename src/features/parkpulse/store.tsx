@@ -10,7 +10,7 @@ type Discount = 'none' | 'SHOP2' | 'voucher';
 type Store = {
   state: DemoState; ready: boolean; authReady: boolean; signedIn: boolean; email: string; displayName: string;
   start: (id: string) => boolean; end: () => boolean;
-  complete: (sessionId: string, payment: 'success' | 'failure' | 'free', method?: 'card' | 'paypal') => boolean;
+  complete: (sessionId: string, payment: 'success' | 'failure' | 'free', method?: import('./data').PayMethod) => boolean;
   applyDiscount: (discount: Discount, voucherId?: string) => boolean; advance: (hours: 1 | 3) => void;
   saveLocation: (level: string, bay: string) => boolean; error: string;
   importOffer: boolean; importLocal: () => Promise<void>; declineImport: () => Promise<void>; refreshProfile: () => Promise<void>;
