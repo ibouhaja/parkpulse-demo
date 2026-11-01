@@ -23,7 +23,10 @@ function surface(spots: ParkingSpot[], selected: ParkingPosition | null, colors:
   const canvas = document.createElement('canvas'); canvas.width = 2048; canvas.height = 1536;
   const ctx = canvas.getContext('2d');
   if (ctx) {
-    const pattern = ctx.createPattern(image, 'repeat');
+    const tile = document.createElement('canvas'); tile.width = 1024; tile.height = 1024;
+    const tileContext = tile.getContext('2d');
+    if (tileContext) { tileContext.filter = 'grayscale(1)'; tileContext.drawImage(image, 0, 0, 1024, 1024); }
+    const pattern = ctx.createPattern(tile, 'repeat');
     ctx.fillStyle = pattern ?? colors.concrete; ctx.fillRect(0, 0, 2048, 1536);
     for (let i = 0; i < 18000; i++) {
       ctx.globalAlpha = .035; ctx.fillStyle = i % 2 ? colors.paint : colors.ink;
@@ -111,7 +114,11 @@ function CameraRig({ view, selected, building, reset, reduced }: { view: CameraV
 
 function Floor({ spots, selected, colors, onSelect }: { spots: ParkingSpot[]; selected: ParkingPosition | null; colors: Palette; onSelect: Props['onSelect'] }) {
   const photo = useTexture(concreteFloor.url);
-  const texture = useMemo(() => surface(spots, selected, colors, photo.image), [spots, selected, colors, photo]);
+  const texture = useMemo(() => {
+    const image = photo.image;
+    if (!(image instanceof HTMLImageElement)) throw new Error('Betontextur konnte nicht geladen werden.');
+    return surface(spots, selected, colors, image);
+  }, [spots, selected, colors, photo]);
   useEffect(() => () => texture.dispose(), [texture]);
   const click = (event: ThreeEvent<MouseEvent>) => { event.stopPropagation(); const local = event.object.worldToLocal(event.point.clone()); const spot = spots.find(s => { const p = spotCoordinates(s.bay); return Math.abs(local.x - p.x) < 1.7 && Math.abs(-local.y - p.z) < 2.7; }); if (spot && !spot.occupied && !spot.unknown && event.delta < 6) onSelect(spot); };
   return <group>

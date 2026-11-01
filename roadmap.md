@@ -1,7 +1,7 @@
 # 3D-Parkhausplan
-- [ ] Architektur, Betonmaterialien, nähere Kamera, Fahreransicht und sanften Stellplatzfokus umsetzen.
-- [ ] Hochwertige CC0-Fahrzeugquellen prüfen und verwendete Modelle samt Einschränkungen nennen.
-- [ ] Zuerst P1, danach P2/P3 sowie Auswahl, Filter und schmale Ansicht prüfen; vorhandene Tests ausführen.
+- [x] Architektur, fotografische Betonmaterialien, nähere Kamera, Fahreransicht und sanften Stellplatzfokus umgesetzt.
+- [x] Drei externe CC0-Fahrzeuge (Three-door hatchback, Car-derived small van, Large three-row SUV) integriert und Quellen dokumentiert. Limousine bleibt eigenes Modell: hochwertiges CC0-Modell nicht verifiziert; kein Fotorealismus zugesichert.
+- [x] Zuerst P1, danach P2/P3, Fahreransicht, Wallbox-Klickauswahl und P3/B02 nach Reload geprüft; 390px ohne Überlauf oder Laufzeitfehler. 126 Tests bestanden; echte GPU-Geschwindigkeit und physische Touchbedienung nicht messbar.
 - [x] Vier eigene detailliertere GLB-Fahrzeuge mit gerundeten Karosserien, getrennten Lack-/Glas-/Radmaterialien, Spiegeln und Lampen ergänzt; kein verifiziertes realistisches CC0-Komplettset verfügbar.
 - [x] Parkflächen, Wallboxkabel und Beleuchtung verbessert; P1/P2/P3, Klickauswahl, Einparken und P3/B10 nach Reload geprüft, 390px ohne Überlauf oder Laufzeitfehler; 124 Tests bestanden. Fotorealismus und echte Gerätegeschwindigkeit nicht zugesichert.
 - [x] P1 mit lizenzierten Fahrzeugen, Kamera und gemeinsamer Auswahl implementieren und prüfen.
