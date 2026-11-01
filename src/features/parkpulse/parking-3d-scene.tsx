@@ -10,7 +10,7 @@ import sedan from '@/assets/models/parkpulse-sedan.glb.asset.json';
 import suv from '@/assets/models/parkpulse-suv.glb.asset.json';
 import van from '@/assets/models/parkpulse-van.glb.asset.json';
 import { demoModels, demoModelLabels, parkingPose, PARKING_ANIMATION_SECONDS, sceneSpots, spotCoordinates, type DemoModel } from './parking-3d-rules';
-import { type ParkingSpot, type ParkingPosition, type ParkingFilters, type ParkingLevel } from './parking-plan';
+import { parkingLevels, type ParkingSpot, type ParkingPosition, type ParkingFilters, type ParkingLevel } from './parking-plan';
 
 const urls = { compact: compact.url, sedan: sedan.url, suv: suv.url, van: van.url };
 type Palette = Record<'concrete' | 'ink' | 'free' | 'occupied' | 'selected' | 'unknown' | 'paint' | 'steel' | 'wallbox' | 'sky' | 'carTeal' | 'carRed' | 'carGold' | 'carSilver' | 'carBlue', string>;
@@ -136,23 +136,29 @@ class SceneBoundary extends Component<{ children: ReactNode }, { failed: boolean
 
 export default function Parking3DScene(props: Props) {
   const [colors, setColors] = useState<Palette | null>(null); const [ready, setReady] = useState(false); const [view, setView] = useState(0); const [run, setRun] = useState(0); const [reduced, setReduced] = useState(false);
+  const [building, setBuilding] = useState(false);
   const wrapper = useRef<HTMLDivElement>(null);
   useEffect(() => { const css = getComputedStyle(document.documentElement); const values = {} as Palette; for (const key of ['concrete', 'ink', 'free', 'occupied', 'selected', 'unknown', 'paint', 'steel', 'wallbox', 'sky', ...colorKeys] as (keyof Palette)[]) values[key] = css.getPropertyValue(`--scene-${key}`).trim(); setColors(values); setReduced(window.matchMedia('(prefers-reduced-motion: reduce)').matches); }, []);
-  const spots = sceneSpots(props.spots, props.level, props.filters);
   const ownSpot = props.selected ?? props.saved;
-  const ownVisible = ownSpot?.level === props.level && spots.some(s => s.bay === ownSpot.bay && !s.unknown);
-  const cars = spots.filter(s => s.occupied && !s.unknown && (!ownVisible || ownSpot?.bay !== s.bay));
+  const floors = building ? parkingLevels : [props.level];
   return <div className="parking-3d">
-    <div className="parking-3d-tools"><label>Dein Demo-Fahrzeug<select aria-label="Dein Demo-Fahrzeug" value={props.model} onChange={e => props.onModel(e.target.value as DemoModel)}>{demoModels.map(m => <option key={m} value={m}>{demoModelLabels[m]}</option>)}</select></label><div><Button variant="outline" size="icon" title="Vogelperspektive" aria-label="Vogelperspektive" onClick={() => setView(v => v % 2 ? v : v + 1)}><Eye/></Button><Button variant="outline" size="icon" title="Ansicht zurücksetzen" aria-label="Ansicht zurücksetzen" onClick={() => setView(v => v % 2 ? v + 1 : v + 2)}><RotateCcw/></Button><Button variant="outline" disabled={!props.selected} onClick={() => setRun(r => r + 1)}><Play/>Einparken (Demo)</Button></div></div>
+    <div className="parking-3d-tools"><label>Dein Demo-Fahrzeug<select aria-label="Dein Demo-Fahrzeug" value={props.model} onChange={e => props.onModel(e.target.value as DemoModel)}>{demoModels.map(m => <option key={m} value={m}>{demoModelLabels[m]}</option>)}</select></label><div><Button variant={building ? 'default' : 'outline'} size="icon" title="Gesamtes Parkhaus / einzelne Ebene" aria-label="Gesamtes Parkhaus" aria-pressed={building} onClick={() => setBuilding(b => !b)}><Building2/></Button><Button variant="outline" size="icon" title="Vogelperspektive" aria-label="Vogelperspektive" onClick={() => setView(v => v % 2 ? v : v + 1)}><Eye/></Button><Button variant="outline" size="icon" title="Ansicht zurücksetzen" aria-label="Ansicht zurücksetzen" onClick={() => setView(v => v % 2 ? v + 1 : v + 2)}><RotateCcw/></Button><Button variant="outline" disabled={!props.selected} onClick={() => setRun(r => r + 1)}><Play/>Einparken (Demo)</Button></div></div>
     <div className="parking-3d-canvas" ref={wrapper} data-scene-ready={ready ? 'true' : undefined} aria-label={`Interaktiver 3D-Parkhausplan ${props.level}`}>
       <SceneBoundary>{colors && <Canvas frameloop="demand" dpr={[1, 1.5]} camera={{ position: [36, 40, 43], fov: 45 }} gl={{ antialias: true }}>
         <color attach="background" args={[colors.sky]}/><ambientLight intensity={.7}/><directionalLight position={[18, 35, 12]} intensity={2.2}/>
         <Environment resolution={128}><Lightformer intensity={2} position={[0, 15, 0]} scale={[40, 30, 1]}/><Lightformer intensity={1} position={[-25, 5, 0]} rotation-y={Math.PI / 2} scale={[40, 10, 1]}/></Environment>
-        <Floor spots={spots} selected={props.selected} colors={colors} onSelect={props.onSelect}/>
-        <Suspense fallback={null}>{demoModels.map((model, index) => <Cars key={model} model={model} colors={colors} spots={cars.filter(s => (Number(s.bay.slice(1)) + Math.floor(Number(s.bay.slice(1)) / 12)) % 4 === index)}/>)}{ownSpot && ownVisible && <DemoCar key={`${ownSpot.level}-${ownSpot.bay}-${props.model}`} model={props.model} bay={ownSpot.bay} run={run} colors={colors} reduced={reduced}/>}<Ready onReady={() => setReady(true)}/></Suspense>
+        {floors.map((floor, floorIndex) => {
+          const spots = sceneSpots(props.spots, floor, props.filters);
+          const ownVisible = ownSpot?.level === floor && spots.some(s => s.bay === ownSpot.bay && !s.unknown);
+          const cars = spots.filter(s => s.occupied && !s.unknown && (!ownVisible || ownSpot?.bay !== s.bay));
+          return <group key={floor} position-y={building ? floorIndex * 7 : 0}>
+            <Floor spots={spots} selected={props.selected} colors={colors} onSelect={props.onSelect}/>
+            <Suspense fallback={null}>{demoModels.map((model, index) => <Cars key={model} model={model} colors={colors} spots={cars.filter(s => (Number(s.bay.slice(1)) + Math.floor(Number(s.bay.slice(1)) / 12)) % 4 === index)}/>)}{ownSpot && ownVisible && <DemoCar key={`${ownSpot.level}-${ownSpot.bay}-${props.model}`} model={props.model} bay={ownSpot.bay} run={run} colors={colors} reduced={reduced}/>}<Ready onReady={() => setReady(true)}/></Suspense>
+          </group>;
+        })}
         <CameraRig view={view}/>
       </Canvas>}</SceneBoundary>
-      <span className="parking-3d-floor-tag"><Building2 size={14}/>{props.level} · 3D · Simulation</span>
+      <span className="parking-3d-floor-tag"><Building2 size={14}/>{building ? 'P1 · P2 · P3' : props.level} · 3D · Simulation</span>
       {!ready && <span className="parking-3d-loading" role="status">3D-Fahrzeuge werden geladen …</span>}
     </div>
   </div>;
