@@ -1,5 +1,5 @@
-import * as T from '/dev-server/node_modules/three/build/three.module.js';
-import {GLTFExporter} from '/dev-server/node_modules/three/examples/jsm/exporters/GLTFExporter.js';
+import * as T from 'three';
+import {GLTFExporter} from 'three/addons/exporters/GLTFExporter.js';
 import fs from 'node:fs/promises';
 globalThis.FileReader=class{readAsArrayBuffer(blob){blob.arrayBuffer().then(x=>{this.result=x;this.onloadend?.()})}readAsDataURL(blob){blob.arrayBuffer().then(x=>{this.result='data:application/octet-stream;base64,'+Buffer.from(x).toString('base64');this.onloadend?.()})}};
 const mat=(name,color,metalness=0,roughness=.4,extra={})=>new T.MeshPhysicalMaterial({name,color,metalness,roughness,...extra});
