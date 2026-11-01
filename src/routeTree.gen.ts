@@ -10,11 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as CheckoutRouteImport } from './routes/checkout'
-import { Route as ParksessionRouteImport } from './routes/parksession'
-import { Route as PraemienRouteImport } from './routes/praemien'
 import { Route as SucheRouteImport } from './routes/suche'
-import { Route as VerlaufRouteImport } from './routes/verlauf'
+import { Route as AuthenticatedCheckoutRouteImport } from './routes/_authenticated/checkout'
+import { Route as AuthenticatedParksessionRouteImport } from './routes/_authenticated/parksession'
+import { Route as AuthenticatedPraemienRouteImport } from './routes/_authenticated/praemien'
+import { Route as AuthenticatedVerlaufRouteImport } from './routes/_authenticated/verlauf'
 import { Route as ParkplatzIdRouteImport } from './routes/parkplatz.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -22,28 +22,29 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CheckoutRoute = CheckoutRouteImport.update({
-  id: '/checkout',
-  path: '/checkout',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ParksessionRoute = ParksessionRouteImport.update({
-  id: '/parksession',
-  path: '/parksession',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PraemienRoute = PraemienRouteImport.update({
-  id: '/praemien',
-  path: '/praemien',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SucheRoute = SucheRouteImport.update({
   id: '/suche',
   path: '/suche',
   getParentRoute: () => rootRouteImport,
 } as any)
-const VerlaufRoute = VerlaufRouteImport.update({
-  id: '/verlauf',
+const AuthenticatedCheckoutRoute = AuthenticatedCheckoutRouteImport.update({
+  id: '/_authenticated/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedParksessionRoute =
+  AuthenticatedParksessionRouteImport.update({
+    id: '/_authenticated/parksession',
+    path: '/parksession',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AuthenticatedPraemienRoute = AuthenticatedPraemienRouteImport.update({
+  id: '/_authenticated/praemien',
+  path: '/praemien',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedVerlaufRoute = AuthenticatedVerlaufRouteImport.update({
+  id: '/_authenticated/verlauf',
   path: '/verlauf',
   getParentRoute: () => rootRouteImport,
 } as any)
@@ -55,69 +56,69 @@ const ParkplatzIdRoute = ParkplatzIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/checkout': typeof CheckoutRoute
-  '/parksession': typeof ParksessionRoute
-  '/praemien': typeof PraemienRoute
   '/suche': typeof SucheRoute
-  '/verlauf': typeof VerlaufRoute
+  '/checkout': typeof AuthenticatedCheckoutRoute
+  '/parksession': typeof AuthenticatedParksessionRoute
+  '/praemien': typeof AuthenticatedPraemienRoute
+  '/verlauf': typeof AuthenticatedVerlaufRoute
   '/parkplatz/$id': typeof ParkplatzIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/checkout': typeof CheckoutRoute
-  '/parksession': typeof ParksessionRoute
-  '/praemien': typeof PraemienRoute
   '/suche': typeof SucheRoute
-  '/verlauf': typeof VerlaufRoute
+  '/checkout': typeof AuthenticatedCheckoutRoute
+  '/parksession': typeof AuthenticatedParksessionRoute
+  '/praemien': typeof AuthenticatedPraemienRoute
+  '/verlauf': typeof AuthenticatedVerlaufRoute
   '/parkplatz/$id': typeof ParkplatzIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/checkout': typeof CheckoutRoute
-  '/parksession': typeof ParksessionRoute
-  '/praemien': typeof PraemienRoute
   '/suche': typeof SucheRoute
-  '/verlauf': typeof VerlaufRoute
+  '/_authenticated/checkout': typeof AuthenticatedCheckoutRoute
+  '/_authenticated/parksession': typeof AuthenticatedParksessionRoute
+  '/_authenticated/praemien': typeof AuthenticatedPraemienRoute
+  '/_authenticated/verlauf': typeof AuthenticatedVerlaufRoute
   '/parkplatz/$id': typeof ParkplatzIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/suche'
     | '/checkout'
     | '/parksession'
     | '/praemien'
-    | '/suche'
     | '/verlauf'
     | '/parkplatz/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/suche'
     | '/checkout'
     | '/parksession'
     | '/praemien'
-    | '/suche'
     | '/verlauf'
     | '/parkplatz/$id'
   id:
     | '__root__'
     | '/'
-    | '/checkout'
-    | '/parksession'
-    | '/praemien'
     | '/suche'
-    | '/verlauf'
+    | '/_authenticated/checkout'
+    | '/_authenticated/parksession'
+    | '/_authenticated/praemien'
+    | '/_authenticated/verlauf'
     | '/parkplatz/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  CheckoutRoute: typeof CheckoutRoute
-  ParksessionRoute: typeof ParksessionRoute
-  PraemienRoute: typeof PraemienRoute
   SucheRoute: typeof SucheRoute
-  VerlaufRoute: typeof VerlaufRoute
+  AuthenticatedCheckoutRoute: typeof AuthenticatedCheckoutRoute
+  AuthenticatedParksessionRoute: typeof AuthenticatedParksessionRoute
+  AuthenticatedPraemienRoute: typeof AuthenticatedPraemienRoute
+  AuthenticatedVerlaufRoute: typeof AuthenticatedVerlaufRoute
   ParkplatzIdRoute: typeof ParkplatzIdRoute
 }
 
@@ -130,27 +131,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/checkout': {
-      id: '/checkout'
-      path: '/checkout'
-      fullPath: '/checkout'
-      preLoaderRoute: typeof CheckoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/parksession': {
-      id: '/parksession'
-      path: '/parksession'
-      fullPath: '/parksession'
-      preLoaderRoute: typeof ParksessionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/praemien': {
-      id: '/praemien'
-      path: '/praemien'
-      fullPath: '/praemien'
-      preLoaderRoute: typeof PraemienRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/suche': {
       id: '/suche'
       path: '/suche'
@@ -158,11 +138,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SucheRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/verlauf': {
-      id: '/verlauf'
+    '/_authenticated/checkout': {
+      id: '/_authenticated/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof AuthenticatedCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/parksession': {
+      id: '/_authenticated/parksession'
+      path: '/parksession'
+      fullPath: '/parksession'
+      preLoaderRoute: typeof AuthenticatedParksessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/praemien': {
+      id: '/_authenticated/praemien'
+      path: '/praemien'
+      fullPath: '/praemien'
+      preLoaderRoute: typeof AuthenticatedPraemienRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/verlauf': {
+      id: '/_authenticated/verlauf'
       path: '/verlauf'
       fullPath: '/verlauf'
-      preLoaderRoute: typeof VerlaufRouteImport
+      preLoaderRoute: typeof AuthenticatedVerlaufRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/parkplatz/$id': {
@@ -177,11 +178,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  CheckoutRoute: CheckoutRoute,
-  ParksessionRoute: ParksessionRoute,
-  PraemienRoute: PraemienRoute,
   SucheRoute: SucheRoute,
-  VerlaufRoute: VerlaufRoute,
+  AuthenticatedCheckoutRoute: AuthenticatedCheckoutRoute,
+  AuthenticatedParksessionRoute: AuthenticatedParksessionRoute,
+  AuthenticatedPraemienRoute: AuthenticatedPraemienRoute,
+  AuthenticatedVerlaufRoute: AuthenticatedVerlaufRoute,
   ParkplatzIdRoute: ParkplatzIdRoute,
 }
 export const routeTree = rootRouteImport
