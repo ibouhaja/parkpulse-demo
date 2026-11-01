@@ -1,4 +1,5 @@
-# Checkout and loyalty
-- [x] Preserve parking position and pending checkout data.
-- [x] Implement SHOP2, vouchers, six stamps and simulated checkout.
-- [x] Persist receipts and history; verify rules and complete UI flow.
+# Accounts
+- [x] Sign-up, sign-in, sign-out, password reset, Google, profiles.
+- [x] Per-user parking data with server-side rules; one-time import of browser data.
+- [x] Simulated PayPal option.
+- [ ] Fix registration error messages (weak/leaked password etc.) and verify flow.
