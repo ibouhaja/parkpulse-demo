@@ -10,7 +10,7 @@ const sampleIds = new Set(initialState.history.map((h) => h.id));
  */
 export function sanitizeAction(input: unknown, now: number, fallbackId: string): Action | null {
   if (!input || typeof input !== 'object') return null;
-  const a = input as Record<string, unknown>;
+  const a = input as { type?: unknown; facilityId?: unknown; id?: unknown; hours?: unknown; level?: unknown; bay?: unknown; sessionId?: unknown; discount?: unknown; voucherId?: unknown; payment?: unknown; method?: unknown };
   switch (a.type) {
     case 'start':
       return typeof a.facilityId === 'string'
