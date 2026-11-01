@@ -1,3 +1,8 @@
+# ParkPulse AI Agent
+- [x] Echte mehrstufige KI mit Suche, Kompatibilität, Verfügbarkeit, Tarif-/Punkteprüfung und harter Budgetgrenze.
+- [x] Kontogetrennte Gespräche mit eigenen URLs, Streaming und aufklappbaren tatsächlichen Tool-Schritten; mehrere Gespräche und Neuladen geprüft.
+- [x] Ausdrücklich bestätigte, wiederholsichere Demo-Reservierung mit Statusprüfung; drei echte LLM-Abläufe bestanden: Wallbox/3h/5€, Familie+Wallbox+barrierefrei/2h/10€, Wallbox/3h/0€ ohne Treffer. Zwei Buchungen über Kontoansicht zurückgelesen; keine Browser-Laufzeitfehler. 191 Tests bestanden, Agenten-Lint sauber, build OK. Gesamtprojekt-Lint hat bestehende Formatierungsverstöße; nicht aufgabenfremd umformatiert. Zusätzliche Demo-Buchungen aus Testdurchläufen bleiben als solche im Konto und sind stornierbar.
+
 # Anmeldung, Präferenzen und Rewards-Pop-up
 - [x] Apple und Gastzugang ergänzen; bestehende E-Mail-/Google-Anmeldung und Bestätigung erhalten. LinkedIn nicht unterstützt; keine Referenzbilder angehängt.
 - [x] Fahrzeugpräferenzen bei Registrierung und im Profil speichern und kontogetrennt auf Kartenfilter anwenden.
