@@ -1,3 +1,8 @@
+# 3D-Parkhausplan
+- [ ] P1 mit lizenzierten Fahrzeugen, Kamera und gemeinsamer Auswahl implementieren und prüfen.
+- [ ] P2/P3 ergänzen; Demo-Einparken, Filter und Sessionsynchronisierung testen.
+- [ ] Desktop-/Smartphone-Darstellung sowie bestehende Tests prüfen.
+
 # Accounts
 - [x] Sign-up, sign-in, sign-out, password reset, Google, profiles.
 - [x] Per-user parking data with server-side rules; one-time import of browser data.
