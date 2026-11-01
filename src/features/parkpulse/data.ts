@@ -12,13 +12,14 @@ export function findFacilities(query: string, evOnly: boolean, sort = 'distance'
   return facilities.filter(p => (!evOnly || p.ev > 0) && `${p.name} ${p.area} ${p.address}`.toLocaleLowerCase('de').includes(term)).sort((a,b) => sort === 'price' ? a.price-b.price : a.distance-b.distance);
 }
 export const money = (value: number) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(value);
-export type Session = { id: string; facilityId: string; facilityName: string; startedAt: number; effectiveDemoTime: number; demoOffsetMs: number; level: string; bay: string; status: 'active' | 'checkout-pending'; endedAt?: number; finalDurationMs?: number; finalFee?: number };
-export type HistoryEntry = { id: string; facilityId: string; date: string; minutes: number; cost: number };
-export type DemoState = { session: Session | null; history: HistoryEntry[]; points: number; redeemed: string[] };
-export const initialState: DemoState = { session: null, points: 240, redeemed: [], history: [
+export type Session = { id: string; facilityId: string; facilityName: string; startedAt: number; effectiveDemoTime: number; demoOffsetMs: number; level: string; bay: string; status: 'active' | 'checkout-pending'; endedAt?: number; finalDurationMs?: number; finalFee?: number; discount?: 'none' | 'SHOP2' | 'voucher'; voucherId?: string };
+export type HistoryEntry = { id: string; facilityId: string; date: string; minutes: number; cost: number; session?: Session; level?: string; bay?: string; receiptId?: string; originalFee?: number; discountAmount?: number };
+export type Voucher = { id: string; value: number; earnedSessionId: string; usedSessionId?: string };
+export type Receipt = { id: string; sessionId: string; date: string; originalFee: number; discountAmount: number; payable: number; discount: string; payment: 'success' | 'free'; level: string; bay: string };
+export type DemoState = { session: Session | null; history: HistoryEntry[]; stamps: number; vouchers: Voucher[]; shop2Used: boolean; receipts: Receipt[]; schemaVersion: 2 };
+export const initialState: DemoState = { session: null, stamps: 5, vouchers: [], shop2Used: false, receipts: [], schemaVersion: 2, history: [
   { id: 'sample-1', facilityId: 'quartier', date: '2026-10-28T10:00:00', minutes: 90, cost: 4 },
   { id: 'sample-2', facilityId: 'ufer', date: '2026-10-25T14:00:00', minutes: 120, cost: 4 },
   { id: 'sample-3', facilityId: 'stadtgarten', date: '2026-10-22T09:00:00', minutes: 60, cost: 2 },
 ] };
 export function sessionCost(startedAt: number, now: number) { return Math.ceil(Math.max(0, now-startedAt) / 3600000) * 2; }
-export const rewards = [{ id:'coffee', name:'Eine kleine Kaffeepause', cost:150, description:'Virtueller Kaffee-Gutschein', icon:'coffee' },{ id:'parking', name:'30 Minuten Parkzeit', cost:300, description:'Virtueller Parkzeit-Gutschein', icon:'parking' },{ id:'charge', name:'Energie für unterwegs', cost:500, description:'Virtueller Lade-Gutschein', icon:'charge' }];
