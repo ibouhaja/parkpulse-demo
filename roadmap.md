@@ -1,9 +1,9 @@
 # Karten-App und Demo-Reservierung
-- [ ] Karten-Startseite, kombinierte Filter und ausziehbare Parkhausdetails.
-- [ ] Sichere Reservierung mit Stellplatz, Termin, Preisvorschau, Stornierung und simulierter Ankunft.
-- [ ] Reservierte Kapazität in Karte, 2D/3D-Plänen und Simulation schützen.
-- [ ] Bonuspunkte transparent ohne doppelte Stempel; Tests und angemeldeten Ablauf prüfen.
-- [ ] Referenz-Screenshots fehlen; nach vorhandener Markenidentität gestalten.
+- [x] Karten-Startseite, kombinierte Filter und ausziehbare Parkhausdetails; 390px ohne Überlauf und mit sichtbarer Reservierungsschaltfläche.
+- [x] Sichere Reservierung, Termin, Preisvorschau, Stornierung und simulierter Ankunft; angemeldet bis Visa-Demo-Beleg und Neuladen geprüft.
+- [x] Reservierte Kapazität über gemeinsamen Plan geschützt; Replay erzeugt keine zweite Buchung und anderer Buchungsversuch auf denselben Platz wird abgewiesen.
+- [x] Bonuspunkte ohne doppelte Stempel; 147 Tests bestanden, fehlgeschlagene Zahlung und erfolgreicher Abschluss mit 100 Punkten im Konto geprüft.
+- [x] Nach vorhandener Markenidentität gestaltet; drei erwähnte Referenz-Screenshots waren nicht angehängt.
 
 # 3D-Parkhausplan
 - [x] Architektur, fotografische Betonmaterialien, nähere Kamera, Fahreransicht und sanften Stellplatzfokus umgesetzt.
