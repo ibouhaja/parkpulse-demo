@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useChat } from "@ai-sdk/react";
@@ -48,7 +48,6 @@ export function AgentPage({ threadId }: { threadId?: string }) {
   const list = useServerFn(agentThreads);
   const get = useServerFn(agentThread);
   const create = useServerFn(newAgentThread);
-  const navigate = useNavigate();
   const qc = useQueryClient();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
