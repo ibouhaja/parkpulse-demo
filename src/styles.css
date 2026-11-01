@@ -32,4 +32,6 @@
 .points-account { margin-top: 2rem; padding-block: 1.5rem; border-block: 1px solid var(--border); }
 .points-progress { display: block; width: 100%; height: 12px; margin-top: 12px; accent-color: var(--primary); }
 .city-marker .marker-offer { display: block; font-size: 9px; max-width: 145px; white-space: normal; line-height: 1.3; color: var(--muted-foreground); }
-.city-marker { min-width: 135px; }
+.city-marker { min-width: 135px; height: 76px; flex-shrink: 0; }
+.city-marker.is-active .marker-offer { color: var(--sidebar-foreground); }
+@media(max-width:720px) { .city-marker { min-width: 112px; max-width: 118px; height: 72px; } .city-marker .marker-offer { font-size: 8px; } .points-account button { white-space: normal; min-height: 48px; } .booking-line strong { max-width: 70%; overflow-wrap: anywhere; } }

@@ -3,12 +3,12 @@ import { facilities, type Facility } from './data';
 import { matchesSpot, type ParkingFilters, type ParkingSpot } from './parking-plan';
 
 export const facilityOffers: Record<string, { points: number; shopping: string; hours: string }> = {
-  quartier: { points: 100, shopping: 'Quartier-Bummel · SHOP2: einmalig bis zu 2 €', hours: 'Täglich 00–24 Uhr' },
-  ufer: { points: 80, shopping: '', hours: 'Täglich 00–24 Uhr' },
+  quartier: { points: 450, shopping: 'Quartier-Bummel · SHOP2: einmalig bis zu 2 €', hours: 'Täglich 00–24 Uhr' },
+  ufer: { points: 750, shopping: '', hours: 'Täglich 00–24 Uhr' },
   stadtgarten: { points: 300, shopping: 'Stadtgarten-Shopping · bis 1 € Demo-Rabatt', hours: 'Täglich 00–24 Uhr' },
-  werk: { points: 120, shopping: 'Westend-Shopping · SHOP2: einmalig bis zu 2 €', hours: 'Täglich 00–24 Uhr' },
-  markt: { points: 150, shopping: 'Marktforum-Aktion · SHOP2: einmalig bis zu 2 €', hours: 'Täglich 00–24 Uhr' },
-  nord: { points: 50, shopping: '', hours: 'Täglich 00–24 Uhr' },
+  werk: { points: 1200, shopping: 'Westend-Shopping · SHOP2: einmalig bis zu 2 €', hours: 'Täglich 00–24 Uhr' },
+  markt: { points: 1000, shopping: 'Marktforum-Aktion · SHOP2: einmalig bis zu 2 €', hours: 'Täglich 00–24 Uhr' },
+  nord: { points: 500, shopping: '', hours: 'Täglich 00–24 Uhr' },
 };
 export const bonusFor = (id: string) => tariffs[id]?.referencePoints ?? 0;
 export function facilityAvailability(spots: ParkingSpot[], filters: ParkingFilters) {

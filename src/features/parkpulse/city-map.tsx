@@ -7,7 +7,7 @@ import { facilityOffers,facilityAvailability } from './map-rules';
 import { type Facility,money } from './data';
 import { type ParkingFilters,type ParkingSpot } from './parking-plan';
 
-const positions:Record<string,[number,number]>={quartier:[53,32],ufer:[81,22],stadtgarten:[46,69],werk:[16,51],markt:[25,15],nord:[78,76]};
+const positions:Record<string,[number,number]>={quartier:[53,45],ufer:[81,34],stadtgarten:[50,80],werk:[16,51],markt:[25,33],nord:[80,77]};
 export function CityMap({items,plans,filters,selected,onSelect,route=false}:{items:Facility[];plans:Record<string,{spots:ParkingSpot[]}>;filters:ParkingFilters;selected:string|null;onSelect:(id:string)=>void;route?:boolean}){
  const [zoom,setZoom]=useState(1);
  return <div className="city-map" aria-label="Fiktive Parkplatzkarte">
