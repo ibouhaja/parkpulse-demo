@@ -19,6 +19,9 @@ export function prepareVehicle(source: Object3D, model: DemoModel): VehiclePart[
     for (let i = 0; i < originals.length; i++) {
       const original = originals[i]; if (!(original instanceof MeshStandardMaterial)) continue;
       const geometry: BufferGeometry = node.geometry.clone();
+      // Original untextured GLBs mix lofted panels with primitive details;
+      // normalize attribute sets before merging them by material.
+      if (!original.map) geometry.deleteAttribute('uv');
       if (originals.length > 1) {
         const group = geometry.groups.find(g => g.materialIndex === i);
         if (!group || !geometry.index) { geometry.dispose(); continue; }
