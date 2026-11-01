@@ -18,7 +18,7 @@ export const getReservations=createServerFn({method:'GET'}).middleware([requireS
   return data;
 });
 export const bookReservation=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator((input:{id:string;facility:string;level:string;bay:string;startsAt:string;hours:number;filters:ParkingFilters})=>{
-  if(!input||!/^[-0-9a-f]{36}$/i.test(input.id)||typeof input.facility!=='string'||typeof input.level!=='string'||typeof input.bay!=='string'||!input.filters?.needs)throw new Error('Bitte prüfe deine Reservierungsangaben.');
+  if(!input||!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(input.id)||typeof input.facility!=='string'||typeof input.level!=='string'||typeof input.bay!=='string'||!input.filters?.needs)throw new Error('Bitte prüfe deine Reservierungsangaben.');
   return input;
 }).handler(async({context,data})=>{
   const {data:held,error:heldError}=await context.supabase.rpc('demo_held_positions');

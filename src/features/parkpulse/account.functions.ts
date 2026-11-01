@@ -28,12 +28,10 @@ async function loadRow({ supabase, userId }: Ctx): Promise<Row> {
 
 async function save(userId: string, version: number, patch: Record<string, unknown>) {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-  if ('state' in patch) {
+  if ('state' in patch && !('import_decision' in patch)) {
     const {data,error}=await supabaseAdmin.rpc('demo_save_state',{p_user:userId,p_version:version,p_state:patch['state'] as Json});
     if(error)throw new Error('Speichern fehlgeschlagen. Dieser Stellplatz ist möglicherweise reserviert.');
     if(!data)return false;
-    // Import metadata is not involved in reservation or loyalty changes.
-    if('import_decision' in patch){const {error:metaError}=await supabaseAdmin.from('parking_states').update({import_decision:patch['import_decision'] as string,imported_at:patch['imported_at'] as string}).eq('user_id',userId);if(metaError)throw new Error('Übernahme konnte nicht abgeschlossen werden.');}
     return true;
   }
   const { data, error } = await supabaseAdmin
