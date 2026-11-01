@@ -75,3 +75,13 @@ describe('sign-in redirect', () => {
     expect(safeRedirect(undefined)).toBe('/parksession');
   });
 });
+
+import { authErrorText } from './auth-errors';
+describe('German auth error messages', () => {
+  it('explains a leaked/weak password instead of a generic error', () => {
+    expect(authErrorText({ code: 'weak_password', message: 'Password is known to be weak and easy to guess' })).toContain('Datenlecks');
+  });
+  it('explains an existing account', () => expect(authErrorText({ code: 'user_already_exists' })).toContain('bereits registriert'));
+  it('explains unconfirmed email', () => expect(authErrorText({ code: 'email_not_confirmed' })).toContain('bestätige'));
+  it('explains rate limits', () => expect(authErrorText({ status: 429 })).toContain('Zu viele'));
+});

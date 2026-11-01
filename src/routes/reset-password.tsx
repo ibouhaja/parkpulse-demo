@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState, type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { authErrorText } from '@/features/parkpulse/auth-errors';
 import { PageHeading, pageHead } from '@/features/parkpulse/shared';
 
 export const Route = createFileRoute('/reset-password')({
@@ -26,7 +27,7 @@ function ResetPassword() {
     setBusy(true);
     const { error } = await supabase.auth.updateUser({ password });
     setBusy(false);
-    if (error) { setMessage('Das Passwort konnte nicht geändert werden. Fordere bitte einen neuen Link an.'); return; }
+    if (error) { setMessage(authErrorText(error, 'Das Passwort konnte nicht geändert werden. Fordere bitte einen neuen Link an.')); return; }
     navigate({ to: '/parksession' });
   };
   return <><PageHeading title="Neues Passwort festlegen." subtitle="Wähle ein Passwort mit mindestens 8 Zeichen." eyebrow="KONTO"/>

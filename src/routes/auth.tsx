@@ -4,6 +4,7 @@ import { ArrowRight, LogIn, Mail, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
+import { authErrorText } from '@/features/parkpulse/auth-errors';
 import { useDemo } from '@/features/parkpulse/store';
 import { PageHeading, pageHead } from '@/features/parkpulse/shared';
 
@@ -40,16 +41,17 @@ function AuthPage() {
     try {
       if (mode === 'login') {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw new Error(error.message.includes('confirm') ? 'Bitte bestätige zuerst deine E-Mail-Adresse.' : 'E-Mail oder Passwort ist falsch.');
+        if (error) throw new Error(authErrorText(error, 'Anmeldung fehlgeschlagen. Bitte versuche es erneut.'));
         navigate({ to: target });
       } else if (mode === 'signup') {
         if (password.length < 8) throw new Error('Das Passwort muss mindestens 8 Zeichen lang sein.');
-        const { error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin, data: { display_name: name.trim().slice(0, 60) } } });
-        if (error) throw new Error(error.message.toLowerCase().includes('registered') ? 'Diese E-Mail-Adresse ist bereits registriert.' : 'Registrierung fehlgeschlagen. Bitte prüfe deine Eingaben.');
+        const { data: signed, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin, data: { display_name: name.trim().slice(0, 60) } } });
+        if (error) throw new Error(authErrorText(error, 'Registrierung fehlgeschlagen. Bitte versuche es später erneut.'));
+        if (signed.user && (signed.user.identities?.length ?? 0) === 0) throw new Error(authErrorText({ code: 'user_already_exists' }));
         setMessage('Fast geschafft: Bitte bestätige deine E-Mail-Adresse über den Link in deinem Postfach. Danach kannst du dich anmelden.');
       } else {
         const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
-        if (error) throw new Error('Die E-Mail konnte nicht gesendet werden. Bitte versuche es später erneut.');
+        if (error) throw new Error(authErrorText(error, 'Die E-Mail konnte nicht gesendet werden. Bitte versuche es später erneut.'));
         setMessage('Falls ein Konto existiert, haben wir dir einen Link zum Zurücksetzen gesendet.');
       }
     } catch (err) {
@@ -73,6 +75,7 @@ function AuthPage() {
         {([['login', 'Anmelden'], ['signup', 'Registrieren'], ['forgot', 'Passwort vergessen']] as const).map(([m, l]) => <Button key={m} role="tab" aria-selected={mode === m} variant={mode === m ? 'default' : 'outline'} size="sm" onClick={() => { setMode(m); setMessage(''); setFailure(''); }}>{l}</Button>)}
       </div>
       <form onSubmit={submit} className="space-y-4">
+        {mode === 'signup' && <p className="text-xs text-muted-foreground">Passwort: mindestens 8 Zeichen, einzigartig. Bekannte oder geleakte Passwörter werden aus Sicherheitsgründen abgelehnt.</p>}
         {mode === 'signup' && <label className="block text-xs">Anzeigename<input className={input} value={name} maxLength={60} onChange={(e) => setName(e.target.value)} placeholder="z. B. Alex"/></label>}
         <label className="block text-xs">E-Mail-Adresse<input className={input} type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)}/></label>
         {mode !== 'forgot' && <label className="block text-xs">Passwort<input className={input} type="password" required minLength={mode === 'signup' ? 8 : undefined} autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} value={password} onChange={(e) => setPassword(e.target.value)}/></label>}
