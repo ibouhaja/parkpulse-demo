@@ -4,7 +4,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import capturedCSS from "../styles/site.css?raw";
 
 export const Route = createFileRoute("/")({
-  head: () => ({ meta: [{ title: "Parking Finder App Prototype – Figma Make" }] }),
+  head: () => ({ meta: [
+    { title: "Parking Finder App Prototype – Figma Make" },
+    { name: "description", content: "Imported Figma Make page for the Parking Finder App Prototype." },
+    { property: "og:title", content: "Parking Finder App Prototype – Figma Make" },
+    { property: "og:description", content: "Imported Figma Make page for the Parking Finder App Prototype." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   staticData: { importedDocument: { html: { "className": "fullscreen_view--fullscreenHtml--eYPWu", "lang": "en", "style": { "--left-panel-width": "368px", "--right-panel-width": "0px", "--canvas-color": "rgba(245, 245, 245, 1)" } as import("react").CSSProperties }, body: { "className": "fullscreen_view--fullscreenBody--KHlOf", "data-editor-theme": "seascape", "data-fpl-version": "ui3", "data-preferred-theme": "light", "style": { colorScheme: "light" } as import("react").CSSProperties } } },
   component: Index,
 });
