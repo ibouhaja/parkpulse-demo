@@ -1,14 +1,14 @@
 import { Suspense, useEffect, useMemo, useRef, useState, Component, type ReactNode } from 'react';
 import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
 import { Environment, Lightformer, OrbitControls, useGLTF } from '@react-three/drei';
-import { Box3, CanvasTexture, Color, Group, InstancedMesh, Mesh, MeshStandardMaterial, Object3D, SRGBColorSpace, Vector3 } from 'three';
-import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { CanvasTexture, Color, Group, InstancedMesh, Object3D, SRGBColorSpace, Vector3, CatmullRomCurve3 } from 'three';
+import { prepareVehicle, disposeVehicle, type VehiclePart } from './parking-vehicle-asset';
 import { Eye, RotateCcw, Play, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import compact from '@/assets/models/parkpulse-compact.glb.asset.json';
-import sedan from '@/assets/models/parkpulse-sedan.glb.asset.json';
-import suv from '@/assets/models/parkpulse-suv.glb.asset.json';
-import van from '@/assets/models/parkpulse-van.glb.asset.json';
+import compact from '@/assets/models/parkpulse-real-compact.glb.asset.json';
+import sedan from '@/assets/models/parkpulse-real-sedan.glb.asset.json';
+import suv from '@/assets/models/parkpulse-real-suv.glb.asset.json';
+import van from '@/assets/models/parkpulse-real-van.glb.asset.json';
 import { demoModels, demoModelLabels, parkingPose, PARKING_ANIMATION_SECONDS, sceneSpots, spotCoordinates, type DemoModel } from './parking-3d-rules';
 import { parkingLevels, type ParkingSpot, type ParkingPosition, type ParkingFilters, type ParkingLevel } from './parking-plan';
 
@@ -38,7 +38,8 @@ function surface(spots: ParkingSpot[], selected: ParkingPosition | null, colors:
       const { x, z } = spotCoordinates(spot.bay);
       const active = selected?.bay === spot.bay && selected.level === spot.level;
       ctx.fillStyle = active ? colors.selected : spot.unknown ? colors.unknown : spot.occupied ? colors.occupied : colors.free;
-      ctx.globalAlpha = .75; ctx.fillRect(px(x - 1.7), pz(z - 2.7), 3.4 / 48 * 2048, 5.4 / 36 * 1536); ctx.globalAlpha = 1;
+      ctx.globalAlpha = active ? .65 : .22; ctx.fillRect(px(x - 1.7), pz(z - 2.7), 3.4 / 48 * 2048, 5.4 / 36 * 1536); ctx.globalAlpha = 1;
+      ctx.fillRect(px(x - 1.7), pz(z + 1.85), 3.4 / 48 * 2048, .85 / 36 * 1536);
       ctx.strokeStyle = colors.paint; ctx.lineWidth = 4; ctx.strokeRect(px(x - 1.7), pz(z - 2.7), 3.4 / 48 * 2048, 5.4 / 36 * 1536);
       ctx.fillStyle = colors.paint; ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center';
       ctx.fillText(spot.bay, px(x), pz(z + 2.2));
@@ -52,52 +53,41 @@ function surface(spots: ParkingSpot[], selected: ParkingPosition | null, colors:
   return texture;
 }
 
-function Cars({ model, spots, colors }: { model: DemoModel; spots: ParkingSpot[]; colors: Palette }) {
-  const { scene } = useGLTF(urls[model], false);
+function CarInstances({ part, spots, colors }: { part: VehiclePart; spots: ParkingSpot[]; colors: Palette }) {
   const ref = useRef<InstancedMesh>(null);
-  const asset = useMemo(() => {
-    scene.updateMatrixWorld(true);
-    const parts: import('three').BufferGeometry[] = [];
-    let material: MeshStandardMaterial | undefined;
-    scene.traverse(node => { if (node instanceof Mesh) { parts.push(node.geometry.clone().applyMatrix4(node.matrixWorld)); if (node.material instanceof MeshStandardMaterial) material = node.material; } });
-    const geometry = mergeGeometries(parts);
-    parts.forEach(part => part.dispose());
-    if (!geometry) throw new Error('Fahrzeugmodell konnte nicht geladen werden.');
-    geometry.computeBoundingBox();
-    const box = geometry.boundingBox ?? new Box3(); const size = box.getSize(new Vector3()); const center = box.getCenter(new Vector3());
-    const scale = (model === 'van' ? 5.6 : model === 'compact' ? 3.8 : 4.5) / Math.max(size.z, .01);
-    geometry.translate(-center.x, -box.min.y, -center.z); geometry.scale(scale, scale, scale);
-    return { geometry, material: material?.clone() ?? new MeshStandardMaterial(), scale };
-  }, [scene, model]);
-  useEffect(() => () => { asset.geometry.dispose(); asset.material.dispose(); }, [asset]);
+  const invalidate = useThree(state => state.invalidate);
   useEffect(() => {
     const mesh = ref.current; if (!mesh) return;
     const transform = new Object3D();
-    spots.forEach((spot, i) => { const p = spotCoordinates(spot.bay); transform.position.set(p.x, .13, p.z); transform.rotation.y = p.yaw; transform.updateMatrix(); mesh.setMatrixAt(i, transform.matrix); mesh.setColorAt(i, new Color(colors[colorKeys[(Number(spot.bay.slice(1)) + i) % colorKeys.length] ?? 'carSilver'])); });
+    spots.forEach((spot, i) => { const p = spotCoordinates(spot.bay); transform.position.set(p.x, .13, p.z); transform.rotation.y = p.yaw; transform.updateMatrix(); mesh.setMatrixAt(i, transform.matrix); if (part.paint) mesh.setColorAt(i, new Color(colors[colorKeys[(Number(spot.bay.slice(1)) + i) % colorKeys.length] ?? 'carSilver'])); });
     mesh.instanceMatrix.needsUpdate = true; if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
     mesh.computeBoundingSphere();
-  }, [spots, colors]);
-  return <instancedMesh ref={ref} args={[asset.geometry, asset.material, 48]} count={spots.length} castShadow receiveShadow/>;
+    part.material.needsUpdate = true;
+    invalidate();
+  }, [spots, colors, part, invalidate]);
+  return <instancedMesh ref={ref} args={[part.geometry, part.material, 48]} count={spots.length} castShadow receiveShadow/>;
+}
+
+function Cars({ model, spots, colors }: { model: DemoModel; spots: ParkingSpot[]; colors: Palette }) {
+  const { scene } = useGLTF(urls[model], false);
+  const parts = useMemo(() => prepareVehicle(scene, model), [scene, model]);
+  useEffect(() => () => disposeVehicle(parts), [parts]);
+  return <group>{parts.map((part, index) => <CarInstances key={index} part={part} spots={spots} colors={colors}/>)}</group>;
 }
 
 function DemoCar({ model, bay, run, colors, reduced }: { model: DemoModel; bay: string; run: number; colors: Palette; reduced: boolean }) {
   const { scene } = useGLTF(urls[model], false);
   const group = useRef<Group>(null); const clock = useRef(1);
-  const clone = useMemo(() => {
-    const result = scene.clone(true); const box = new Box3().setFromObject(result); const size = box.getSize(new Vector3()); const center = box.getCenter(new Vector3());
-    const scale = (model === 'van' ? 5.6 : model === 'compact' ? 3.8 : 4.5) / size.z;
-    result.scale.setScalar(scale); result.position.set(-center.x * scale, -box.min.y * scale, -center.z * scale);
-    result.traverse(node => { if (node instanceof Mesh) { node.castShadow = true; node.receiveShadow = true; const materials = Array.isArray(node.material) ? node.material : [node.material]; node.material = materials.map(m => { const c = m.clone(); if (c instanceof MeshStandardMaterial) c.color.set(colors.carBlue); return c; }); } });
-    return result;
-  }, [scene, model, colors]);
-  useEffect(() => () => { clone.traverse(node => { if (node instanceof Mesh) { const materials = Array.isArray(node.material) ? node.material : [node.material]; materials.forEach(m => m.dispose()); } }); }, [clone]);
+  const parts = useMemo(() => prepareVehicle(scene, model), [scene, model]);
+  useEffect(() => { parts.forEach(part => { if (part.paint) part.material.color.set(colors.carBlue); }); }, [parts, colors]);
+  useEffect(() => () => disposeVehicle(parts), [parts]);
   useEffect(() => { clock.current = reduced || run === 0 ? 1 : 0; }, [run, bay, reduced]);
   useFrame((state, delta) => {
     clock.current = Math.min(1, clock.current + Math.min(delta, .05) / PARKING_ANIMATION_SECONDS);
     const pose = parkingPose(bay, clock.current); if (group.current) { group.current.position.set(pose.x, .14, pose.z); group.current.rotation.y = pose.yaw; }
     if (clock.current < 1) state.invalidate();
   });
-  return <group ref={group}><primitive object={clone}/></group>;
+  return <group ref={group}>{parts.map((part, index) => <mesh key={index} geometry={part.geometry} material={part.material} castShadow receiveShadow/>)}</group>;
 }
 
 function Ready({ onReady }: { onReady: () => void }) { const sent = useRef(false); useFrame(() => { if (!sent.current) { sent.current = true; onReady(); } }); return null; }
@@ -121,7 +111,7 @@ function Floor({ spots, selected, colors, onSelect }: { spots: ParkingSpot[]; se
       return <group key={spot.bay} position={[p.x + 1.3, 0, signZ]}>
         <mesh position-y={.7}><boxGeometry args={[.12, 1.4, .12]}/><meshStandardMaterial color={colors.steel}/></mesh>
         <mesh position-y={1.5}><boxGeometry args={[.45, .6, .2]}/><meshStandardMaterial color={spot.charging ? colors.wallbox : spot.category === 'women' ? colors.selected : colors.free}/></mesh>
-        {spot.charging && <mesh position={[0, 1.55, .12]}><boxGeometry args={[.26, .16, .04]}/><meshStandardMaterial color={colors.ink}/></mesh>}
+        {spot.charging && <><mesh position={[0, 1.55, .12]}><boxGeometry args={[.26, .16, .04]}/><meshStandardMaterial color={colors.ink} roughness={.15}/></mesh><mesh position={[0, 1.36, .13]}><boxGeometry args={[.22, .035, .025]}/><meshStandardMaterial color={colors.free} emissive={colors.free} emissiveIntensity={.6}/></mesh><mesh><tubeGeometry args={[new CatmullRomCurve3([new Vector3(.18,1.25,0),new Vector3(.4,.9,.1),new Vector3(.25,.45,.15),new Vector3(.04,.8,.15)]),12,.025,6,false]}/><meshStandardMaterial color={colors.ink}/></mesh></>}
         {spot.accessible && <mesh position={[.25, .35, 0]}><boxGeometry args={[.12, .7, .12]}/><meshStandardMaterial color={colors.paint}/></mesh>}
       </group>;
     })}
@@ -144,8 +134,8 @@ export default function Parking3DScene(props: Props) {
   return <div className="parking-3d">
     <div className="parking-3d-tools"><label>Dein Demo-Fahrzeug<select aria-label="Dein Demo-Fahrzeug" value={props.model} onChange={e => props.onModel(e.target.value as DemoModel)}>{demoModels.map(m => <option key={m} value={m}>{demoModelLabels[m]}</option>)}</select></label><div><Button variant={building ? 'default' : 'outline'} size="icon" title="Gesamtes Parkhaus / einzelne Ebene" aria-label="Gesamtes Parkhaus" aria-pressed={building} onClick={() => setBuilding(b => !b)}><Building2/></Button><Button variant="outline" size="icon" title="Vogelperspektive" aria-label="Vogelperspektive" onClick={() => setView(v => v % 2 ? v : v + 1)}><Eye/></Button><Button variant="outline" size="icon" title="Ansicht zurücksetzen" aria-label="Ansicht zurücksetzen" onClick={() => setView(v => v % 2 ? v + 1 : v + 2)}><RotateCcw/></Button><Button variant="outline" disabled={!props.selected} onClick={() => setRun(r => r + 1)}><Play/>Einparken (Demo)</Button></div></div>
     <div className="parking-3d-canvas" ref={wrapper} data-scene-ready={ready ? 'true' : undefined} aria-label={`Interaktiver 3D-Parkhausplan ${props.level}`}>
-      <SceneBoundary>{colors && <Canvas frameloop="demand" dpr={[1, 1.5]} camera={{ position: [36, 40, 43], fov: 45 }} gl={{ antialias: true }}>
-        <color attach="background" args={[colors.sky]}/><ambientLight intensity={.7}/><directionalLight position={[18, 35, 12]} intensity={2.2}/>
+      <SceneBoundary>{colors && <Canvas shadows frameloop="demand" dpr={[1, 1.5]} camera={{ position: [36, 40, 43], fov: 45 }} gl={{ antialias: true }}>
+        <color attach="background" args={[colors.sky]}/><ambientLight intensity={.5}/><directionalLight position={[18, 35, 12]} intensity={2} castShadow shadow-mapSize={[1024,1024]} shadow-camera-left={-32} shadow-camera-right={32} shadow-camera-top={28} shadow-camera-bottom={-28} shadow-normalBias={.08}/>
         <Environment resolution={128}><Lightformer intensity={2} position={[0, 15, 0]} scale={[40, 30, 1]}/><Lightformer intensity={1} position={[-25, 5, 0]} rotation-y={Math.PI / 2} scale={[40, 10, 1]}/></Environment>
         {floors.map((floor, floorIndex) => {
           const spots = sceneSpots(props.spots, floor, props.filters);
@@ -153,6 +143,7 @@ export default function Parking3DScene(props: Props) {
           const cars = spots.filter(s => s.occupied && !s.unknown && (!ownVisible || ownSpot?.bay !== s.bay));
           return <group key={floor} position-y={building ? floorIndex * 7 : 0}>
             <Floor spots={spots} selected={props.selected} colors={colors} onSelect={props.onSelect}/>
+            {[-20,20].flatMap(x => [-8,8].map(z => <group key={`light-${x}-${z}`} position={[x,0,z]}><mesh position-y={2}><cylinderGeometry args={[.05,.05,4,8]}/><meshStandardMaterial color={colors.steel} metalness={.6} roughness={.35}/></mesh><mesh position={[0,4,0]}><boxGeometry args={[2.5,.1,.28]}/><meshStandardMaterial color={colors.paint} emissive={colors.paint} emissiveIntensity={2}/></mesh></group>))}
             <Suspense fallback={null}>{demoModels.map((model, index) => <Cars key={model} model={model} colors={colors} spots={cars.filter(s => (Number(s.bay.slice(1)) + Math.floor(Number(s.bay.slice(1)) / 12)) % 4 === index)}/>)}{ownSpot && ownVisible && <DemoCar key={`${ownSpot.level}-${ownSpot.bay}-${props.model}`} model={props.model} bay={ownSpot.bay} run={run} colors={colors} reduced={reduced}/>}<Ready onReady={() => setReady(true)}/></Suspense>
           </group>;
         })}
