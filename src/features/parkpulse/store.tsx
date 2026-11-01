@@ -65,6 +65,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
       authEventSeen=true;
       const u = session?.user;
       identity.current=u?.id??null;
+      setAuthReady(true);
       setUser((prev) => (prev?.id === u?.id ? prev : u ? { id: u.id, email: u.email ?? '' } : null));
       router.invalidate();
     });
