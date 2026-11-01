@@ -9,6 +9,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        nav: "text-sidebar-foreground hover:bg-sidebar-accent hover:text-primary-foreground",
+        navActive: "bg-sidebar-accent text-primary-foreground border-l-2 border-primary",
         default: "bg-primary text-primary-foreground shadow hover:bg-primary/90",
         destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
         outline:

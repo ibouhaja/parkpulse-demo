@@ -1,0 +1,7 @@
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { ArrowUpRight } from 'lucide-react';
+import { facilities, money } from '@/features/parkpulse/data';
+import { useDemo } from '@/features/parkpulse/store';
+import { PageHeading, pageHead } from '@/features/parkpulse/shared';
+export const Route=createFileRoute('/verlauf')({head:()=>pageHead('Parkverlauf','Deine fiktiven Parkvorgänge und lokal abgeschlossenen Demo-Parksessions im Überblick.'),component:ParkingHistory});
+function ParkingHistory(){const {state}=useDemo();return <><PageHeading title="Deine Wege im Überblick." subtitle="Fiktive Beispieldaten und deine abgeschlossenen Demo-Parksessions. Keine echten Rechnungen." eyebrow="PARKVERLAUF"/><div className="section-heading"><h2>{state.history.length} Parkvorgänge</h2><span className="section-subtitle">Lokal gespeichert</span></div><div className="table-wrap"><table className="history-table"><thead><tr><th>Parkplatz</th><th>Datum</th><th>Parkdauer</th><th>Fiktive Kosten</th><th>Status</th></tr></thead><tbody>{state.history.map(h=>{const p=facilities.find(p=>p.id===h.facilityId);return <tr key={h.id}><td><Link to="/parkplatz/$id" params={{id:h.facilityId}}><strong>{p?.name}<ArrowUpRight size={12} className="inline ml-2"/></strong><small>{p?.area}</small></Link></td><td>{new Date(h.date).toLocaleDateString('de-DE')}</td><td>{h.minutes} Min.</td><td><strong>{money(h.cost)}</strong></td><td><span className="ev-tag">Abgeschlossen · Demo</span></td></tr>;})}</tbody></table></div></>;}

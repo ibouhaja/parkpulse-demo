@@ -1,0 +1,7 @@
+import { Link } from '@tanstack/react-router';
+import { MapPin, Zap, ArrowRight, ChevronRight } from 'lucide-react';
+import { money, type Facility } from './data';
+export const pageHead=(title:string,description:string)=>({meta:[{title:`${title} | ParkPulse`},{name:'description',content:description},{property:'og:title',content:`${title} | ParkPulse`},{property:'og:description',content:description},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary_large_image'}]});
+export function PageHeading({title,subtitle,eyebrow='DEIN PARKPULSE'}:{title:string;subtitle:string;eyebrow?:string}){return <div className="page-heading"><div><div className="eyebrow">{eyebrow}</div><h1>{title}</h1><p>{subtitle}</p></div><div className="city-label"><MapPin size={15}/> Demostadt, Deutschland</div></div>;}
+export function FacilityRow({p}:{p:Facility}){return <Link className="facility-row" to="/parkplatz/$id" params={{id:p.id}}><div className="parking-icon">P</div><div className="facility-info"><h3>{p.name}</h3><div className="facility-meta"><span><MapPin size={10}/>{p.area} · {p.distance.toString().replace('.',',')} km</span><span className="availability">{p.spaces} freie Plätze*</span>{p.ev>0&&<span className="ev-tag"><Zap size={9}/> E-Laden</span>}</div></div><div className="facility-cost">{money(p.price)}<small>pro Stunde</small></div><ChevronRight size={17}/></Link>;}
+export function SectionLink({to,label='Alle ansehen'}:{to:'/suche'|'/verlauf'|'/praemien';label?:string}){return <Link to={to}>{label}<ArrowRight size={12}/></Link>;}

@@ -1,4 +1,3 @@
-import { useMatches as useImportedMatches } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -12,6 +11,8 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { DemoProvider } from "@/features/parkpulse/store";
+import { ParkShell } from "@/features/parkpulse/shell";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
@@ -79,10 +80,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Parking Finder App Prototype" },
-      { name: "description", content: "Parking Finder App Prototype imported from Figma Make." },
-      { property: "og:title", content: "Parking Finder App Prototype" },
-      { property: "og:description", content: "Parking Finder App Prototype imported from Figma Make." },
+      { title: "ParkPulse" },
+      { name: "description", content: "ParkPulse – dein smarter Parkplatzfinder mit fiktiven Demo-Daten." },
+      { property: "og:title", content: "ParkPulse" },
+      { property: "og:description", content: "ParkPulse – dein smarter Parkplatzfinder mit fiktiven Demo-Daten." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -91,7 +92,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/parkpulse.svg", type: "image/svg+xml" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" },
     ],
   }),
   shellComponent: RootShell,
@@ -100,24 +102,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
-declare module "@tanstack/react-router" {
-  interface StaticDataRouteOption {
-    importedDocument?: {
-      html?: import("react").HTMLAttributes<HTMLHtmlElement> & Record<`data-${string}`, string>;
-      body?: import("react").HTMLAttributes<HTMLBodyElement> & Record<`data-${string}`, string>;
-    };
-  }
-}
-
 function RootShell({ children }: { children: ReactNode }) {
-  const importedDocument = useImportedMatches({ select: matches => matches.at(-1)?.staticData.importedDocument });
   return (
-    <html lang="en" {...importedDocument?.html}>
+    <html lang="de">
       <head>
-        <style href="site-import-inline" precedence="imported-inline">{"@layer imported-inline;"}</style>
         <HeadContent />
       </head>
-      <body {...importedDocument?.body}>
+      <body>
         {children}
         <Scripts />
       </body>
@@ -130,8 +121,8 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      {/* Required: nested routes render here. Removing <DemoProvider><ParkShell><Outlet /></ParkShell></DemoProvider> breaks all child routes. */}
+      <DemoProvider><ParkShell><Outlet /></ParkShell></DemoProvider>
     </QueryClientProvider>
   );
 }

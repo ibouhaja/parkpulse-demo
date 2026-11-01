@@ -9,4 +9,5 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- Keep imported markup and interactions in their route files, source CSS separate, and document attributes in route staticData so source structure is preserved.
+- ParkPulse uses TanStack file routes with a shared shell and demo provider; keep parking data and local persistence in the feature module to share state consistently across views.
+- Demo persistence uses browser localStorage after hydration only; no server, authentication, payment or external data integrations are needed.
