@@ -27,7 +27,7 @@ export function sanitizeAction(input: unknown, now: number, fallbackId: string):
     case 'end':
       return { type: 'end', now };
     case 'discount':
-      return a.discount === 'none' || a.discount === 'SHOP2' || a.discount === 'voucher'
+      return a.discount === 'shopping' || a.discount === 'none' || a.discount === 'SHOP2' || a.discount === 'voucher'
         ? { type: 'discount', discount: a.discount, voucherId: typeof a.voucherId === 'string' ? a.voucherId : undefined }
         : null;
     case 'complete':

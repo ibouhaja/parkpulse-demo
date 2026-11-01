@@ -8,7 +8,7 @@ import { applyAccountAction, declineLocalImport, getAccountState, importLocalSta
 import { ParkingPlanProvider } from './parking-plan-provider';
 import { ReservationsProvider } from './reservations-provider';
 
-type Discount = 'none' | 'SHOP2' | 'voucher';
+type Discount = 'none' | 'SHOP2' | 'voucher' | 'shopping';
 type Store = {
   state: DemoState; ready: boolean; authReady: boolean; signedIn: boolean; email: string; displayName: string;
   start: (id: string) => boolean; end: () => boolean;

@@ -7,10 +7,10 @@ export function durationText(ms: number) {const secs=Math.floor(ms/1000);return 
 export function checkoutAmounts(state: DemoState) {
  const s=state.session;const original=s?.finalFee ?? 0;
  const voucher=state.vouchers.find(v=>v.id===s?.voucherId && !v.usedSessionId && v.earnedSessionId!==s?.id);
- const discount=s?.discount==='SHOP2'&&!state.shop2Used?Math.min(2,original):s?.discount==='voucher'&&voucher?Math.min(10,voucher.value,original):0;
+ const discount=s?.discount==='SHOP2'&&!state.shop2Used?Math.min(2,original):s?.discount==='shopping'?Math.min((s.tariff?.shoppingCents??0)/100,original):s?.discount==='voucher'&&voucher?Math.min(10,voucher.value,original):0;
  return {original,discount,payable:Math.max(0,original-discount)};
 }
-export type Action = {type:'redeem';points:number;id:string;now:number}|{type:'start';facilityId:string;id:string;now:number}|{type:'advance';hours:1|3;now:number}|{type:'location';level:string;bay:string;sessionId?:string|undefined}|{type:'end';now:number}|{type:'discount';discount:'none'|'SHOP2'|'voucher';voucherId?:string|undefined}|{type:'complete';sessionId:string;payment:'success'|'failure'|'free';method?:import('./data').PayMethod|undefined;now:number};
+export type Action = {type:'redeem';points:number;id:string;now:number}|{type:'start';facilityId:string;id:string;now:number}|{type:'advance';hours:1|3;now:number}|{type:'location';level:string;bay:string;sessionId?:string|undefined}|{type:'end';now:number}|{type:'discount';discount:'none'|'SHOP2'|'voucher'|'shopping';voucherId?:string|undefined}|{type:'complete';sessionId:string;payment:'success'|'failure'|'free';method?:import('./data').PayMethod|undefined;now:number};
 export function transition(state: DemoState, action: Action): DemoState {
  if(action.type==='redeem'){
   const balance=state.pointsBalance??0;const id=`points-${action.id}`;
@@ -24,6 +24,7 @@ export function transition(state: DemoState, action: Action): DemoState {
  if(action.type==='discount'){
   if(session.status!=='checkout-pending')return state;
   if(action.discount==='SHOP2'&&state.shop2Used)return state;
+  if(action.discount==='shopping'&&!(session.tariff?.shoppingCents??0))return state;
   if(action.discount==='voucher'&&!state.vouchers.some(v=>v.id===action.voucherId&&!v.usedSessionId&&v.earnedSessionId!==session.id))return state;
   return {...state,session:{...session,discount:action.discount,voucherId:action.discount==='voucher'?action.voucherId:undefined}};
  }

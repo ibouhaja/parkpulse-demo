@@ -12,7 +12,7 @@ export function findFacilities(query: string, evOnly: boolean, sort = 'distance'
   return facilities.filter(p => (!evOnly || p.ev > 0) && `${p.name} ${p.area} ${p.address}`.toLocaleLowerCase('de').includes(term)).sort((a,b) => sort === 'price' ? a.price-b.price : a.distance-b.distance);
 }
 export const money = (value: number) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(value);
-export type Session = { id: string; facilityId: string; facilityName: string; startedAt: number; effectiveDemoTime: number; demoOffsetMs: number; level: string; bay: string; status: 'active' | 'checkout-pending'; endedAt?: number; finalDurationMs?: number; finalFee?: number; discount?: 'none' | 'SHOP2' | 'voucher'; voucherId?: string | undefined; tariff?: import('./tariffs').Tariff };
+export type Session = { id: string; facilityId: string; facilityName: string; startedAt: number; effectiveDemoTime: number; demoOffsetMs: number; level: string; bay: string; status: 'active' | 'checkout-pending'; endedAt?: number; finalDurationMs?: number; finalFee?: number; discount?: 'none' | 'SHOP2' | 'voucher' | 'shopping'; voucherId?: string | undefined; tariff?: import('./tariffs').Tariff };
 export type HistoryEntry = { id: string; facilityId: string; date: string; minutes: number; cost: number; session?: Session; level?: string; bay?: string; receiptId?: string; originalFee?: number; discountAmount?: number; stampEarned?: boolean; bonusPoints?: number; pointsBalance?: number; pointsHistory?: import('./points').PointEntry[] };
 export type Voucher = { id: string; value: number; earnedSessionId: string; usedSessionId?: string; source?: 'points'; pointsSpent?: number };
 export type PayMethod = 'card' | 'paypal' | 'klarna' | 'visa' | 'bitcoin';
