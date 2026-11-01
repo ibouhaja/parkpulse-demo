@@ -4,8 +4,9 @@ import { useServerFn } from '@tanstack/react-start';
 import { supabase } from '@/integrations/supabase/client';
 import { initialState, type DemoState } from './data';
 import { restoreState, STORAGE_KEY, transition, type Action } from './session';
-import { applyAccountAction, declineLocalImport, getAccountState, importLocalState } from './account.functions';
+import { applyAccountAction, declineLocalImport, getAccountState, importLocalState, arriveBooking } from './account.functions';
 import { ParkingPlanProvider } from './parking-plan-provider';
+import { ReservationsProvider } from './reservations-provider';
 
 type Discount = 'none' | 'SHOP2' | 'voucher';
 type Store = {
@@ -14,6 +15,7 @@ type Store = {
   complete: (sessionId: string, payment: 'success' | 'failure' | 'free', method?: import('./data').PayMethod) => boolean;
   applyDiscount: (discount: Discount, voucherId?: string) => boolean; advance: (hours: 1 | 3) => void;
   saveLocation: (level: string, bay: string) => boolean; error: string;
+  arrive: (id:string)=>Promise<void>;
   importOffer: boolean; importLocal: () => Promise<void>; declineImport: () => Promise<void>; refreshProfile: () => Promise<void>;
 };
 const Context = createContext<Store | null>(null);
@@ -38,6 +40,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   const applyAction = useServerFn(applyAccountAction);
   const importFn = useServerFn(importLocalState);
   const declineFn = useServerFn(declineLocalImport);
+  const arriveFn=useServerFn(arriveBooking);
 
   const put = (s: DemoState) => { current.current = s; setState(s); };
 
@@ -107,6 +110,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     applyDiscount: (discount, voucherId) => commit({ type: 'discount', discount, voucherId }),
     advance: (hours) => { commit({ type: 'advance', hours, now: Date.now() }); },
     saveLocation: (level, bay) => commit({ type: 'location', level, bay, sessionId: current.current.session?.id }),
+    arrive:async(id)=>{await queue.current;const r=await arriveFn({data:{id}});put(r.state as DemoState);},
     importLocal: async () => {
       const raw = readLocal();
       if (!raw) { setImportOffer(false); return; }
@@ -115,7 +119,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     },
     declineImport: async () => { await declineFn(); setImportOffer(false); },
   };
-  return <Context.Provider value={store}><ParkingPlanProvider session={state.session}>{children}</ParkingPlanProvider></Context.Provider>;
+  return <Context.Provider value={store}><ReservationsProvider signedIn={!!user}><ParkingPlanProvider session={state.session}>{children}</ParkingPlanProvider></ReservationsProvider></Context.Provider>;
 }
 
 export function useDemo() { const ctx = useContext(Context); if (!ctx) throw new Error('ParkPulse-Demo ist nicht verfügbar'); return ctx; }
