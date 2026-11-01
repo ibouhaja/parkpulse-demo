@@ -43,6 +43,13 @@
       "when": 1793536197927,
       "tag": "0005_reservation_cancellation_no_show",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793536355440,
+      "tag": "0006_reservation_no_show_scheduler",
+      "breakpoints": true
     }
   ]
 }
