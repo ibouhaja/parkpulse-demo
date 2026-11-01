@@ -107,3 +107,4 @@
  .rewards-popup button{min-height:46px}
 }
 @media(max-width:720px){.reservation-row>div:last-child{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}.reservation-row>div:last-child>*{width:100%}}
+@media(max-width:720px){.parking-3d-tools{flex-wrap:wrap;overflow:visible}.parking-3d-tools>div{flex-wrap:wrap;gap:8px}.parking-3d-tools button{flex-shrink:0;min-width:46px}.reservation-row>div:last-child>button,.reservation-row>div:last-child>[data-slot=button]{border:1px solid var(--border)}}
