@@ -1,12 +1,15 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { ArrowDown, ArrowRight, Camera, Car, Check, Navigation, RefreshCw, Save, CircleHelp, Zap } from 'lucide-react';
-import { Link } from '@tanstack/react-router';
+import { ClientOnly, Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { useDemo } from './store';
 import { parkingLevels, spotsPerLevel, occupancyStats, selectFreeSpot, savePlanPosition, matchesSpot, defaultFilters, categoryLabels, type ParkingLevel, type ParkingPosition } from './parking-plan';
 import { ParkingFiltersView, SpotProperties, FilterReset, categoryIcons, shortCategories } from './parking-filters';
 import { facilities } from './data';
 import { useParkingPlan } from './parking-plan-provider';
+import { filtersForModel, type DemoModel } from './parking-3d-rules';
+
+const Parking3DScene = lazy(() => import('./parking-3d-scene'));
 
 export function ParkingPlanView({ facilityId }: { facilityId: string }) {
   const { plans, simulate } = useParkingPlan();
@@ -17,6 +20,8 @@ export function ParkingPlanView({ facilityId }: { facilityId: string }) {
   const [notice, setNotice] = useState('');
   const [filters, setFilters] = useState(defaultFilters);
   const [inspected, setInspected] = useState('');
+  const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
+  const [demoModel, setDemoModel] = useState<DemoModel>('sedan');
   const plan = plans[facilityId];
   useEffect(() => {
     if (!auto) return;
@@ -56,9 +61,10 @@ export function ParkingPlanView({ facilityId }: { facilityId: string }) {
     <ParkingFiltersView filters={filters} onChange={next => { setFilters(next); setInspected(''); }}/>
     <div className="parking-plan-toolbar">
       <div className="parking-levels" role="group" aria-label="Parkebene auswählen">{parkingLevels.map(floor => <Button key={floor} variant={level === floor ? 'default' : 'outline'} aria-pressed={level === floor} onClick={() => { setLevel(floor); setSelected(null); setNotice(''); }}>{floor}</Button>)}</div>
+      <div className="parking-levels" role="group" aria-label="Planansicht auswählen"><Button variant={viewMode === '2d' ? 'default' : 'outline'} aria-pressed={viewMode === '2d'} onClick={() => setViewMode('2d')}>2D-Parkhausplan</Button><Button variant={viewMode === '3d' ? 'default' : 'outline'} aria-pressed={viewMode === '3d'} disabled={level !== 'P1'} onClick={() => setViewMode('3d')}>3D-Ansicht</Button></div>
       <span className="parking-free-count">{free} frei · {matching.length - free - unknown} belegt · {unknown} ungeklärt <small>(passend · fiktiv)</small></span>
     </div>
-    <div className="parking-floor" aria-label={`Parkhausplan ${level}`}>
+    {viewMode === '3d' && level === 'P1' ? <ClientOnly fallback={<p role="status">3D-Ansicht wird vorbereitet …</p>}><Suspense fallback={<p role="status">3D-Ansicht wird geladen …</p>}><Parking3DScene spots={plan.spots} level={level} filters={filters} selected={currentSelection} saved={state.session?.facilityId === facilityId && parkingLevels.includes(state.session.level as ParkingLevel) ? { level: state.session.level as ParkingLevel, bay: state.session.bay } : null} model={demoModel} onModel={model => { setDemoModel(model); setFilters(filtersForModel(filters, model)); setInspected(''); }} onSelect={spot => { setSelected(selectFreeSpot(plan.spots, spot, filters)); setInspected(''); setNotice(''); }}/></Suspense></ClientOnly> : <div className="parking-floor" aria-label={`Parkhausplan ${level}`}>
       <div className="parking-floor-label"><Navigation size={14}/><span>Einfahrt · {level}</span><span>{spotsPerLevel} Demo-Plätze · {floorTotals.free} frei · {floorTotals.occupied} belegt · {floorTotals.percent} % Auslastung</span></div>
       {[0, 1, 2, 3].map(row => <div key={row}>
         {row % 2 === 1 && <div className="parking-aisle"><ArrowRight size={20}/><span>FAHRGASSE</span><ArrowRight size={20}/></div>}
@@ -73,7 +79,7 @@ export function ParkingPlanView({ facilityId }: { facilityId: string }) {
         })}</div>
       </div>)}
       <div className="parking-floor-exit"><ArrowDown size={14}/>Ausfahrt</div>
-    </div>
+    </div>}
     <div className="parking-plan-legend"><span><i className="spot-free-dot"/>Frei</span><span><Car size={14}/>Belegt</span><span><CircleHelp size={14}/>Ungeklärt</span><span><Check size={14}/>Ausgewählt</span></div>
     {free === 0 && <div className="parking-no-match" role="status"><strong>Keine passenden freien Stellplätze auf {level}.</strong><p>{matching.length ? 'Passende Plätze sind belegt oder ihre Belegung ist ungeklärt.' : 'Die Stellplätze passen nicht zu deinem Fahrzeug oder den gewählten Bedürfnissen.'} Fahrzeuggrenzen werden nicht gelockert.</p><div>{(otherLevels.length ? otherLevels : parkingLevels.filter(floor => floor !== level)).map(floor => <Button key={floor} variant="outline" onClick={() => { setLevel(floor); setSelected(null); setInspected(''); }}>{otherLevels.includes(floor) ? 'Freie Plätze auf' : 'Ebene ansehen:'} {floor}</Button>)}<FilterReset onReset={() => setFilters({ ...filters, needs: { wallbox: false, family: false, women: false, accessible: false } })}/></div>{alternatives.length > 0 && <p>Andere fiktive Parkgelände mit passenden freien Plätzen: {alternatives.map(p => <Link key={p.id} to="/parkplatz/$id" params={{ id: p.id }} className="parking-alternative">{p.name}</Link>)}<br/>Bitte Fahrzeug und Bedürfnisse dort erneut einstellen.</p>}</div>}
     {matching.length > 0 && <label className="parking-inspect">Stellplatzdetails (auch belegt / ungeklärt)<select value={inspected} onChange={e => setInspected(e.target.value)}><option value="">Stellplatz ansehen</option>{matching.map(s => <option key={s.bay} value={s.bay}>{s.bay} · {categoryLabels[s.category]} · {s.unknown ? 'ungeklärt' : s.occupied ? 'belegt' : 'frei'}</option>)}</select></label>}
