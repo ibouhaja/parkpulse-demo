@@ -1,19 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import { facilities, initialState } from './data';
 import { restoreState, transition } from './session';
-import { createParkingPlan, parkingLevels, savePlanPosition, selectFreeSpot, simulateOccupancy, matchesSpot, defaultFilters, vehicleDefaults, type ParkingSpot } from './parking-plan';
+import { createParkingPlan, parkingLevels, savePlanPosition, selectFreeSpot, simulateOccupancy, matchesSpot, defaultFilters, vehicleDefaults, type ParkingSpot, occupancyStats, protectSessionPosition } from './parking-plan';
 
 const plan = () => createParkingPlan('quartier');
 const started = (facilityId = 'quartier') => transition(initialState, { type: 'start', facilityId, id: 'plan-session', now: 1000 });
 
 describe('Fiktive Stellplatzübersicht', () => {
-  it('enthält P1, P2 und P3 mit je 24 eindeutigen Stellplätzen für alle sechs Parkhäuser', () => {
+  it('enthält P1, P2 und P3 mit je 48 eindeutigen Stellplätzen für alle sechs Parkhäuser', () => {
     expect(facilities).toHaveLength(6);
     for (const facility of facilities) {
       const spots = createParkingPlan(facility.id);
-      expect(spots).toHaveLength(72);
-      for (const level of parkingLevels) expect(spots.filter(s => s.level === level)).toHaveLength(24);
-      expect(new Set(spots.map(s => `${s.level}/${s.bay}`)).size).toBe(72);
+      expect(spots).toHaveLength(144);
+      for (const level of parkingLevels) expect(spots.filter(s => s.level === level)).toHaveLength(48);
+      expect(new Set(spots.map(s => `${s.level}/${s.bay}`)).size).toBe(144);
     }
   });
   it('ändert Belegungen in beide Richtungen ohne den Ausgangsplan zu verändern', () => {
@@ -35,9 +35,9 @@ describe('Fiktive Stellplatzübersicht', () => {
   it('macht eine Auswahl ungültig, sobald der Platz simuliert belegt wird', () => {
     const selected = { level: 'P1' as const, bay: 'B03' };
     expect(selectFreeSpot(plan(), selected)).toEqual(selected);
-    expect(selectFreeSpot(simulateOccupancy(plan(), 2), selected)).toBeNull();
+    expect(selectFreeSpot(simulateOccupancy(plan(), 1), selected)).toBeNull();
     const state = started();
-    expect(savePlanPosition(state, 'quartier', simulateOccupancy(plan(), 2), selected)).toBe(state);
+    expect(savePlanPosition(state, 'quartier', simulateOccupancy(plan(), 1), selected)).toBe(state);
   });
   it('speichert Ebene und Nummer in der aktiven Session und erhält sie nach Wiederherstellung', () => {
     const state = savePlanPosition(started(), 'quartier', plan(), { level: 'P1', bay: 'B03' });
@@ -59,7 +59,7 @@ describe('Fiktive Stellplatzübersicht', () => {
   });
   it('überschreibt eine gespeicherte Parkposition nicht durch Belegungswechsel', () => {
     const state = savePlanPosition(started(), 'quartier', plan(), { level: 'P1', bay: 'B03' });
-    const changed = simulateOccupancy(plan(), 2);
+    const changed = simulateOccupancy(plan(), 1);
     expect(savePlanPosition(state, 'quartier', changed, { level: 'P1', bay: 'B03' })).toBe(state);
     expect(state.session?.bay).toBe('B03');
   });
@@ -120,13 +120,9 @@ describe('Fahrzeugkriterien und Kategorien', () => {
     expect(plan().filter(s => matchesSpot(s, { ...family, needs: { ...family.needs, women: true } }))).toHaveLength(0);
   });
   it('sperrt ungeklärte Belegung und löst diese durch Simulation auf', () => {
-    const spots = plan();
-    expect(getSpot('B13').unknown).toBe(true);
-    expect(selectFreeSpot(spots, { level: 'P1', bay: 'B13' })).toBeNull();
-    const simulated = simulateOccupancy(spots, 0);
-    expect(selectFreeSpot(simulated, { level: 'P1', bay: 'B13' })).toEqual({ level: 'P1', bay: 'B13' });
-    expect(simulated[0]?.unknown).toBe(true);
-    expect(selectFreeSpot(simulated, { level: 'P1', bay: 'B01' })).toBeNull();
+    const spots = plan().map(s => s.bay === 'B03' ? { ...s, unknown: true, occupied: false } : s);
+    expect(selectFreeSpot(spots, { level: 'P1', bay: 'B03' })).toBeNull();
+    expect(selectFreeSpot(simulateOccupancy(spots, 0), { level: 'P1', bay: 'B03' })).toEqual({ level: 'P1', bay: 'B03' });
   });
   it('sperrt ungeeignete Auswahl und Speicherung auch nach Filterwechsel', () => {
     const state = started();
@@ -137,5 +133,52 @@ describe('Fahrzeugkriterien und Kategorien', () => {
     const restored = restoreState(JSON.stringify(saved));
     expect(restored.session?.bay).toBe('B03');
     expect(restored.session?.level).toBe('P1');
+  });
+});
+
+describe('Ausgewogene Demo-Belegung', () => {
+  it('startet auf jeder Ebene jedes Parkhauses mit 60–70 % frei und 30–40 % belegt', () => {
+    for (const facility of facilities) for (const level of parkingLevels) {
+      const stats = occupancyStats(createParkingPlan(facility.id).filter(s => s.level === level));
+      expect(stats.total).toBe(48);
+      expect(stats.free / stats.total).toBeGreaterThanOrEqual(0.6);
+      expect(stats.free / stats.total).toBeLessThanOrEqual(0.7);
+      expect(stats.occupied / stats.total).toBeGreaterThanOrEqual(0.3);
+      expect(stats.occupied / stats.total).toBeLessThanOrEqual(0.4);
+      expect(stats.unknown).toBe(0);
+      expect(stats.percent).toBe(35);
+    }
+  });
+  it('zeigt konsistente Gesamtsummen und bleibt bei wiederholter Simulation ausgewogen', () => {
+    let spots = plan();
+    expect(occupancyStats(spots)).toEqual({ total: 144, free: 93, occupied: 51, unknown: 0, percent: 35 });
+    for (let step = 0; step < 30; step++) {
+      spots = simulateOccupancy(spots, step);
+      const stats = occupancyStats(spots);
+      expect(stats.free + stats.occupied + stats.unknown).toBe(144);
+      expect(stats.free / stats.total).toBeGreaterThanOrEqual(0.6);
+      expect(stats.occupied / stats.total).toBeLessThanOrEqual(0.4);
+    }
+  });
+  it('gibt eine gespeicherte Sessionposition bei keiner Simulation wieder frei', () => {
+    const state = savePlanPosition(started(), 'quartier', plan(), { level: 'P1', bay: 'B03' });
+    const restored = restoreState(JSON.stringify(state));
+    expect(restored.session?.bay).toBe('B03');
+    for (let step = 0; step < 30; step++) {
+      const protectedSpots = protectSessionPosition(simulateOccupancy(plan(), step), restored.session);
+      const spot = protectedSpots.find(s => s.level === 'P1' && s.bay === 'B03');
+      expect(spot?.occupied).toBe(true);
+      expect(spot?.unknown).toBe(false);
+      expect(selectFreeSpot(protectedSpots, { level: 'P1', bay: 'B03' })).toBeNull();
+    }
+    expect(protectSessionPosition(plan(), null)).toEqual(plan());
+  });
+  it('schützt auch ausstehende Abschlüsse und normalisiert frühere Stellplatznummern', () => {
+    const saved = transition(started(), { type: 'location', level: 'P1', bay: 'B3' });
+    const pending = transition(saved, { type: 'end', now: 5000 });
+    const spots = protectSessionPosition(plan(), restoreState(JSON.stringify(pending)).session);
+    expect(spots.find(s => s.level === 'P1' && s.bay === 'B03')?.occupied).toBe(true);
+    expect(pending.session?.finalFee).toBe(2);
+    expect(pending.stamps).toBe(5);
   });
 });

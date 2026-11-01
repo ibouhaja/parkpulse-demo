@@ -3,7 +3,7 @@ import { ArrowDown, ArrowRight, Camera, Car, Check, Navigation, RefreshCw, Save,
 import { Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { useDemo } from './store';
-import { parkingLevels, selectFreeSpot, savePlanPosition, matchesSpot, defaultFilters, categoryLabels, type ParkingLevel, type ParkingPosition } from './parking-plan';
+import { parkingLevels, spotsPerLevel, occupancyStats, selectFreeSpot, savePlanPosition, matchesSpot, defaultFilters, categoryLabels, type ParkingLevel, type ParkingPosition } from './parking-plan';
 import { ParkingFiltersView, SpotProperties, FilterReset, categoryIcons, shortCategories } from './parking-filters';
 import { facilities } from './data';
 import { useParkingPlan } from './parking-plan-provider';
@@ -31,6 +31,8 @@ export function ParkingPlanView({ facilityId }: { facilityId: string }) {
   }, [plan, selected, filters]);
   if (!plan) return null;
   const visible = plan.spots.filter(s => s.level === level);
+  const totals = occupancyStats(plan.spots);
+  const floorTotals = occupancyStats(visible);
   const matching = visible.filter(s => matchesSpot(s, filters));
   const free = matching.filter(s => !s.occupied && !s.unknown).length;
   const unknown = matching.filter(s => s.unknown).length;
@@ -50,15 +52,16 @@ export function ParkingPlanView({ facilityId }: { facilityId: string }) {
 
   return <section className="parking-overview" aria-label="Demo-Stellplatzübersicht">
     <div className="section-heading"><div><p className="eyebrow">FIKTIVER PARKHAUSPLAN</p><h2>Deinen Stellplatz im Blick</h2></div><span className="ev-tag"><Camera size={14}/>Nur Simulation</span></div>
+    <div className="parking-occupancy-summary" aria-label="Gesamtbelegung aller Demo-Ebenen" role="status"><span><strong>{totals.total}</strong>Gesamtzahl</span><span><strong>{totals.free}</strong>Frei</span><span><strong>{totals.occupied}</strong>Belegt</span><span><strong>{totals.unknown}</strong>Ungeklärt</span><span><strong>{totals.percent} %</strong>Auslastung</span></div><p className="section-subtitle">Alle drei Demo-Ebenen · unabhängig vom Fahrzeugfilter · ausschließlich simuliert</p>
     <ParkingFiltersView filters={filters} onChange={next => { setFilters(next); setInspected(''); }}/>
     <div className="parking-plan-toolbar">
       <div className="parking-levels" role="group" aria-label="Parkebene auswählen">{parkingLevels.map(floor => <Button key={floor} variant={level === floor ? 'default' : 'outline'} aria-pressed={level === floor} onClick={() => { setLevel(floor); setSelected(null); setNotice(''); }}>{floor}</Button>)}</div>
       <span className="parking-free-count">{free} frei · {matching.length - free - unknown} belegt · {unknown} ungeklärt <small>(passend · fiktiv)</small></span>
     </div>
     <div className="parking-floor" aria-label={`Parkhausplan ${level}`}>
-      <div className="parking-floor-label"><Navigation size={14}/><span>Einfahrt · {level}</span><span>Demo-Ausschnitt · 24 Plätze</span></div>
-      {[0, 1].map(row => <div key={row}>
-        {row === 1 && <div className="parking-aisle"><ArrowRight size={20}/><span>FAHRGASSE</span><ArrowRight size={20}/></div>}
+      <div className="parking-floor-label"><Navigation size={14}/><span>Einfahrt · {level}</span><span>{spotsPerLevel} Demo-Plätze · {floorTotals.free} frei · {floorTotals.occupied} belegt · {floorTotals.percent} % Auslastung</span></div>
+      {[0, 1, 2, 3].map(row => <div key={row}>
+        {row % 2 === 1 && <div className="parking-aisle"><ArrowRight size={20}/><span>FAHRGASSE</span><ArrowRight size={20}/></div>}
         <div className="parking-spots">{visible.slice(row * 12, row * 12 + 12).map(spot => {
           if (!matchesSpot(spot, filters)) return <div key={spot.bay} className="parking-spot-hidden" aria-hidden="true"/>;
           const active = currentSelection?.level === spot.level && currentSelection.bay === spot.bay;
@@ -76,8 +79,9 @@ export function ParkingPlanView({ facilityId }: { facilityId: string }) {
     {matching.length > 0 && <label className="parking-inspect">Stellplatzdetails (auch belegt / ungeklärt)<select value={inspected} onChange={e => setInspected(e.target.value)}><option value="">Stellplatz ansehen</option>{matching.map(s => <option key={s.bay} value={s.bay}>{s.bay} · {categoryLabels[s.category]} · {s.unknown ? 'ungeklärt' : s.occupied ? 'belegt' : 'frei'}</option>)}</select></label>}
     {detailSpot && <SpotProperties spot={detailSpot}/>}
     <div className="parking-selection"><div><strong>{currentSelection ? `Ausgewählt: ${currentSelection.level} · ${currentSelection.bay}` : 'Kein Stellplatz ausgewählt'}</strong><p>{savedPosition ? `In deiner Parksession: ${savedPosition}` : matchingSession ? 'Noch keine Parkposition gespeichert.' : signedIn ? 'Speichern ist nur in einer aktiven Parksession dieses Parkhauses möglich.' : 'Zum Speichern ist eine Anmeldung und aktive Parksession erforderlich.'}</p></div><Button variant="outline" disabled={!ready || !matchingSession || !currentSelection} onClick={save}><Save/>In Parksession speichern</Button></div>
+    {savedPosition && <p className="section-subtitle">Deine gespeicherte Position bleibt bis zum Abschluss der Parksession simuliert belegt. Keine echte Reservierung.</p>}
     {notice && <p role="status" className="parking-plan-notice">{notice}</p>}
     <div className="parking-simulation"><div><h3><Camera size={18}/>KI-Kameraerkennung simulieren</h3><p>Fiktive Belegungen · keine Kamera verbunden · keine Live-Verfügbarkeit</p></div><Button variant="secondary" onClick={() => simulate(facilityId)}><RefreshCw/>Belegung simulieren</Button><label className="filter-switch"><input type="checkbox" checked={auto} onChange={e => setAuto(e.target.checked)}/>Automatisch (alle 4 Sek.)</label><span className="section-subtitle" role="status">{plan.step ? `${plan.step} simulierte Aktualisierung${plan.step === 1 ? '' : 'en'}` : 'Fiktiver Ausgangszustand'}</span></div>
-    <details className="parking-camera-explanation"><summary>Wie könnte echte Kameraerkennung funktionieren?</summary><p>Eine echte Kamera könnte Bilder der markierten Stellplätze liefern. Ein Computer-Vision-Modell würde Fahrzeuge erkennen und ihre Position den Stellplatzflächen zuordnen. Mehrere aufeinanderfolgende Bilder könnten eine Belegung bestätigen. Schatten, schlechte Beleuchtung oder verdeckte Fahrzeuge können Fehler verursachen; eine unsichere Belegung würde als ungeklärt gelten. Ein realer Einsatz müsste Datenschutz, Datenminimierung und die rechtlichen Voraussetzungen berücksichtigen.</p><p>Geschlecht, Familienstatus oder persönliche Bedürfnisse werden nicht durch eine Kamera erkannt. Familien-, Frauen- und barrierefreie Plätze sind vorab festgelegte Kategorien; Bedürfnisse wählt der Nutzer selbst.</p><p>ParkPulse verarbeitet keine Kamerabilder. Hier ändern ausschließlich simulierte Zustandswechsel die fiktiven Plätze. Die Auswahl ist keine Reservierung. Die drei Demo-Ebenen und 24 Plätze pro Ebene sind illustrative Ausschnitte, keine tatsächlichen Kapazitäten. Bei offenen Parkgeländen sind P1/P2/P3 fiktive Planbereiche, keine Gebäudegeschosse.</p></details>
+    <details className="parking-camera-explanation"><summary>Wie könnte echte Kameraerkennung funktionieren?</summary><p>Eine echte Kamera könnte Bilder der markierten Stellplätze liefern. Ein Computer-Vision-Modell würde Fahrzeuge erkennen und ihre Position den Stellplatzflächen zuordnen. Mehrere aufeinanderfolgende Bilder könnten eine Belegung bestätigen. Schatten, schlechte Beleuchtung oder verdeckte Fahrzeuge können Fehler verursachen; eine unsichere Belegung würde als ungeklärt gelten. Ein realer Einsatz müsste Datenschutz, Datenminimierung und die rechtlichen Voraussetzungen berücksichtigen.</p><p>Geschlecht, Familienstatus oder persönliche Bedürfnisse werden nicht durch eine Kamera erkannt. Familien-, Frauen- und barrierefreie Plätze sind vorab festgelegte Kategorien; Bedürfnisse wählt der Nutzer selbst.</p><p>ParkPulse verarbeitet keine Kamerabilder. Hier ändern ausschließlich simulierte Zustandswechsel die fiktiven Plätze. Die Auswahl ist keine Reservierung. Die drei Demo-Ebenen und 48 Plätze pro Ebene sind illustrative Ausschnitte, keine tatsächlichen Kapazitäten. Bei offenen Parkgeländen sind P1/P2/P3 fiktive Planbereiche, keine Gebäudegeschosse.</p></details>
   </section>;
 }
