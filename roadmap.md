@@ -2,7 +2,7 @@
 - [x] Karten-Startseite, kombinierte Filter und ausziehbare Parkhausdetails; 390px ohne Überlauf und mit sichtbarer Reservierungsschaltfläche.
 - [x] Sichere Reservierung, Termin, Preisvorschau, Stornierung und simulierter Ankunft; angemeldet bis Visa-Demo-Beleg und Neuladen geprüft.
 - [x] Reservierte Kapazität über gemeinsamen Plan geschützt; Replay erzeugt keine zweite Buchung und anderer Buchungsversuch auf denselben Platz wird abgewiesen.
-- [x] Bonuspunkte ohne doppelte Stempel; 147 Tests bestanden, fehlgeschlagene Zahlung und erfolgreicher Abschluss mit 100 Punkten im Konto geprüft.
+- [x] Bonuspunkte ohne doppelte Stempel; 148 Tests bestanden, fehlgeschlagene Zahlung und erfolgreicher Abschluss mit 100 Punkten im Konto geprüft.
 - [x] Nach vorhandener Markenidentität gestaltet; drei erwähnte Referenz-Screenshots waren nicht angehängt.
 
 # 3D-Parkhausplan
