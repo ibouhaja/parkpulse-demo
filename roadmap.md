@@ -1,3 +1,10 @@
+# Karten-App und Demo-Reservierung
+- [x] Karten-Startseite, kombinierte Filter und ausziehbare Parkhausdetails; 390px ohne Überlauf und mit sichtbarer Reservierungsschaltfläche.
+- [x] Sichere Reservierung, Termin, Preisvorschau, Stornierung und simulierter Ankunft; angemeldet bis Visa-Demo-Beleg und Neuladen geprüft.
+- [x] Reservierte Kapazität über gemeinsamen Plan geschützt; Replay erzeugt keine zweite Buchung und anderer Buchungsversuch auf denselben Platz wird abgewiesen.
+- [x] Bonuspunkte ohne doppelte Stempel; 148 Tests bestanden, fehlgeschlagene Zahlung und erfolgreicher Abschluss mit 100 Punkten im Konto geprüft.
+- [x] Nach vorhandener Markenidentität gestaltet; drei erwähnte Referenz-Screenshots waren nicht angehängt.
+
 # 3D-Parkhausplan
 - [x] Architektur, fotografische Betonmaterialien, nähere Kamera, Fahreransicht und sanften Stellplatzfokus umgesetzt.
 - [x] Drei externe CC0-Fahrzeuge (Three-door hatchback, Car-derived small van, Large three-row SUV) integriert und Quellen dokumentiert. Limousine bleibt eigenes Modell: hochwertiges CC0-Modell nicht verifiziert; kein Fotorealismus zugesichert.

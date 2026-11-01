@@ -1,4 +1,5 @@
 import { facilities, initialState, sessionCost, type DemoState, type Session } from './data';
+import { bonusFor } from './map-rules';
 export const STORAGE_KEY = 'parkpulse-demo-v1';
 export function elapsedMs(session: Session, now: number) {return session.status === 'checkout-pending' ? session.finalDurationMs ?? 0 : Math.max(0, Math.max(now + session.demoOffsetMs, session.effectiveDemoTime) - session.startedAt);}
 export function durationText(ms: number) {const secs=Math.floor(ms/1000);return [Math.floor(secs/3600),Math.floor(secs/60)%60,secs%60].map(n=>String(n).padStart(2,'0')).join(':');}
@@ -29,7 +30,8 @@ export function transition(state: DemoState, action: Action): DemoState {
   let vouchers=state.vouchers.map(v=>session.discount==='voucher'&&v.id===session.voucherId&&amount.discount>0?{...v,usedSessionId:session.id}:v);
   if(stamps===6){stamps=0;vouchers=[...vouchers,{id:`gutschein-${session.id}`,value:10,earnedSessionId:session.id}];}
   const date=new Date(action.now).toISOString();
-  return {...state,session:null,stamps,vouchers,shop2Used:state.shop2Used||(session.discount==='SHOP2'&&amount.discount>0),receipts:[{id:receiptId,sessionId:session.id,date,originalFee:amount.original,discountAmount:amount.discount,payable:amount.payable,discount:session.discount ?? 'none',payment:amount.payable===0?'free':'success',...(amount.payable>0?{method:action.method??'card'}:{}),level:session.level,bay:session.bay},...state.receipts],history:[{id:session.id,facilityId:session.facilityId,date,minutes:Math.ceil(session.finalDurationMs/60000),cost:amount.payable,originalFee:amount.original,discountAmount:amount.discount,level:session.level,bay:session.bay,receiptId,session:{...session}},...state.history]};
+  const points=amount.payable>0?bonusFor(session.facilityId):0;
+  return {...state,session:null,stamps,vouchers,bonusPoints:(state.bonusPoints??0)+points,shop2Used:state.shop2Used||(session.discount==='SHOP2'&&amount.discount>0),receipts:[{id:receiptId,sessionId:session.id,date,originalFee:amount.original,discountAmount:amount.discount,payable:amount.payable,discount:session.discount ?? 'none',payment:amount.payable===0?'free':'success',...(amount.payable>0?{method:action.method??'card'}:{}),level:session.level,bay:session.bay},...state.receipts],history:[{id:session.id,facilityId:session.facilityId,date,minutes:Math.ceil(session.finalDurationMs/60000),cost:amount.payable,originalFee:amount.original,discountAmount:amount.discount,level:session.level,bay:session.bay,receiptId,bonusPoints:points,session:{...session}},...state.history]};
  }
  if(session.status!=='active')return state;
  if(action.type==='advance'){const offset=session.demoOffsetMs+action.hours*3600000;return {...state,session:{...session,demoOffsetMs:offset,effectiveDemoTime:Math.max(action.now+offset,session.effectiveDemoTime+action.hours*3600000)}};}

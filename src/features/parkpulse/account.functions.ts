@@ -4,6 +4,7 @@ import type { Json } from '@/integrations/supabase/types';
 import { initialState, type DemoState } from './data';
 import { restoreState } from './session';
 import { applyServerAction, canImport } from './account-rules';
+import { arriveReservation, type Reservation } from './reservation-rules';
 
 type Ctx = { supabase: any; userId: string };
 type Row = { state: DemoState; version: number; import_decision: string | null };
@@ -27,6 +28,12 @@ async function loadRow({ supabase, userId }: Ctx): Promise<Row> {
 
 async function save(userId: string, version: number, patch: Record<string, unknown>) {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+  if ('state' in patch && !('import_decision' in patch)) {
+    const {data,error}=await supabaseAdmin.rpc('demo_save_state',{p_user:userId,p_version:version,p_state:patch['state'] as Json});
+    if(error)throw new Error('Speichern fehlgeschlagen. Dieser Stellplatz ist möglicherweise reserviert.');
+    if(!data)return false;
+    return true;
+  }
   const { data, error } = await supabaseAdmin
     .from('parking_states')
     .update({ ...patch, version: version + 1 })
@@ -81,3 +88,19 @@ export const declineLocalImport = createServerFn({ method: 'POST' })
     if (row.import_decision === null) await save(context.userId, row.version, { import_decision: 'declined' });
     return { ok: true };
   });
+
+export const arriveBooking=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator((input:{id:string})=>input).handler(async({context,data})=>{
+  for(let attempt=0;attempt<3;attempt++){
+    const row=await loadRow(context as Ctx);
+    const {data:r,error}=await context.supabase.from('demo_reservations').select('*').eq('id',data.id).eq('user_id',context.userId).maybeSingle();
+    if(error||!r)throw new Error('Reservierung wurde nicht gefunden.');
+    if(r.status==='arrived'&&row.state.session?.id===r.session_id)return {state:row.state};
+    const next=arriveReservation(row.state,r as Reservation,Date.now());
+    if(next===row.state)throw new Error('Bitte schließe zuerst deine bestehende Parksession ab.');
+    const {supabaseAdmin}=await import('@/integrations/supabase/client.server');
+    const {data:ok,error:saveError}=await supabaseAdmin.rpc('demo_save_state',{p_user:context.userId,p_version:row.version,p_state:next as unknown as Json,p_arrival:data.id});
+    if(saveError)throw new Error('Ankunft konnte nicht gespeichert werden. Bitte lade deine Reservierungen neu.');
+    if(ok)return {state:next};
+  }
+  throw new Error('Gleichzeitige Änderung. Bitte erneut versuchen.');
+});
