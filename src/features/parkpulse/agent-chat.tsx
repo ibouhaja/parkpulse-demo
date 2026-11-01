@@ -74,7 +74,7 @@ export function AgentPage({ threadId }: { threadId?: string }) {
         run_started_at: null,
       });
       await qc.invalidateQueries({ queryKey: ["agent-threads", userId] });
-      await navigate({ to: "/assistent/$threadId", params: { threadId: row.id } });
+      window.location.assign(`/assistent/${row.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Gespräch konnte nicht geöffnet werden.");
     } finally {
