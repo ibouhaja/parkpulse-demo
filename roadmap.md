@@ -1,4 +1,6 @@
 # 3D-Parkhausplan
+- [ ] Detailliertere lizenzierte Fahrzeugmodelle und getrennte Lack-/Glas-/Radmaterialien ergänzen.
+- [ ] Parkflächen, Wallboxen und Beleuchtung verbessern; bestehende Synchronisierung und Darstellung prüfen.
 - [x] P1 mit lizenzierten Fahrzeugen, Kamera und gemeinsamer Auswahl implementieren und prüfen.
 - [x] P2/P3 und dreigeschossige Gesamtansicht ergänzt; 3D-Klickauswahl, Einparken und Kontospeicherung P3/B02 nach Neuladen geprüft.
 - [x] Desktop und 390px-Smartphone-Darstellung geprüft, keine Laufzeitfehler oder horizontales Überlaufen; 123 Tests bestanden. Echte Gerätegeschwindigkeit und physische Touchbedienung bleiben hardwareabhängig.
