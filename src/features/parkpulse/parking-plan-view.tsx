@@ -31,9 +31,10 @@ export function ParkingPlanView({ facilityId }: { facilityId: string }) {
   useEffect(() => {
     if (selected && plan && !selectFreeSpot(plan.spots, selected, filters)) {
       setSelected(null);
+      if (state.session?.facilityId === facilityId && state.session.level === selected.level && state.session.bay === selected.bay) return;
       setNotice('Der ausgewählte Stellplatz ist nicht mehr frei oder passt nicht zu deinen Kriterien. Bitte wähle erneut.');
     }
-  }, [plan, selected, filters]);
+  }, [plan, selected, filters, state.session, facilityId]);
   if (!plan) return null;
   const visible = plan.spots.filter(s => s.level === level);
   const totals = occupancyStats(plan.spots);
