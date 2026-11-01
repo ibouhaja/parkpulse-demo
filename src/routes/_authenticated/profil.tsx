@@ -1,7 +1,7 @@
 import { PreferencesForm } from '@/features/parkpulse/preferences-form';
 import { defaultPreferences,normalizePreferences } from '@/features/parkpulse/preferences';
 import type { Json } from '@/integrations/supabase/types';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useState, type FormEvent } from 'react';
 import { Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { facilities } from '@/features/parkpulse/data';
 import { useDemo } from '@/features/parkpulse/store';
 import { PageHeading, pageHead } from '@/features/parkpulse/shared';
+import { useReservations } from '@/features/parkpulse/reservations-provider';
+import { money } from '@/features/parkpulse/data';
+import { reservationStatus } from '@/features/parkpulse/cancellation-rules';
 
 export const Route = createFileRoute('/_authenticated/profil')({
   head: () => pageHead('Mein Profil', 'Anzeigename, fiktives Kennzeichen und bevorzugtes Parkhaus in deinem ParkPulse-Konto.'),
@@ -18,6 +21,8 @@ export const Route = createFileRoute('/_authenticated/profil')({
 const input = 'mt-2 w-full rounded-md border border-input bg-background p-3';
 
 function Profile() {
+  const {reservations}=useReservations();
+  const resolvedReservations=reservations.filter(r=>['cancelled','no_show'].includes(reservationStatus(r)));
   const { email, refreshProfile,userId } = useDemo();
   const [form, setForm] = useState({ display_name: '', license_plate: '', preferred_facility: '' });
   const [preferences,setPreferences]=useState(defaultPreferences);
@@ -43,6 +48,7 @@ function Profile() {
     if (!error) await refreshProfile();setBusy(false);
   };
   return <><PageHeading title="Dein Profil." subtitle="Nur du kannst diese Angaben sehen und bearbeiten. Bitte nur fiktive Kennzeichen eingeben." eyebrow="MEIN KONTO"/>
+    <section className="mb-6 space-y-2"><h2 className="font-semibold">Reservierungsverlauf · Demo-Gebühren</h2><p>{resolvedReservations.length} Stornierungen / No-Shows · {money(resolvedReservations.reduce((sum,r)=>sum+(r.fee_cents??0),0)/100)} simulierte Gebühren · keine echte Abbuchung</p><Button asChild variant="outline"><Link to="/reservierungen">Reservierungen und Gebühren ansehen</Link></Button></section>
     <div className="session-page"><div className="active-panel text-left">{!loaded ? <p>Profil wird geladen …</p> :
       <form onSubmit={submit} className="space-y-4">
         <div className="booking-line"><span>E-Mail</span><strong>{email}</strong></div>
