@@ -1,7 +1,7 @@
 # 3D-Parkhausplan
 - [x] P1 mit lizenzierten Fahrzeugen, Kamera und gemeinsamer Auswahl implementieren und prüfen.
-- [ ] P2/P3 ergänzen; Demo-Einparken, Filter und Sessionsynchronisierung testen.
-- [ ] Desktop-/Smartphone-Darstellung sowie bestehende Tests prüfen.
+- [x] P2/P3 und dreigeschossige Gesamtansicht ergänzt; 3D-Klickauswahl, Einparken und Kontospeicherung P3/B02 nach Neuladen geprüft.
+- [x] Desktop und 390px-Smartphone-Darstellung geprüft, keine Laufzeitfehler oder horizontales Überlaufen; 123 Tests bestanden. Echte Gerätegeschwindigkeit und physische Touchbedienung bleiben hardwareabhängig.
 
 # Accounts
 - [x] Sign-up, sign-in, sign-out, password reset, Google, profiles.
