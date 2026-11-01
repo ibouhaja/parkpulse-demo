@@ -18,3 +18,4 @@
 
 - Checkout records the completed session and receipt atomically with loyalty and benefit consumption; migration initializes new loyalty fields once without changing frozen legacy sessions.
 - Fictional parking occupancy is a browser-safe feature provider shared across detail/session views, separate from account state; plan selections reuse authenticated location saves and never reserve spots or alter saved positions during simulation.
+- Vehicle suitability and user-selected needs are pure parking-plan predicates reused for filtering, selection and save guards; unknown occupancy is separate from occupied state and never selectable, while category/property data remains fictional and does not change account schemas.
