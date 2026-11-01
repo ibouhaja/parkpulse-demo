@@ -6,10 +6,10 @@ import { prepareVehicle, disposeVehicle, type VehiclePart } from './parking-vehi
 import { GarageArchitecture } from './parking-garage';
 import { Eye, RotateCcw, Play, Building2, CarFront, Maximize, Minimize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import compact from '@/assets/models/parkpulse-real-compact.glb.asset.json';
+import compact from '@/assets/models/parkpulse-fleet-hatchback.glb.asset.json';
 import sedan from '@/assets/models/parkpulse-real-sedan.glb.asset.json';
-import suv from '@/assets/models/parkpulse-real-suv.glb.asset.json';
-import van from '@/assets/models/parkpulse-real-van.glb.asset.json';
+import suv from '@/assets/models/parkpulse-showroom-suv.glb.asset.json';
+import van from '@/assets/models/parkpulse-fleet-van.glb.asset.json';
 import { cameraPose, demoModels, demoModelLabels, parkingPose, PARKING_ANIMATION_SECONDS, sceneSpots, spotCoordinates, type CameraView, type DemoModel } from './parking-3d-rules';
 import { parkingLevels, type ParkingSpot, type ParkingPosition, type ParkingFilters, type ParkingLevel } from './parking-plan';
 
