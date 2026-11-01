@@ -15,6 +15,7 @@ type Store = {
   complete: (sessionId: string, payment: 'success' | 'failure' | 'free', method?: import('./data').PayMethod) => boolean;
   applyDiscount: (discount: Discount, voucherId?: string) => boolean; advance: (hours: 1 | 3) => void;
   saveLocation: (level: string, bay: string) => boolean; error: string;
+  redeem: (points:number)=>boolean;
   arrive: (id:string)=>Promise<void>;
   importOffer: boolean; importLocal: () => Promise<void>; declineImport: () => Promise<void>; refreshProfile: () => Promise<void>;
 };
@@ -104,6 +105,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
 
   const store: Store = {
     state, ready, authReady, signedIn: !!user, email: user?.email ?? '', displayName, error, importOffer, refreshProfile,
+    redeem:(points)=>commit({type:'redeem',points,id:crypto.randomUUID(),now:Date.now()}),
     start: (facilityId) => commit({ type: 'start', facilityId, id: crypto.randomUUID(), now: Date.now() }),
     end: () => commit({ type: 'end', now: Date.now() }),
     complete: (sessionId, payment, method = 'card') => commit({ type: 'complete', sessionId, payment, method, now: Date.now() }),

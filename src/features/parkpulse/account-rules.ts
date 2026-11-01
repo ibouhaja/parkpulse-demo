@@ -10,8 +10,10 @@ const sampleIds = new Set(initialState.history.map((h) => h.id));
  */
 export function sanitizeAction(input: unknown, now: number, fallbackId: string): Action | null {
   if (!input || typeof input !== 'object') return null;
-  const a = input as { type?: unknown; facilityId?: unknown; id?: unknown; hours?: unknown; level?: unknown; bay?: unknown; sessionId?: unknown; discount?: unknown; voucherId?: unknown; payment?: unknown; method?: unknown };
+  const a = input as { type?: unknown; facilityId?: unknown; id?: unknown; hours?: unknown; level?: unknown; bay?: unknown; sessionId?: unknown; discount?: unknown; voucherId?: unknown; payment?: unknown; method?: unknown; points?: unknown };
   switch (a.type) {
+    case 'redeem':
+      return typeof a.points==='number'&&typeof a.id==='string'&&UUID.test(a.id)?{type:'redeem',points:a.points,id:a.id,now}:null;
     case 'start':
       return typeof a.facilityId === 'string'
         ? { type: 'start', facilityId: a.facilityId, id: typeof a.id === 'string' && UUID.test(a.id) ? a.id : fallbackId, now }
@@ -45,5 +47,5 @@ export function applyServerAction(state: DemoState, input: unknown, now: number,
 
 /** An account may adopt browser data only once, and only while it is still untouched. */
 export function canImport(state: DemoState, decision: string | null) {
-  return decision === null && state.session === null && state.receipts.length === 0 && state.history.every((h) => sampleIds.has(h.id));
+  return decision === null && state.session === null && (state.pointsHistory?.length??0)===0 && (state.pointsBalance??0)===0 && state.receipts.length === 0 && state.history.every((h) => sampleIds.has(h.id));
 }
