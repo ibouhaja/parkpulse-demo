@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep imported markup and interactions in their route files, source CSS separate, and document attributes in route staticData so source structure is preserved.

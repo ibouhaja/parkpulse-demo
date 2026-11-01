@@ -142,3 +142,61 @@
     color: var(--color-foreground);
   }
 }
+
+/* site-import tokens: begin (generated; re-import replaces this block) */
+/* Imported clone roles use prefixed Tailwind utilities
+   (bg-site-import-primary, text-site-import-foreground, …); edit the
+   --site-import-* variables to restyle the clone. Unprefixed roles theme new UI. */
+:root {
+  --background: oklch(1 0 0);
+  --site-import-background: oklch(1 0 0);
+  --foreground: oklch(0 0 0);
+  --site-import-foreground: oklch(0 0 0);
+  --border: oklch(0 0 0 / 0.16);
+  --site-import-border: oklch(0 0 0 / 0.16);
+  --card: oklch(1 0 0 / 0.16);
+  --site-import-card: oklch(1 0 0 / 0.16);
+  --muted: oklch(1 0 0 / 0.24);
+  --site-import-muted: oklch(1 0 0 / 0.24);
+}
+/* Design tokens captured from the imported site, registered as Tailwind
+   utilities (bg-<name>, text-<name>, font-<name>). var() values live in
+   the imported stylesheet's :root. */
+@theme inline {
+  --font-sans: figmaSans, "figmaSans Fallback", "SF Pro Display", system-ui, helvetica, sans-serif;
+  --color-site-import-background: var(--site-import-background);
+  --color-site-import-foreground: var(--site-import-foreground);
+  --color-site-import-border: var(--site-import-border);
+  --color-site-import-card: var(--site-import-card);
+  --color-site-import-muted: var(--site-import-muted);
+  --color-fig-theme-badge-bg: var(--fig-theme-badge-bg);
+  --color-fig-theme-badge-fg: var(--fig-theme-badge-fg);
+  --color-fig-theme-bg: var(--fig-theme-bg);
+  --color-fig-theme-border: var(--fig-theme-border);
+  --color-fig-theme-border-hover: var(--fig-theme-border-hover);
+  --color-fig-theme-btn-ghost-bg: var(--fig-theme-btn-ghost-bg);
+  --color-fig-theme-btn-ghost-bg-hover: var(--fig-theme-btn-ghost-bg-hover);
+  --color-fig-theme-btn-primary-bg: var(--fig-theme-btn-primary-bg);
+  --color-fig-theme-btn-primary-bg-hover: var(--fig-theme-btn-primary-bg-hover);
+  --color-fig-theme-btn-primary-fg: var(--fig-theme-btn-primary-fg);
+  --color-fig-theme-btn-secondary-bg: var(--fig-theme-btn-secondary-bg);
+  --color-fig-theme-btn-secondary-fg: var(--fig-theme-btn-secondary-fg);
+  --color-fig-theme-btn-transparent-bg: var(--fig-theme-btn-transparent-bg);
+  --color-fig-theme-btn-transparent-bg-hover: var(--fig-theme-btn-transparent-bg-hover);
+  --color-fig-theme-btn-transparent-fg: var(--fig-theme-btn-transparent-fg);
+  --color-fig-theme-card-bg: var(--fig-theme-card-bg);
+  --color-fig-theme-fg: var(--fig-theme-fg);
+  --color-fig-theme-fg-muted: var(--fig-theme-fg-muted);
+  --color-fig-theme-form-error-bg: var(--fig-theme-form-error-bg);
+  --color-fig-theme-form-error-fg: var(--fig-theme-form-error-fg);
+  --color-fig-theme-form-input-bg: var(--fig-theme-form-input-bg);
+  --color-fig-theme-form-placeholder: var(--fig-theme-form-placeholder);
+  --font-global-font-mono: var(--global-font-mono);
+  --font-global-font-sans: var(--global-font-sans);
+  --color-global-statsig-overlay: var(--global-statsig-overlay);
+}
+@theme reference {
+  --font-figma-mono: "figmaMono","figmaMono Fallback",SF Mono,menlo,monospace;
+  --font-figma-sans: "figmaSans","figmaSans Fallback",SF Pro Display,system-ui,helvetica,sans-serif;
+}
+/* site-import tokens: end */
