@@ -1,10 +1,18 @@
 import { describe, it, expect } from 'vitest';
 import { createParkingPlan, defaultFilters, parkingLevels, selectFreeSpot, savePlanPosition, protectSessionPosition, simulateOccupancy } from './parking-plan';
-import { demoModels, filtersForModel, parkingPose, sceneSpots, spotCoordinates } from './parking-3d-rules';
+import { cameraPose, demoModels, filtersForModel, parkingPose, sceneSpots, spotCoordinates } from './parking-3d-rules';
 import { initialState } from './data';
 import { transition, restoreState } from './session';
 
 describe('3D-P1', () => {
+  it('fokussiert denselben Stellplatz in allen Kameramodi ohne die Planposition zu verändern', () => {
+    const spot = spotCoordinates('B14');
+    expect(cameraPose('isometric', 'B14').target).toEqual([spot.x, 0, spot.z]);
+    expect(cameraPose('bird', 'B14').position).toEqual([spot.x, 22, spot.z + .01]);
+    expect(cameraPose('driver', 'B14').position).toEqual([spot.x, 1.65, spot.z + 7]);
+    expect(cameraPose('isometric', undefined, true).target).toEqual([0, 7, 0]);
+    expect(spotCoordinates('B14')).toEqual(spot);
+  });
   it('zeigt dieselben gefilterten Belegungen ohne Änderungen der Quelle', () => {
     const source = createParkingPlan('quartier'); const before = JSON.stringify(source);
     const spots = sceneSpots(source, 'P1', defaultFilters);

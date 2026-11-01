@@ -1,4 +1,4 @@
-import { Box3, BufferGeometry, DoubleSide, Matrix4, Mesh, MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Vector3 } from 'three';
+import { Box3, BufferGeometry, Float32BufferAttribute, DoubleSide, Matrix4, Mesh, MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Vector3 } from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import type { DemoModel } from './parking-3d-rules';
 
@@ -18,7 +18,20 @@ export function prepareVehicle(source: Object3D, model: DemoModel): VehiclePart[
     const originals = Array.isArray(node.material) ? node.material : [node.material];
     for (let i = 0; i < originals.length; i++) {
       const original = originals[i]; if (!(original instanceof MeshStandardMaterial)) continue;
+      // Quantized GLBs retain normalized integer attributes after loading;
+      // merging/baking them requires float positions/normals first.
       const geometry: BufferGeometry = node.geometry.clone();
+      for (const attributeName of ['position', 'normal', 'uv']) {
+        const attribute = geometry.getAttribute(attributeName);
+        if (!attribute?.normalized) continue;
+        const values = new Float32Array(attribute.count * attribute.itemSize);
+        for (let n = 0; n < attribute.count; n++) {
+          values[n * attribute.itemSize] = attribute.getX(n);
+          if (attribute.itemSize > 1) values[n * attribute.itemSize + 1] = attribute.getY(n);
+          if (attribute.itemSize > 2) values[n * attribute.itemSize + 2] = attribute.getZ(n);
+        }
+        geometry.setAttribute(attributeName, new Float32BufferAttribute(values, attribute.itemSize));
+      }
       // Original untextured GLBs mix lofted panels with primitive details;
       // normalize attribute sets before merging them by material.
       if (!original.map) geometry.deleteAttribute('uv');
