@@ -13,7 +13,7 @@ export function transition(state: DemoState, action: Action): DemoState {
  const session=state.session;
  if(action.type==='start'){const p=facilities.find(p=>p.id===action.facilityId);if(session||!p||state.history.some(h=>h.id===action.id))return state;return {...state,session:{id:action.id,facilityId:p.id,facilityName:p.name,startedAt:action.now,effectiveDemoTime:action.now,demoOffsetMs:0,level:'',bay:'',status:'active',discount:'none'}};}
  if(!session)return state;
- if(action.type==='location'){if(action.sessionId&&action.sessionId!==session.id)return state;return {...state,session:{...session,level:action.level.trim().slice(0,20),bay:action.bay.trim().slice(0,20)}};}
+ if(action.type==='location'){if(action.sessionId&&action.sessionId!==session.id)return state;const level=action.level.trim().slice(0,20);const bay=action.bay.trim().slice(0,20);if(!level||!bay)return state;return {...state,session:{...session,level,bay}};}
  if(action.type==='discount'){
   if(session.status!=='checkout-pending')return state;
   if(action.discount==='SHOP2'&&state.shop2Used)return state;
