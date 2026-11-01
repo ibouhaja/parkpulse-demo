@@ -1,7 +1,7 @@
 # Anmeldung, Präferenzen und Rewards-Pop-up
-- [ ] Apple und Gastzugang ergänzen; bestehende E-Mail-/Google-Anmeldung und Bestätigung erhalten. LinkedIn nicht unterstützt; keine Referenzbilder angehängt.
-- [ ] Fahrzeugpräferenzen bei Registrierung und im Profil speichern und kontogetrennt auf Kartenfilter anwenden.
-- [ ] Persönliches Rewards-Pop-up ergänzen; Tests, Speicherung, Anmeldung und Abmeldung prüfen.
+- [x] Apple und Gastzugang ergänzen; bestehende E-Mail-/Google-Anmeldung und Bestätigung erhalten. LinkedIn nicht unterstützt; keine Referenzbilder angehängt.
+- [x] Fahrzeugpräferenzen bei Registrierung und im Profil speichern und kontogetrennt auf Kartenfilter anwenden.
+- [x] Persönliches Rewards-Pop-up ergänzt; 184 Tests bestanden. Angemeldetes Profil: EV + Wallbox/Familie + Maße gespeichert und nach Neuladen als Filter aktiv, Popup mit 698 Punkten, Abmeldung und Gastreset ohne Laufzeitfehler geprüft. Apple/Google konfiguriert; vollständiger OAuth-Durchlauf und E-Mail-Bestätigungslink nicht geprüft. Registrierung mit example.com wurde korrekt abgewiesen; erfolgreiche neue Registrierung bleibt wegen fehlender erreichbarer Test-Mailadresse unbestätigt.
 
 # Tarife und ParkPulse-Punkte
 - [x] Unterschiedliche Tarife, Tageslimit, Abend-/Shopping-/Erststundenangebote konsistent berechnen; Altbestände und eingefrorene Gebühren erhalten.

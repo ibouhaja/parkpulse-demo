@@ -47,3 +47,5 @@
 .active-panel .parking-preferences { text-align: left; }
 .active-panel .parking-preferences button[role="checkbox"] { width: 16px; height: 16px; min-width: 16px; min-height: 16px; padding: 0; margin: 0; flex-shrink: 0; }
 .parking-preferences .preference-need { min-width: 0; }
+
+.popup-balance strong { color: var(--primary-foreground); }

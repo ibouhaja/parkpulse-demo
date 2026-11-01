@@ -134,11 +134,12 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     applyDiscount: (discount, voucherId) => commit({ type: 'discount', discount, voucherId }),
     advance: (hours) => { commit({ type: 'advance', hours, now: Date.now() }); },
     saveLocation: (level, bay) => commit({ type: 'location', level, bay, sessionId: current.current.session?.id }),
-    arrive:async(id)=>{await queue.current;const r=await arriveFn({data:{id}});put(r.state as DemoState);},
+    arrive:async(id)=>{const owner=identity.current;await queue.current;if(!owner||identity.current!==owner)return;const r=await arriveFn({data:{id}});if(identity.current===owner)put(r.state as DemoState);},
     importLocal: async () => {
       const raw = readLocal();
       if (!raw) { setImportOffer(false); return; }
-      try { const r = await importFn({ data: { raw } }); put(r.state as DemoState); setImportOffer(false); setError(''); }
+      const owner=identity.current;
+      try { const r = await importFn({ data: { raw } }); if(identity.current!==owner)return;put(r.state as DemoState); setImportOffer(false); setError(''); }
       catch (e) { setError(e instanceof Error ? e.message : 'Übernahme fehlgeschlagen.'); }
     },
     declineImport: async () => { await declineFn(); setImportOffer(false); },
