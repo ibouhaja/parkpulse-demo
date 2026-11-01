@@ -85,3 +85,23 @@ describe('German auth error messages', () => {
   it('explains unconfirmed email', () => expect(authErrorText({ code: 'email_not_confirmed' })).toContain('bestätige'));
   it('explains rate limits', () => expect(authErrorText({ status: 429 })).toContain('Zu viele'));
 });
+
+describe('demo payment methods', () => {
+  for (const m of ['paypal', 'klarna', 'visa', 'bitcoin'] as const) {
+    it(`stores ${m} on the receipt`, () => {
+      const s = run(pending(), { type: 'complete', sessionId: ID, payment: 'success', method: m });
+      expect(s.receipts[0]?.method).toBe(m);
+    });
+  }
+  it('rejects unknown methods by falling back to the demo card', () => {
+    const s = run(pending(), { type: 'complete', sessionId: ID, payment: 'success', method: 'mastercard-real' });
+    expect(s.receipts[0]?.method).toBe('card');
+  });
+  it('a zero-payable completion records no payment method', () => {
+    let s = pending();
+    s = { ...s, session: s.session ? { ...s.session, finalFee: 0 } : null };
+    s = run(s, { type: 'complete', sessionId: ID, payment: 'free', method: 'visa' });
+    expect(s.receipts[0]?.payment).toBe('free');
+    expect(s.receipts[0]?.method).toBeUndefined();
+  });
+});
