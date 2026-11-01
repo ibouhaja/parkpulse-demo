@@ -17,3 +17,4 @@
 - Session state transitions are pure functions; the provider applies them optimistically, then the server result replaces local state, preserving pending checkout and upgrading older local records.
 
 - Checkout records the completed session and receipt atomically with loyalty and benefit consumption; migration initializes new loyalty fields once without changing frozen legacy sessions.
+- Fictional parking occupancy is a browser-safe feature provider shared across detail/session views, separate from account state; plan selections reuse authenticated location saves and never reserve spots or alter saved positions during simulation.
