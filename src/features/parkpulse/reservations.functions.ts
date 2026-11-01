@@ -1,3 +1,6 @@
+import { tariffs } from './tariffs';
+import { reservationPrice } from './map-rules';
+import type { Json } from '@/integrations/supabase/types';
 import { createServerFn } from '@tanstack/react-start';
 import { createClient } from '@supabase/supabase-js';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
@@ -13,7 +16,7 @@ export const getHeldPositions = createServerFn({method:'GET'}).handler(async () 
   return (data??[]) as HeldPosition[];
 });
 export const getReservations=createServerFn({method:'GET'}).middleware([requireSupabaseAuth]).handler(async({context})=>{
-  const {data,error}=await context.supabase.from('demo_reservations').select('id,facility_id,level,bay,starts_at,hours,price,status,session_id').eq('user_id',context.userId).order('created_at',{ascending:false});
+  const {data,error}=await context.supabase.from('demo_reservations').select('id,facility_id,level,bay,starts_at,hours,price,status,session_id,tariff').eq('user_id',context.userId).order('created_at',{ascending:false});
   if(error)throw new Error('Reservierungen konnten nicht geladen werden.');
   return data;
 });
@@ -30,7 +33,7 @@ export const bookReservation=createServerFn({method:'POST'}).middleware([require
   const start=Date.parse(data.startsAt);
   if(!Number.isFinite(start)||start<Date.now()-60000||start>Date.now()+365*86400000)throw new Error('Bitte wähle einen zukünftigen Termin innerhalb eines Jahres.');
   const {supabaseAdmin}=await import('@/integrations/supabase/client.server');
-  const {error}=await supabaseAdmin.rpc('demo_book_spot',{p_id:data.id,p_user:context.userId,p_facility:data.facility,p_level:data.level,p_bay:data.bay,p_start:new Date(start).toISOString(),p_hours:data.hours});
+  const {error}=await supabaseAdmin.rpc('demo_book_spot_priced',{p_id:data.id,p_user:context.userId,p_facility:data.facility,p_level:data.level,p_bay:data.bay,p_start:new Date(start).toISOString(),p_hours:data.hours,p_price:reservationPrice(data.hours,data.facility,start)??-1,p_tariff:tariffs[data.facility] as unknown as Json});
   if(error)throw new Error('Dieser Stellplatz konnte nicht reserviert werden. Er ist möglicherweise bereits vergeben.');
   return {id:data.id};
 });

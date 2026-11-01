@@ -1,0 +1,34 @@
+import { describe, it, expect } from 'vitest';
+import { initialState, type DemoState } from './data';
+import { tariffs, legacyTariff, tariffFeeCents } from './tariffs';
+import { earnedPoints } from './points';
+import { transition, restoreState, checkoutAmounts } from './session';
+import { applyServerAction } from './account-rules';
+import { arriveReservation } from './reservation-rules';
+import { reservationPrice } from './map-rules';
+const now=Date.parse('2026-11-01T09:00:00Z');
+const tariff=tariffs['quartier']??legacyTariff;
+const pending=(id='new',facilityId='quartier')=>transition(transition({...initialState,stamps:1},{type:'start',facilityId,id,now}),{type:'end',now:now+7200000});
+const finish=(s:DemoState,id='new')=>transition(s,{type:'complete',sessionId:id,payment:'success',now:now+7200000});
+describe('Facility tariff rules',()=>{
+ it('uses exact example rates without renaming existing facilities',()=>{expect(Object.values(tariffs).map(t=>t.hourlyCents)).toEqual([149,199,99,249,299,129]);});
+ it('rounds started hours, applies first-hour offer and preserves zero duration',()=>{expect(tariffFeeCents(tariff,now,0)).toBe(0);expect(tariffFeeCents(tariff,now,1)).toBe(99);expect(tariffFeeCents(tariff,now,3600000)).toBe(99);expect(tariffFeeCents(tariff,now,3600001)).toBe(248);});
+ it('uses Berlin evening hours including transition from daytime',()=>{expect(tariffFeeCents(tariff,Date.parse('2026-11-01T17:00:00Z'),7200000)).toBe(198);expect(tariffFeeCents(tariff,Date.parse('2026-11-01T16:00:00Z'),10800000)).toBe(297);});
+ it('caps each rolling 24-hour block',()=>{expect(tariffFeeCents(tariff,now,86400000)).toBe(999);expect(tariffFeeCents(tariff,now,2*86400000)).toBe(1998);});
+ it('reservation preview and frozen session use identical tariff math',()=>{expect(reservationPrice(2,'quartier',now)).toBe(2.48);expect(pending().session?.finalFee).toBe(2.48);});
+ it('shopping discount is exclusive and final amount stays cent-exact',()=>{let s=transition(pending(),{type:'discount',discount:'shopping'});expect(checkoutAmounts(s)).toEqual({original:2.48,discount:1,payable:1.48});s=transition(s,{type:'discount',discount:'SHOP2'});expect(checkoutAmounts(s)).toEqual({original:2.48,discount:.0+2,payable:.48});});
+ it('old active and frozen sessions preserve legacy costs and receipts',()=>{const old=pending();const raw={...old,session:old.session?{...old.session,tariff:undefined,finalFee:8}:null};const restored=restoreState(JSON.stringify(raw));expect(restored.session?.finalFee).toBe(8);expect(restoreState(JSON.stringify(finish(restored))).receipts[0]?.originalFee).toBe(8);const active=transition(initialState,{type:'start',facilityId:'quartier',id:'old',now});if(!active.session)throw new Error('missing');const legacy={...active,session:{...active.session,tariff:legacyTariff}};expect(transition(legacy,{type:'end',now:now+7200000}).session?.finalFee).toBe(4);});
+ it('old reservation keeps its saved price and legacy tariff at arrival',()=>{const r={id:'old-booking',facility_id:'quartier',level:'P1',bay:'B02',starts_at:new Date(now).toISOString(),hours:2,price:4,status:'booked' as const,session_id:null};const arrived=arriveReservation(initialState,r,now);expect(r.price).toBe(4);expect(transition(arrived,{type:'end',now:now+7200000}).session?.finalFee).toBe(4);});
+});
+describe('Separate redeemable ParkPulse points',()=>{
+ it('100 points per paid euro are calculated cent-exact, not rounded to whole euros',()=>{expect(earnedPoints(1.49,false,legacyTariff)).toEqual({base:149,promotion:0,total:149});expect(earnedPoints(0,false,tariff).total).toBe(0);});
+ it.each([['quartier',450],['ufer',750],['stadtgarten',300],['werk',1200]])('two daytime hours give the example total for %s', (id,total)=>{const s=finish(pending('new',id));expect(s.pointsBalance).toBe(total);expect(s.pointsHistory?.[0]?.points).toBe(total);expect(s.stamps).toBe(2);});
+ it('failed payment credits nothing and consumes no benefit',()=>{const s=transition(pending(),{type:'discount',discount:'SHOP2'});expect(transition(s,{type:'complete',sessionId:'new',payment:'failure',now})).toBe(s);expect(s.pointsBalance).toBe(0);expect(s.shop2Used).toBe(false);});
+ it('free completion earns neither points nor a stamp',()=>{const s=transition(transition(transition(initialState,{type:'start',facilityId:'quartier',id:'free',now}),{type:'end',now:now+1}),{type:'discount',discount:'SHOP2'});const done=transition(s,{type:'complete',sessionId:'free',payment:'free',now});expect(done.pointsBalance).toBe(0);expect(done.stamps).toBe(5);});
+ it('voucher redemption excludes points even with a positive remaining payment',()=>{const s=transition({...pending(),vouchers:[{id:'v',value:1,source:'points',earnedSessionId:'before'}]},{type:'discount',discount:'voucher',voucherId:'v'});expect(checkoutAmounts(s).payable).toBe(1.48);expect(finish(s).pointsBalance).toBe(0);expect(finish(s).vouchers[0]?.usedSessionId).toBe('new');});
+ it('repeated completion after reload cannot double-credit points',()=>{const done=restoreState(JSON.stringify(finish(pending())));expect(finish(done).pointsBalance).toBe(450);expect(done.pointsHistory).toHaveLength(1);expect(done.receipts).toHaveLength(1);});
+ it.each([[1000,1],[2000,2],[5000,5],[10000,10]])('exchanges %s points for €%s once and persists', (points,value)=>{const s={...initialState,pointsBalance:10000};const a={type:'redeem' as const,points,id:'reward',now};const done=restoreState(JSON.stringify(transition(s,a)));expect(done.pointsBalance).toBe(10000-points);expect(done.vouchers[0]?.value).toBe(value);expect(transition(done,a)).toBe(done);expect(done.stamps).toBe(5);expect(done.pointsHistory?.[0]?.points).toBe(-points);});
+ it('rejects insufficient balances, arbitrary tiers and forged balance values',()=>{const s={...initialState,pointsBalance:999};expect(transition(s,{type:'redeem',points:1000,id:'x',now})).toBe(s);expect(transition({...s,pointsBalance:5000},{type:'redeem',points:1500,id:'x',now}).vouchers).toHaveLength(0);expect(applyServerAction(s,{type:'redeem',points:1000,id:'11111111-2222-4333-8444-555555555555',pointsBalance:10000},now,'fallback').changed).toBe(false);});
+ it('cannot use a newly redeemed voucher on the current session',()=>{const s=transition({...pending(),pointsBalance:1000},{type:'redeem',points:1000,id:'future',now});expect(transition(s,{type:'discount',discount:'voucher',voucherId:'points-future'})).toBe(s);});
+ it('preserves historical non-redeemable bonuses and all stamp vouchers on reload',()=>{const s=restoreState(JSON.stringify({...initialState,pointsBalance:undefined,pointsHistory:undefined,bonusPoints:900,vouchers:[{id:'old',value:10,earnedSessionId:'old-session'}]}));expect(s.bonusPoints).toBe(900);expect(s.pointsBalance).toBe(0);expect(s.vouchers[0]?.value).toBe(10);expect(s.stamps).toBe(5);});
+});

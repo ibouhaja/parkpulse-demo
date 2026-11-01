@@ -1,3 +1,8 @@
+# Tarife und ParkPulse-Punkte
+- [x] Unterschiedliche Tarife, Tageslimit, Abend-/Shopping-/Erststundenangebote konsistent berechnen; Altbestände und eingefrorene Gebühren erhalten.
+- [x] Separate Punkte, Vorschau, sichere Gutschrift und idempotente Einlösung mit Verlauf ergänzen; ältere dokumentierte Boni bleiben unverändert und nicht rückwirkend einlösbar.
+- [x] Karte, Details, Reservierung, Checkout und Prämien aktualisieren; 172 Tests bestanden. Angemeldet: fehlgeschlagene Zahlung, 1.698 Punkte nach Visa-Demo-Erfolg, 1.000 Punkte gegen 1-€-Gutschein, 698 Punkte nach Neuladen und nach zukünftiger Gutscheinzahlung; Reservierungspreis 2,48 € in Cloud geprüft. 390px ohne Überlauf; keine Laufzeitfehler.
+
 # Karten-App und Demo-Reservierung
 - [x] Karten-Startseite, kombinierte Filter und ausziehbare Parkhausdetails; 390px ohne Überlauf und mit sichtbarer Reservierungsschaltfläche.
 - [x] Sichere Reservierung, Termin, Preisvorschau, Stornierung und simulierter Ankunft; angemeldet bis Visa-Demo-Beleg und Neuladen geprüft.

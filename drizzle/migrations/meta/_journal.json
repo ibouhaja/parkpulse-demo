@@ -15,6 +15,13 @@
       "when": 1793532052217,
       "tag": "0001_demo_reservations",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793532751510,
+      "tag": "0002_reservation_tariff_snapshots",
+      "breakpoints": true
     }
   ]
 }

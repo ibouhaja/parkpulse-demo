@@ -178,7 +178,7 @@ describe('Ausgewogene Demo-Belegung', () => {
     const pending = transition(saved, { type: 'end', now: 5000 });
     const spots = protectSessionPosition(plan(), restoreState(JSON.stringify(pending)).session);
     expect(spots.find(s => s.level === 'P1' && s.bay === 'B03')?.occupied).toBe(true);
-    expect(pending.session?.finalFee).toBe(2);
+    expect(pending.session?.finalFee).toBe(0.99);
     expect(pending.stamps).toBe(5);
   });
 });
