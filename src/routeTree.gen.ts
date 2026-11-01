@@ -18,6 +18,7 @@ import { Route as AuthenticatedCheckoutRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedParksessionRouteImport } from './routes/_authenticated/parksession'
 import { Route as AuthenticatedPraemienRouteImport } from './routes/_authenticated/praemien'
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
+import { Route as AuthenticatedReservierungenRouteImport } from './routes/_authenticated/reservierungen'
 import { Route as AuthenticatedVerlaufRouteImport } from './routes/_authenticated/verlauf'
 import { Route as ParkplatzIdRouteImport } from './routes/parkplatz.$id'
 
@@ -66,6 +67,12 @@ const AuthenticatedProfilRoute = AuthenticatedProfilRouteImport.update({
   path: '/profil',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedReservierungenRoute =
+  AuthenticatedReservierungenRouteImport.update({
+    id: '/reservierungen',
+    path: '/reservierungen',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedVerlaufRoute = AuthenticatedVerlaufRouteImport.update({
   id: '/verlauf',
   path: '/verlauf',
@@ -86,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/parksession': typeof AuthenticatedParksessionRoute
   '/praemien': typeof AuthenticatedPraemienRoute
   '/profil': typeof AuthenticatedProfilRoute
+  '/reservierungen': typeof AuthenticatedReservierungenRoute
   '/verlauf': typeof AuthenticatedVerlaufRoute
   '/parkplatz/$id': typeof ParkplatzIdRoute
 }
@@ -98,6 +106,7 @@ export interface FileRoutesByTo {
   '/parksession': typeof AuthenticatedParksessionRoute
   '/praemien': typeof AuthenticatedPraemienRoute
   '/profil': typeof AuthenticatedProfilRoute
+  '/reservierungen': typeof AuthenticatedReservierungenRoute
   '/verlauf': typeof AuthenticatedVerlaufRoute
   '/parkplatz/$id': typeof ParkplatzIdRoute
 }
@@ -112,6 +121,7 @@ export interface FileRoutesById {
   '/_authenticated/parksession': typeof AuthenticatedParksessionRoute
   '/_authenticated/praemien': typeof AuthenticatedPraemienRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
+  '/_authenticated/reservierungen': typeof AuthenticatedReservierungenRoute
   '/_authenticated/verlauf': typeof AuthenticatedVerlaufRoute
   '/parkplatz/$id': typeof ParkplatzIdRoute
 }
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/parksession'
     | '/praemien'
     | '/profil'
+    | '/reservierungen'
     | '/verlauf'
     | '/parkplatz/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/parksession'
     | '/praemien'
     | '/profil'
+    | '/reservierungen'
     | '/verlauf'
     | '/parkplatz/$id'
   id:
@@ -151,6 +163,7 @@ export interface FileRouteTypes {
     | '/_authenticated/parksession'
     | '/_authenticated/praemien'
     | '/_authenticated/profil'
+    | '/_authenticated/reservierungen'
     | '/_authenticated/verlauf'
     | '/parkplatz/$id'
   fileRoutesById: FileRoutesById
@@ -229,6 +242,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfilRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/reservierungen': {
+      id: '/_authenticated/reservierungen'
+      path: '/reservierungen'
+      fullPath: '/reservierungen'
+      preLoaderRoute: typeof AuthenticatedReservierungenRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/verlauf': {
       id: '/_authenticated/verlauf'
       path: '/verlauf'
@@ -251,6 +271,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedParksessionRoute: typeof AuthenticatedParksessionRoute
   AuthenticatedPraemienRoute: typeof AuthenticatedPraemienRoute
   AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
+  AuthenticatedReservierungenRoute: typeof AuthenticatedReservierungenRoute
   AuthenticatedVerlaufRoute: typeof AuthenticatedVerlaufRoute
 }
 
@@ -259,6 +280,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedParksessionRoute: AuthenticatedParksessionRoute,
   AuthenticatedPraemienRoute: AuthenticatedPraemienRoute,
   AuthenticatedProfilRoute: AuthenticatedProfilRoute,
+  AuthenticatedReservierungenRoute: AuthenticatedReservierungenRoute,
   AuthenticatedVerlaufRoute: AuthenticatedVerlaufRoute,
 }
 
