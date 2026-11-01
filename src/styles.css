@@ -51,3 +51,61 @@
 .popup-balance strong { color: var(--primary-foreground); }
 .agent-heading{display:flex;align-items:center;gap:14px;margin-bottom:24px}.agent-heading img{border-radius:8px;flex-shrink:0}.agent-heading h1{font-size:28px}.agent-heading .demo-pill{margin-left:auto}.agent-workspace{display:grid;grid-template-columns:220px minmax(0,1fr);gap:24px;min-height:640px}.agent-threads{border-right:1px solid var(--border);padding-right:18px;min-width:0}.agent-threads>button{width:100%;margin-bottom:16px}.agent-threads nav{display:grid;gap:5px}.agent-threads nav a{justify-content:flex-start;white-space:normal;height:auto;min-height:44px;text-align:left;max-width:100%;font-size:11px}.agent-threads nav a span{overflow-wrap:anywhere;min-width:0}.agent-main{display:flex;flex-direction:column;min-width:0}.agent-conversation{height:620px;min-height:320px}.agent-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;min-height:350px;text-align:center}.agent-empty img{border-radius:8px}.agent-empty p{color:var(--muted-foreground)}.agent-composer{margin-top:16px;background:var(--card)}.agent-composer textarea{min-height:90px;resize:none;font:inherit}.agent-composer button{flex-shrink:0}.agent-tool-result{width:100%;min-width:0}.agent-tool-result>div[data-state]{margin-bottom:10px}.agent-offers{display:grid;gap:12px;margin:16px 0}.agent-offer{border:1px solid var(--border);border-radius:8px;padding:18px;background:var(--card)}.agent-offer-title{display:flex;align-items:center;gap:10px}.agent-offer-title>span{background:var(--accent);color:var(--primary);font-weight:800;display:grid;place-items:center;width:25px;height:25px;border-radius:4px}.agent-offer h3{font-size:14px}.agent-offer-price{display:block;font-size:23px;margin:12px 0}.agent-offer-price small{font-size:11px;font-weight:400}.agent-offer p{display:flex;gap:5px;align-items:center;line-height:1.8;font-size:11px;color:var(--muted-foreground);margin-top:5px}.agent-offer button{margin-top:14px;white-space:normal;height:auto;min-height:38px}.agent-error{color:var(--destructive);line-height:1.7;margin:12px 0;overflow-wrap:anywhere}.agent-conversation .is-user>div{background:var(--primary);color:var(--primary-foreground)}.agent-conversation .is-assistant>div{width:100%}.agent-main pre{max-width:100%;overflow:auto}
 @media(max-width:900px){.agent-workspace{grid-template-columns:1fr}.agent-threads{border-right:0;border-bottom:1px solid var(--border);padding:0 0 16px}.agent-threads nav{display:flex;overflow:auto}.agent-threads nav a{min-width:160px;max-width:210px}.agent-threads>button{width:auto;margin-bottom:10px}.agent-heading{flex-wrap:wrap}.agent-heading h1{font-size:24px}.agent-heading .demo-pill{margin-left:66px;margin-top:-5px}.agent-conversation{height:540px}.mobile-bottom-nav a{min-width:0;flex:1;font-size:7px}.agent-offer{padding:14px}}
+/* Smartphone optimisation (≤720px); desktop layout untouched */
+.install-app{display:inline-flex}
+.install-help ol{display:grid;gap:12px;margin:8px 0 16px;padding:0;list-style:none}.install-help li{display:flex;align-items:center;gap:10px;font-size:14px}.install-help li svg{color:var(--primary);flex-shrink:0}
+.parking-3d-canvas,.parking-3d-canvas canvas{touch-action:none}
+@media(max-width:720px){
+ html{-webkit-text-size-adjust:100%}body{overscroll-behavior-y:none}
+ .topbar{position:sticky;top:0;z-index:30;background:var(--card);padding-top:env(safe-area-inset-top);height:calc(58px + env(safe-area-inset-top))}
+ .topbar-breadcrumb{font-size:13px;max-width:140px;overflow:hidden;text-overflow:ellipsis}.topbar-breadcrumb>span,.topbar-breadcrumb{color:inherit}
+ .topbar-breadcrumb{font-size:0}.topbar-breadcrumb strong{font-size:14px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .demo-pill{display:none}
+ .install-app{font-size:0!important;padding:0 10px!important;min-height:40px}.install-app svg{width:18px!important;height:18px!important}
+ .demo-notice{font-size:10px;padding:7px 14px;line-height:1.35}
+ .mobile-bottom-nav{padding:6px 2px max(6px,env(safe-area-inset-bottom))}
+ .mobile-bottom-nav a{flex:1;min-width:0;min-height:48px;justify-content:center;font-size:10px;gap:3px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .mobile-bottom-nav svg{width:22px;height:22px}
+ .app-main{padding-bottom:calc(68px + env(safe-area-inset-bottom))}
+ .page-content :is(button,a)[data-slot=button]:not([aria-label]){min-height:48px;font-size:14px}
+ .page-content input:not([type=checkbox]):not([type=radio]),.page-content select,.page-content textarea{font-size:16px;min-height:44px}
+ /* Fullscreen map */
+ .is-map-page .page-content{padding:0}
+ .is-map-page .main-footer,.is-map-page .map-home-heading{display:none}
+ .is-map-page .map-home .map-experience{margin:0}
+ .is-map-page .map-home .city-map{height:calc(100dvh - 58px - 34px - 68px - env(safe-area-inset-top) - env(safe-area-inset-bottom));min-height:480px;border:0}
+ .is-map-page .map-search-controls{inset:10px 10px auto}
+ .is-map-page .map-search{min-height:50px;box-shadow:var(--map-shadow)}
+ .is-map-page .map-search input{font-size:16px}
+ .map-filter-chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:4px}.map-filter-chips::-webkit-scrollbar{display:none}
+ .map-filter-chips button{flex-shrink:0;min-height:42px!important}
+ .facility-sheet{left:0!important;right:0;bottom:0!important;width:100%!important;max-width:100%!important;border-radius:20px 20px 0 0!important;max-height:48%}
+ .facility-sheet.is-expanded{max-height:calc(100% - 70px)}
+ .sheet-handle{min-height:36px;width:100%}
+ .facility-sheet button[data-slot=button]:not([aria-label]),.facility-sheet a[data-slot=button]{min-height:52px;font-size:15px}
+ .reservation-row button,.reservation-row a{min-height:50px}
+ /* AI agent */
+ .is-agent-page .main-footer{display:none}
+ .is-agent-page .page-content{padding:14px 12px 12px}
+ .agent-heading{margin-bottom:12px;gap:10px;flex-wrap:nowrap}.agent-heading img{width:40px;height:40px}.agent-heading h1{font-size:20px}.agent-heading .eyebrow{display:none}.agent-heading .demo-pill{display:none}
+ .agent-workspace{min-height:0;gap:10px}
+ .agent-threads{padding-bottom:10px}
+ .agent-threads nav{gap:6px;scrollbar-width:none}.agent-threads nav::-webkit-scrollbar{display:none}
+ .agent-threads nav a{min-width:0!important;max-width:170px!important;min-height:40px!important;flex-shrink:0;white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis;display:block!important;line-height:40px;padding:0 12px!important;border:1px solid var(--border);border-radius:999px;font-size:13px}
+ .agent-threads nav a svg{display:none}
+ .agent-conversation{height:calc(100dvh - 58px - 34px - 68px - 190px - env(safe-area-inset-top) - env(safe-area-inset-bottom));min-height:380px}
+ .agent-composer textarea{font-size:16px}
+ .agent-composer button{min-width:48px;min-height:48px}
+ /* 3D & 2D garage for touch */
+ .parking-3d-canvas{height:min(62dvh,520px)}
+ .parking-3d.is-expanded{padding:calc(10px + env(safe-area-inset-top)) 10px calc(10px + env(safe-area-inset-bottom))}
+ .parking-3d-tools{overflow-x:auto}
+ .parking-3d-tools button,.parking-levels button,.parking-plan-toolbar button{min-height:46px}
+ .parking-spot{min-height:56px}
+ /* Account, rewards & dialogs */
+ [data-slot=dialog-content]{max-height:calc(100dvh - 24px);overflow-y:auto;width:calc(100% - 16px)}
+ .rewards-popup button{min-height:46px}
+}
+@media(max-width:720px){.reservation-row>div:last-child{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}.reservation-row>div:last-child>*{width:100%}}
+@media(max-width:720px){.parking-3d-tools{flex-wrap:wrap;overflow:visible}.parking-3d-tools>div{flex-wrap:wrap;gap:8px}.parking-3d-tools button{flex-shrink:0;min-width:46px}.reservation-row>div:last-child>button,.reservation-row>div:last-child>[data-slot=button]{border:1px solid var(--border)}}
+@media(max-width:720px){.parking-3d-tools>div>button:last-child{flex:1 1 100%;width:auto!important;min-height:50px}.parking-3d-tools>div>button[data-slot=button]{height:46px;width:46px}.parking-3d-tools>div>button:last-child{width:100%!important}}

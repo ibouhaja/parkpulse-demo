@@ -1,3 +1,6 @@
+# Smartphone & PWA
+- [x] Vollbildkarte, Suchfeld/Filter oben, Detailkarte unten, große Buttons, kompakter KI-Agent, Touch-3D, Dialoge; Manifest, App-Icons und Installieren-Button (Android-Dialog / iPhone-Anleitung). iPhone 390, Android 412, klein 360 ohne Überlauf/Fehler; Desktop unverändert; 206 Tests bestanden. Offline-Modus nicht enthalten.
+
 # Stornierung und No-Show
 - [x] Gebührenregeln, 15-Minuten-Demo-Kulanzfrist und atomare, wiederholsichere Statuswechsel ergänzt; No-Shows auf Kontolesen und alle fünf Minuten ohne Browser geprüft (288 Läufe/Tag, mögliche Cloud-Kosten erläutert).
 - [x] Bedingungen vor Buchung, Gebührenbestätigung, Kontoverlauf und ausdrücklich bestätigte KI-Stornierung ergänzt; alter unbestätigter Stornierungsweg gesperrt, Altdaten und Treuekonto unverändert.
