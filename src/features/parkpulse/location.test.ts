@@ -58,7 +58,7 @@ describe('Parkposition speichern', () => {
     expect(restored.session?.status).toBe('checkout-pending');
     expect(restored.session?.level).toBe('P2');
     expect(restored.session?.bay).toBe('B14');
-    const done = transition(restored, { type: 'complete', sessionId: 's1', payment: 'free', now: 3_000_000 });
+    const done = transition(restored, { type: 'complete', sessionId: 's1', payment: 'success', method: 'paypal', now: 3_000_000 });
     expect(done.history[0]?.level).toBe('P2');
     expect(done.history[0]?.bay).toBe('B14');
     expect(done.receipts[0]?.level).toBe('P2');
