@@ -9,6 +9,9 @@ describe('Fahrzeugmaterialien', () => {
       const material = new MeshStandardMaterial({ name });
       source.add(new Mesh(new BoxGeometry(1, 1, 2), material));
     }
+    const bodyDetail = new BoxGeometry(.2, .2, .2);
+    bodyDetail.deleteAttribute('uv');
+    source.add(new Mesh(bodyDetail, (source.children[0] as Mesh).material));
     const original = (source.children[0] as Mesh).geometry.attributes['position']?.array.slice();
     const parts = prepareVehicle(source, 'sedan');
     expect(parts).toHaveLength(3);
