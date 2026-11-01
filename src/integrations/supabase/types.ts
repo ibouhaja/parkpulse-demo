@@ -26,6 +26,7 @@ export type Database = {
           session_id: string | null
           starts_at: string
           status: string
+          tariff: Json | null
           user_id: string
         }
         Insert: {
@@ -39,6 +40,7 @@ export type Database = {
           session_id?: string | null
           starts_at: string
           status?: string
+          tariff?: Json | null
           user_id: string
         }
         Update: {
@@ -52,6 +54,7 @@ export type Database = {
           session_id?: string | null
           starts_at?: string
           status?: string
+          tariff?: Json | null
           user_id?: string
         }
         Relationships: []
@@ -123,6 +126,20 @@ export type Database = {
           p_id: string
           p_level: string
           p_start: string
+          p_user: string
+        }
+        Returns: string
+      }
+      demo_book_spot_priced: {
+        Args: {
+          p_bay: string
+          p_facility: string
+          p_hours: number
+          p_id: string
+          p_level: string
+          p_price: number
+          p_start: string
+          p_tariff: Json
           p_user: string
         }
         Returns: string
