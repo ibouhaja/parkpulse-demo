@@ -1,3 +1,10 @@
+# Karten-App und Demo-Reservierung
+- [ ] Karten-Startseite, kombinierte Filter und ausziehbare Parkhausdetails.
+- [ ] Sichere Reservierung mit Stellplatz, Termin, Preisvorschau, Stornierung und simulierter Ankunft.
+- [ ] Reservierte Kapazität in Karte, 2D/3D-Plänen und Simulation schützen.
+- [ ] Bonuspunkte transparent ohne doppelte Stempel; Tests und angemeldeten Ablauf prüfen.
+- [ ] Referenz-Screenshots fehlen; nach vorhandener Markenidentität gestalten.
+
 # 3D-Parkhausplan
 - [x] Architektur, fotografische Betonmaterialien, nähere Kamera, Fahreransicht und sanften Stellplatzfokus umgesetzt.
 - [x] Drei externe CC0-Fahrzeuge (Three-door hatchback, Car-derived small van, Large three-row SUV) integriert und Quellen dokumentiert. Limousine bleibt eigenes Modell: hochwertiges CC0-Modell nicht verifiziert; kein Fotorealismus zugesichert.
