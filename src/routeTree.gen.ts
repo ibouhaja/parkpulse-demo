@@ -21,6 +21,7 @@ import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedReservierungenRouteImport } from './routes/_authenticated/reservierungen'
 import { Route as AuthenticatedVerlaufRouteImport } from './routes/_authenticated/verlauf'
 import { Route as ParkplatzIdRouteImport } from './routes/parkplatz.$id'
+import { Route as ApiPublicAgentRouteImport } from './routes/api/public/agent'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -83,6 +84,11 @@ const ParkplatzIdRoute = ParkplatzIdRouteImport.update({
   path: '/parkplatz/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAgentRoute = ApiPublicAgentRouteImport.update({
+  id: '/api/public/agent',
+  path: '/api/public/agent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/reservierungen': typeof AuthenticatedReservierungenRoute
   '/verlauf': typeof AuthenticatedVerlaufRoute
   '/parkplatz/$id': typeof ParkplatzIdRoute
+  '/api/public/agent': typeof ApiPublicAgentRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -109,6 +116,7 @@ export interface FileRoutesByTo {
   '/reservierungen': typeof AuthenticatedReservierungenRoute
   '/verlauf': typeof AuthenticatedVerlaufRoute
   '/parkplatz/$id': typeof ParkplatzIdRoute
+  '/api/public/agent': typeof ApiPublicAgentRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/_authenticated/reservierungen': typeof AuthenticatedReservierungenRoute
   '/_authenticated/verlauf': typeof AuthenticatedVerlaufRoute
   '/parkplatz/$id': typeof ParkplatzIdRoute
+  '/api/public/agent': typeof ApiPublicAgentRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -139,6 +148,7 @@ export interface FileRouteTypes {
     | '/reservierungen'
     | '/verlauf'
     | '/parkplatz/$id'
+    | '/api/public/agent'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -152,6 +162,7 @@ export interface FileRouteTypes {
     | '/reservierungen'
     | '/verlauf'
     | '/parkplatz/$id'
+    | '/api/public/agent'
   id:
     | '__root__'
     | '/'
@@ -166,6 +177,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reservierungen'
     | '/_authenticated/verlauf'
     | '/parkplatz/$id'
+    | '/api/public/agent'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -175,6 +187,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SucheRoute: typeof SucheRoute
   ParkplatzIdRoute: typeof ParkplatzIdRoute
+  ApiPublicAgentRoute: typeof ApiPublicAgentRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -263,6 +276,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ParkplatzIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/agent': {
+      id: '/api/public/agent'
+      path: '/api/public/agent'
+      fullPath: '/api/public/agent'
+      preLoaderRoute: typeof ApiPublicAgentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -294,6 +314,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SucheRoute: SucheRoute,
   ParkplatzIdRoute: ParkplatzIdRoute,
+  ApiPublicAgentRoute: ApiPublicAgentRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
