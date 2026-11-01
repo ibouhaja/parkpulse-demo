@@ -1,3 +1,5 @@
+import { PreferencesForm } from '@/features/parkpulse/preferences-form';
+import { defaultPreferences, normalizePreferences } from '@/features/parkpulse/preferences';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useState, type FormEvent } from 'react';
 import { ArrowRight, LogIn, Mail, ShieldCheck } from 'lucide-react';
@@ -30,6 +32,7 @@ function AuthPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [preferences,setPreferences]=useState(defaultPreferences);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [failure, setFailure] = useState('');
@@ -45,7 +48,7 @@ function AuthPage() {
         navigate({ to: target });
       } else if (mode === 'signup') {
         if (password.length < 8) throw new Error('Das Passwort muss mindestens 8 Zeichen lang sein.');
-        const { data: signed, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin, data: { display_name: name.trim().slice(0, 60) } } });
+        const { data: signed, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin, data: { display_name: name.trim().slice(0, 60),parking_preferences:normalizePreferences(preferences) } } });
         if (error) throw new Error(authErrorText(error, 'Registrierung fehlgeschlagen. Bitte versuche es später erneut.'));
         if (signed.user && (signed.user.identities?.length ?? 0) === 0) throw new Error(authErrorText({ code: 'user_already_exists' }));
         setMessage('Fast geschafft: Bitte bestätige deine E-Mail-Adresse über den Link in deinem Postfach. Danach kannst du dich anmelden.');
@@ -59,10 +62,10 @@ function AuthPage() {
     } finally { setBusy(false); }
   };
 
-  const google = async () => {
+  const social = async (provider:'google'|'apple') => {
     setFailure('');
-    const result = await lovable.auth.signInWithOAuth('google', { redirect_uri: window.location.origin });
-    if (result.error) { setFailure('Die Anmeldung mit Google ist fehlgeschlagen.'); return; }
+    const result = await lovable.auth.signInWithOAuth(provider, { redirect_uri: window.location.origin });
+    if (result.error) { setFailure(`Die Anmeldung mit ${provider==='google'?'Google':'Apple'} ist fehlgeschlagen.`); return; }
     if (result.redirected) return;
     navigate({ to: target });
   };
@@ -79,11 +82,13 @@ function AuthPage() {
         {mode === 'signup' && <label className="block text-xs">Anzeigename<input className={input} value={name} maxLength={60} onChange={(e) => setName(e.target.value)} placeholder="z. B. Alex"/></label>}
         <label className="block text-xs">E-Mail-Adresse<input className={input} type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)}/></label>
         {mode !== 'forgot' && <label className="block text-xs">Passwort<input className={input} type="password" required minLength={mode === 'signup' ? 8 : undefined} autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} value={password} onChange={(e) => setPassword(e.target.value)}/></label>}
+        {mode==='signup'&&<PreferencesForm value={preferences} onChange={setPreferences}/>}
         <Button type="submit" disabled={busy} className="w-full">{mode === 'login' ? <><LogIn/>Anmelden</> : mode === 'signup' ? 'Konto erstellen' : <><Mail/>Link senden</>}</Button>
       </form>
-      {mode !== 'forgot' && <><div className="my-4 text-center text-xs text-muted-foreground">oder</div><Button variant="outline" className="w-full" onClick={google}>Weiter mit Google</Button></>}
+      {mode !== 'forgot' && <><div className="my-4 text-center text-xs text-muted-foreground">oder</div><Button variant="outline" className="w-full" onClick={()=>void social('google')}>Weiter mit Google</Button><Button variant="outline" className="w-full mt-3" onClick={()=>void social('apple')}>Weiter mit Apple</Button></>}
       {message && <p role="status" className="mt-4 text-sm text-primary">{message}</p>}
       {failure && <p role="alert" className="mt-4 text-sm text-destructive">{failure}</p>}
+      <Button asChild variant="ghost" className="w-full mt-4"><Link to="/">Als Gast fortfahren<ArrowRight/></Link></Button>
       <div className="safe-note"><ShieldCheck size={13}/>Nur Demo-Parkdaten · keine echten Zahlungsdaten</div>
     </div></div></>;
 }

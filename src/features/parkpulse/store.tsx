@@ -1,3 +1,4 @@
+import { defaultPreferences, normalizePreferences, type Preferences } from './preferences';
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useRouter } from '@tanstack/react-router';
 import { useServerFn } from '@tanstack/react-start';
@@ -10,6 +11,7 @@ import { ReservationsProvider } from './reservations-provider';
 
 type Discount = 'none' | 'SHOP2' | 'voucher' | 'shopping';
 type Store = {
+  preferences: Preferences; profileReady:boolean; userId:string|null; flush:()=>Promise<void>;
   state: DemoState; ready: boolean; authReady: boolean; signedIn: boolean; email: string; displayName: string;
   start: (id: string) => boolean; end: () => boolean;
   complete: (sessionId: string, payment: 'success' | 'failure' | 'free', method?: import('./data').PayMethod) => boolean;
@@ -35,6 +37,10 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState('');
   const [importOffer, setImportOffer] = useState(false);
   const [displayName, setDisplayName] = useState('');
+  const [preferences,setPreferences]=useState(defaultPreferences);
+  const [profileOwner,setProfileOwner]=useState<string|null>(null);
+  const [stateOwner,setStateOwner]=useState<string|null>(null);
+  const identity=useRef<string|null>(null);
   const queue = useRef<Promise<unknown>>(Promise.resolve());
   const pending = useRef(0);
   const fetchState = useServerFn(getAccountState);
@@ -46,14 +52,19 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   const put = (s: DemoState) => { current.current = s; setState(s); };
 
   useEffect(() => {
+    let authEventSeen=false;
     supabase.auth.getSession().then(({ data }) => {
+      if(authEventSeen)return;
       const u = data.session?.user;
+      identity.current=u?.id??null;
       setUser(u ? { id: u.id, email: u.email ?? '' } : null);
       setAuthReady(true);
     });
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       if (event !== 'SIGNED_IN' && event !== 'SIGNED_OUT' && event !== 'USER_UPDATED') return;
+      authEventSeen=true;
       const u = session?.user;
+      identity.current=u?.id??null;
       setUser((prev) => (prev?.id === u?.id ? prev : u ? { id: u.id, email: u.email ?? '' } : null));
       router.invalidate();
     });
@@ -62,19 +73,25 @@ export function DemoProvider({ children }: { children: ReactNode }) {
 
   const refreshProfile = useCallback(async () => {
     if (!user) return;
-    const { data } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle();
-    setDisplayName(data?.display_name ?? '');
+    const owner=user.id;
+    const { data,error:profileError } = await supabase.from('profiles').select('display_name,parking_preferences').eq('id', owner).maybeSingle();
+    if(identity.current!==owner)return;
+    if(profileError||!data){setProfileOwner(null);return;}
+    setDisplayName(data.display_name);setPreferences(normalizePreferences(data.parking_preferences));setProfileOwner(owner);
   }, [user]);
 
   const reload = useCallback(async () => {
+    const owner=identity.current;
     const r = await fetchState();
+    if(identity.current!==owner)return;
+    setStateOwner(owner);
     put(r.state as DemoState);
     setImportOffer(r.canImport && readLocal() !== null);
   }, [fetchState]);
 
   useEffect(() => {
     if (!authReady) return;
-    if (!user) { put(initialState); setImportOffer(false); setDisplayName(''); setReady(true); return; }
+    if (!user) { put(initialState); setImportOffer(false); setDisplayName('');setPreferences(defaultPreferences);setProfileOwner(null);setStateOwner(null); setReady(true); return; }
     let cancelled = false;
     setReady(false);
     reload().then(() => { if (!cancelled) { setReady(true); setError(''); } })
@@ -85,17 +102,20 @@ export function DemoProvider({ children }: { children: ReactNode }) {
 
   // Optimistic local transition for instant UI; the server re-applies the same rules and is authoritative.
   const commit = (action: Action) => {
-    if (!user || !ready) return false;
+    if (!user || !ready || stateOwner!==user.id || identity.current!==user.id) return false;
+    const owner=user.id;
     const next = transition(current.current, action);
     if (next === current.current) return false;
     put(next);
     pending.current++;
     queue.current = queue.current.then(async () => {
       try {
+        if(identity.current!==owner)return;
         const r = await applyAction({ data: { action } });
-        if (pending.current === 1) put(r.state as DemoState);
+        if (pending.current === 1&&identity.current===owner) put(r.state as DemoState);
         setError('');
       } catch {
+        if(identity.current!==owner)return;
         setError('Speichern fehlgeschlagen. Der zuletzt gespeicherte Stand wurde wiederhergestellt.');
         await reload().catch(() => undefined);
       } finally { pending.current--; }
@@ -104,7 +124,8 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   };
 
   const store: Store = {
-    state, ready, authReady, signedIn: !!user, email: user?.email ?? '', displayName, error, importOffer, refreshProfile,
+    userId:user?.id??null,preferences:profileOwner===user?.id?preferences:defaultPreferences,profileReady:!user||profileOwner===user.id,flush:async()=>{await queue.current;},
+    state:stateOwner===user?.id?state:initialState, ready:ready&&(!user||stateOwner===user.id), authReady, signedIn: !!user, email: user?.email ?? '', displayName:profileOwner===user?.id?displayName:'', error, importOffer:!!user&&stateOwner===user.id&&importOffer, refreshProfile,
     redeem:(points)=>commit({type:'redeem',points,id:crypto.randomUUID(),now:Date.now()}),
     start: (facilityId) => commit({ type: 'start', facilityId, id: crypto.randomUUID(), now: Date.now() }),
     end: () => commit({ type: 'end', now: Date.now() }),
@@ -121,7 +142,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     },
     declineImport: async () => { await declineFn(); setImportOffer(false); },
   };
-  return <Context.Provider value={store}><ReservationsProvider signedIn={!!user} userId={user?.id??null}><ParkingPlanProvider session={state.session}>{children}</ParkingPlanProvider></ReservationsProvider></Context.Provider>;
+  return <Context.Provider value={store}><ReservationsProvider signedIn={!!user} userId={user?.id??null}><ParkingPlanProvider session={store.state.session}>{children}</ParkingPlanProvider></ReservationsProvider></Context.Provider>;
 }
 
 export function useDemo() { const ctx = useContext(Context); if (!ctx) throw new Error('ParkPulse-Demo ist nicht verfügbar'); return ctx; }
