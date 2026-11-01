@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useMemo, useRef, useState, Component, type ReactNode } from 'react';
 import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
-import { Environment, Lightformer, OrbitControls, useGLTF } from '@react-three/drei';
+import { Environment, Lightformer, OrbitControls, useGLTF, useTexture } from '@react-three/drei';
+import concreteFloor from '@/assets/materials/concrete-floor.jpg.asset.json';
 import { CanvasTexture, Color, Group, InstancedMesh, Object3D, SRGBColorSpace, Vector3, CatmullRomCurve3 } from 'three';
 import { prepareVehicle, disposeVehicle, type VehiclePart } from './parking-vehicle-asset';
 import { GarageArchitecture } from './parking-garage';
@@ -18,11 +19,12 @@ type Palette = Record<'concrete' | 'ink' | 'free' | 'occupied' | 'selected' | 'u
 const colorKeys = ['carTeal', 'carRed', 'carGold', 'carSilver', 'carBlue'] as const;
 type Props = { spots: ParkingSpot[]; level: ParkingLevel; filters: ParkingFilters; selected: ParkingPosition | null; saved: ParkingPosition | null; model: DemoModel; onModel: (model: DemoModel) => void; onSelect: (spot: ParkingSpot) => void };
 
-function surface(spots: ParkingSpot[], selected: ParkingPosition | null, colors: Palette) {
+function surface(spots: ParkingSpot[], selected: ParkingPosition | null, colors: Palette, image: CanvasImageSource) {
   const canvas = document.createElement('canvas'); canvas.width = 2048; canvas.height = 1536;
   const ctx = canvas.getContext('2d');
   if (ctx) {
-    ctx.fillStyle = colors.concrete; ctx.fillRect(0, 0, 2048, 1536);
+    const pattern = ctx.createPattern(image, 'repeat');
+    ctx.fillStyle = pattern ?? colors.concrete; ctx.fillRect(0, 0, 2048, 1536);
     for (let i = 0; i < 18000; i++) {
       ctx.globalAlpha = .035; ctx.fillStyle = i % 2 ? colors.paint : colors.ink;
       ctx.fillRect((i * 739) % 2048, (i * 313) % 1536, 2, 2);
@@ -108,7 +110,8 @@ function CameraRig({ view, selected, building, reset, reduced }: { view: CameraV
 }
 
 function Floor({ spots, selected, colors, onSelect }: { spots: ParkingSpot[]; selected: ParkingPosition | null; colors: Palette; onSelect: Props['onSelect'] }) {
-  const texture = useMemo(() => surface(spots, selected, colors), [spots, selected, colors]);
+  const photo = useTexture(concreteFloor.url);
+  const texture = useMemo(() => surface(spots, selected, colors, photo.image), [spots, selected, colors, photo]);
   useEffect(() => () => texture.dispose(), [texture]);
   const click = (event: ThreeEvent<MouseEvent>) => { event.stopPropagation(); const local = event.object.worldToLocal(event.point.clone()); const spot = spots.find(s => { const p = spotCoordinates(s.bay); return Math.abs(local.x - p.x) < 1.7 && Math.abs(-local.y - p.z) < 2.7; }); if (spot && !spot.occupied && !spot.unknown && event.delta < 6) onSelect(spot); };
   return <group>
@@ -151,7 +154,7 @@ export default function Parking3DScene(props: Props) {
           const ownVisible = ownSpot?.level === floor && spots.some(s => s.bay === ownSpot.bay && !s.unknown);
           const cars = spots.filter(s => s.occupied && !s.unknown && (!ownVisible || ownSpot?.bay !== s.bay));
           return <group key={floor} position-y={building ? floorIndex * 7 : 0}>
-            <Floor spots={spots} selected={props.selected} colors={colors} onSelect={props.onSelect}/>
+            <Suspense fallback={null}><Floor spots={spots} selected={props.selected} colors={colors} onSelect={props.onSelect}/></Suspense>
             <GarageArchitecture colors={colors} level={floor}/>
             <Suspense fallback={null}>{demoModels.map((model, index) => <Cars key={model} model={model} colors={colors} spots={cars.filter(s => (Number(s.bay.slice(1)) + Math.floor(Number(s.bay.slice(1)) / 12)) % 4 === index)}/>)}{ownSpot && ownVisible && <DemoCar key={`${ownSpot.level}-${ownSpot.bay}-${props.model}`} model={props.model} bay={ownSpot.bay} run={run} colors={colors} reduced={reduced}/>}<Ready onReady={() => setReady(true)}/></Suspense>
           </group>;

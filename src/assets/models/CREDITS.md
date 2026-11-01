@@ -23,3 +23,5 @@ License verified from https://opengameart.org/content/car-kit and the archive's 
 Sources: https://opengameart.org/content/car-kit and https://kenney.nl/assets/car-kit.
 These are fictional, optimized low-poly vehicle models, not replicas of real brands.
 Concrete, markings, garage architecture and charging pedestals are generated for ParkPulse.
+
+Floor photographic texture: Concrete Floor, Poly Haven — https://polyhaven.com/a/concrete_floor — CC0 (https://polyhaven.com/license), verified 2026-11-01. 1K diffuse image hosted via the concrete-floor asset pointer. Walls retain original procedural concrete.
