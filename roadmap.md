@@ -1,7 +1,7 @@
 # Stornierung und No-Show
-- [ ] Gebührenregeln, 15-Minuten-Demo-Kulanzfrist und atomare, wiederholsichere Statuswechsel ergänzen.
-- [ ] Bedingungen vor Buchung, Gebührenbestätigung, Kontoverlauf und ausdrücklich bestätigte KI-Stornierung ergänzen.
-- [ ] Zeitgrenzen, Gebühren, Neuladen und angemeldeten Ablauf testen.
+- [x] Gebührenregeln, 15-Minuten-Demo-Kulanzfrist und atomare, wiederholsichere Statuswechsel ergänzt; No-Shows auf Kontolesen und alle fünf Minuten ohne Browser geprüft (288 Läufe/Tag, mögliche Cloud-Kosten erläutert).
+- [x] Bedingungen vor Buchung, Gebührenbestätigung, Kontoverlauf und ausdrücklich bestätigte KI-Stornierung ergänzt; alter unbestätigter Stornierungsweg gesperrt, Altdaten und Treuekonto unverändert.
+- [x] 206 Tests bestanden, exakte SQL-Zeitgrenzen 3h=25%, 2h=25%, 1h=50% geprüft. Angemeldete Buchung, Abbruch der Vorschau, 2,48-€-Stornierung, echter KI-Bestätigungsklick und 9,99-€-No-Show nach Neuladen geprüft; wiederholte RPCs erfolgreich, keine Laufzeitfehler, build OK. Zwei stornierte Testbuchungen und eine No-Show-Testbuchung bleiben im Demo-Verlauf.
 
 # ParkPulse AI Agent
 - [x] Echte mehrstufige KI mit Suche, Kompatibilität, Verfügbarkeit, Tarif-/Punkteprüfung und harter Budgetgrenze.
