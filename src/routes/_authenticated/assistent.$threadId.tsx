@@ -7,8 +7,9 @@ export const Route = createFileRoute("/_authenticated/assistent/$threadId")({
       "AI Agent – Parkplatzgespräch",
       "Persönliches ParkPulse-Agentengespräch mit echten Werkzeugaufrufen und fiktiven Parkplatzangeboten.",
     ),
-  component: () => {
-    const { threadId } = Route.useParams();
-    return <AgentPage key={threadId} threadId={threadId} />;
-  },
+  component: AgentThreadPage,
 });
+function AgentThreadPage() {
+  const { threadId } = Route.useParams();
+  return <AgentPage key={threadId} threadId={threadId} />;
+}
