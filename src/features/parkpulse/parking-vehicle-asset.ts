@@ -1,4 +1,4 @@
-import { Box3, BufferGeometry, DoubleSide, Matrix4, Mesh, MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Vector3 } from 'three';
+import { Box3, BufferGeometry, Float32BufferAttribute, DoubleSide, Matrix4, Mesh, MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Vector3 } from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import type { DemoModel } from './parking-3d-rules';
 
