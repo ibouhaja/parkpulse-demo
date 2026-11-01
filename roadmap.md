@@ -5,8 +5,8 @@
 - [x] Fix registration error messages (weak/leaked password etc.) and verify flow.
 
 # Stellplatzübersicht
-- [ ] Fahrzeugfilter, Bedürfnisse, Kategorien und fiktive Stellplatzeigenschaften ergänzen.
-- [ ] Ungeklärte Belegung und ungeeignete Plätze sperren; Alternativen und Tests ergänzen.
+- [x] Fahrzeugfilter, Bedürfnisse, Kategorien und fiktive Stellplatzeigenschaften ergänzen.
+- [x] Ungeklärte Belegung und ungeeignete Plätze sperren; Alternativen und Tests ergänzen (80 Tests bestanden; Filter, Ladeleistung, LKW-Auswahl, Simulation und schmale Ansicht im Browser geprüft).
 - [x] Grafische Demo-Pläne für alle sechs Parkhäuser mit P1/P2/P3 und gesperrten belegten Plätzen.
 - [x] Manuelle und automatische Belegungssimulation, Erklärung und Speichern in der aktiven Session.
 - [x] 72 automatisierte Tests bestanden; Auswahl, beide Simulationen, sechs Pläne und schmale Ansicht im Browser geprüft.
