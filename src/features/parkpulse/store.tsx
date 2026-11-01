@@ -119,7 +119,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     },
     declineImport: async () => { await declineFn(); setImportOffer(false); },
   };
-  return <Context.Provider value={store}><ReservationsProvider signedIn={!!user}><ParkingPlanProvider session={state.session}>{children}</ParkingPlanProvider></ReservationsProvider></Context.Provider>;
+  return <Context.Provider value={store}><ReservationsProvider signedIn={!!user} userId={user?.id??null}><ParkingPlanProvider session={state.session}>{children}</ParkingPlanProvider></ReservationsProvider></Context.Provider>;
 }
 
 export function useDemo() { const ctx = useContext(Context); if (!ctx) throw new Error('ParkPulse-Demo ist nicht verfügbar'); return ctx; }
