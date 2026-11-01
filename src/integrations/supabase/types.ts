@@ -14,7 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      parking_states: {
+        Row: {
+          import_decision: string | null
+          imported_at: string | null
+          state: Json
+          updated_at: string
+          user_id: string
+          version: number
+        }
+        Insert: {
+          import_decision?: string | null
+          imported_at?: string | null
+          state: Json
+          updated_at?: string
+          user_id: string
+          version?: number
+        }
+        Update: {
+          import_decision?: string | null
+          imported_at?: string | null
+          state?: Json
+          updated_at?: string
+          user_id?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+          license_plate: string
+          preferred_facility: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string
+          id: string
+          license_plate?: string
+          preferred_facility?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          id?: string
+          license_plate?: string
+          preferred_facility?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
