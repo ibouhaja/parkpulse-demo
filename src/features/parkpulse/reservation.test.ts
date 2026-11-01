@@ -1,6 +1,6 @@
 import {describe,it,expect} from 'vitest';
 import {facilities,initialState} from './data';
-import {defaultFilters,createParkingPlan} from './parking-plan';
+import {defaultFilters,createParkingPlan,simulateOccupancy,matchesSpot} from './parking-plan';
 import {facilityAvailability,mapFacilities,reservationPrice,bonusFor} from './map-rules';
 import {arriveReservation,bookingAllowed,canCancelReservation,type Reservation} from './reservation-rules';
 import {restoreState,transition} from './session';
@@ -8,6 +8,7 @@ import {restoreState,transition} from './session';
 const r:Reservation={id:'reservation-test',facility_id:'quartier',level:'P1',bay:'B02',starts_at:'2026-11-02T10:00:00Z',hours:2,price:4,status:'booked',session_id:null};
 const plans=Object.fromEntries(facilities.map(p=>[p.id,{spots:createParkingPlan(p.id)}]));
 describe('Karte und Reservierung',()=>{
+ it('books using the current deterministic demo simulation step',()=>{for(const step of [1,2,10]){const plan=simulateOccupancy(createParkingPlan('quartier'),step-1);for(const spot of plan){expect(bookingAllowed('quartier',spot.level,spot.bay,2,defaultFilters,[],step)).toBe(!spot.occupied&&!spot.unknown&&matchesSpot(spot,defaultFilters));}}});
  it('counts matching free spots rather than occupied/unknown positions',()=>{const spots=createParkingPlan('quartier');const a=facilityAvailability(spots,defaultFilters);expect(a.total).toBe(144);expect(a.free).toBe(93);expect(a.matching).toBe(spots.filter(s=>!s.occupied&&s.category!=='ev').length);});
  it('combines wallbox and family filters across all three levels without changing source',()=>{const f={...defaultFilters,needs:{...defaultFilters.needs,wallbox:true,family:true}};const before=JSON.stringify(plans);for(const level of ['P1','P2','P3']){const a=facilityAvailability(plans['quartier']?.spots.filter(s=>s.level===level)??[],f);expect(a.matching).toBeGreaterThan(0);expect(a.matching).toBeLessThanOrEqual(a.family);}expect(JSON.stringify(plans)).toBe(before);});
  it('20+ filter uses suitable free capacity',()=>{const result=mapFacilities(plans,defaultFilters,'',true,false,false);expect(result).toHaveLength(6);const family={...defaultFilters,needs:{...defaultFilters.needs,family:true}};expect(mapFacilities(plans,family,'',true,false,false)).toHaveLength(0);});

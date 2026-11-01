@@ -17,7 +17,7 @@ export const getReservations=createServerFn({method:'GET'}).middleware([requireS
   if(error)throw new Error('Reservierungen konnten nicht geladen werden.');
   return data;
 });
-export const bookReservation=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator((input:{id:string;facility:string;level:string;bay:string;startsAt:string;hours:number;filters:ParkingFilters})=>{
+export const bookReservation=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator((input:{id:string;facility:string;level:string;bay:string;startsAt:string;hours:number;filters:ParkingFilters;step?:number})=>{
   if(!input||!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(input.id)||typeof input.facility!=='string'||typeof input.level!=='string'||typeof input.bay!=='string'||!input.filters?.needs)throw new Error('Bitte prüfe deine Reservierungsangaben.');
   return input;
 }).handler(async({context,data})=>{
@@ -26,7 +26,7 @@ export const bookReservation=createServerFn({method:'POST'}).middleware([require
   // A request replay must return the original reservation, not fail its own held-spot check.
   const {data:existing}=await context.supabase.from('demo_reservations').select('id').eq('user_id',context.userId).eq('id',data.id).maybeSingle();
   if(existing)return {id:existing.id};
-  if(!bookingAllowed(data.facility,data.level,data.bay,data.hours,data.filters,held??[]))throw new Error('Dieser Stellplatz ist nicht mehr frei oder passt nicht zu deinem Fahrzeug.');
+  if(!bookingAllowed(data.facility,data.level,data.bay,data.hours,data.filters,held??[],data.step??0))throw new Error('Dieser Stellplatz ist nicht mehr frei oder passt nicht zu deinem Fahrzeug.');
   const start=Date.parse(data.startsAt);
   if(!Number.isFinite(start)||start<Date.now()-60000||start>Date.now()+365*86400000)throw new Error('Bitte wähle einen zukünftigen Termin innerhalb eines Jahres.');
   const {supabaseAdmin}=await import('@/integrations/supabase/client.server');
