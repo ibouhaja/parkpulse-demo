@@ -43,3 +43,7 @@
 .popup-balance span,.popup-balance small { display: block; font-size: 11px; }
 .popup-balance strong { display: block; font-size: 36px; margin: 6px 0; }
 @media(max-width:720px) { .account-trigger { padding: 0; max-width: 95px; } .rewards-popup { padding: 20px; } .popup-balance strong { font-size: 30px; } }
+
+.active-panel .parking-preferences { text-align: left; }
+.active-panel .parking-preferences button[role="checkbox"] { width: 16px; height: 16px; min-width: 16px; min-height: 16px; padding: 0; margin: 0; flex-shrink: 0; }
+.parking-preferences .preference-need { min-width: 0; }
