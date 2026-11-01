@@ -1,4 +1,4 @@
 # ParkPulse sessions
-- [ ] Uniform started-hour tariff and all displayed prices.
-- [ ] Persistent session, parking position, demo clock and guarded checkout.
-- [ ] Verify unit tests and complete browser flow including reloads.
+- [x] Uniform started-hour tariff and all displayed prices.
+- [x] Persistent session, parking position, demo clock and guarded checkout.
+- [x] Verify unit tests and complete browser flow including reloads.
