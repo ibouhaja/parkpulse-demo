@@ -15,7 +15,9 @@ export const money = (value: number) => new Intl.NumberFormat('de-DE', { style: 
 export type Session = { id: string; facilityId: string; facilityName: string; startedAt: number; effectiveDemoTime: number; demoOffsetMs: number; level: string; bay: string; status: 'active' | 'checkout-pending'; endedAt?: number; finalDurationMs?: number; finalFee?: number; discount?: 'none' | 'SHOP2' | 'voucher'; voucherId?: string | undefined };
 export type HistoryEntry = { id: string; facilityId: string; date: string; minutes: number; cost: number; session?: Session; level?: string; bay?: string; receiptId?: string; originalFee?: number; discountAmount?: number };
 export type Voucher = { id: string; value: number; earnedSessionId: string; usedSessionId?: string };
-export type Receipt = { id: string; sessionId: string; date: string; originalFee: number; discountAmount: number; payable: number; discount: string; payment: 'success' | 'free'; method?: 'card' | 'paypal'; level: string; bay: string };
+export type PayMethod = 'card' | 'paypal' | 'klarna' | 'visa' | 'bitcoin';
+export const payMethodLabel: Record<PayMethod, string> = { card: 'Demo-Karte', paypal: 'PayPal', klarna: 'Klarna', visa: 'Visa', bitcoin: 'Bitcoin (BTC)' };
+export type Receipt = { id: string; sessionId: string; date: string; originalFee: number; discountAmount: number; payable: number; discount: string; payment: 'success' | 'free'; method?: PayMethod; level: string; bay: string };
 export type DemoState = { session: Session | null; history: HistoryEntry[]; stamps: number; vouchers: Voucher[]; shop2Used: boolean; receipts: Receipt[]; schemaVersion: 2 };
 export const initialState: DemoState = { session: null, stamps: 5, vouchers: [], shop2Used: false, receipts: [], schemaVersion: 2, history: [
   { id: 'sample-1', facilityId: 'quartier', date: '2026-10-28T10:00:00', minutes: 90, cost: 4 },
