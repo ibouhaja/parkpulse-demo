@@ -35,7 +35,7 @@ describe('server-side action rules', () => {
   it('records a simulated PayPal payment on the receipt and awards a stamp', () => {
     const s = run(pending(), { type: 'complete', sessionId: ID, payment: 'success', method: 'paypal' });
     expect(s.receipts[0]?.method).toBe('paypal');
-    expect(s.receipts[0]?.payable).toBe(6);
+    expect(s.receipts[0]?.payable).toBe(8); // 3 h plus a moment = 4 started hours × 2 €
     expect(s.stamps).toBe(0); // 5 + 1 = 6th stamp -> voucher issued, counter reset
     expect(s.vouchers).toHaveLength(1);
   });

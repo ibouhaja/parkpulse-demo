@@ -12,7 +12,7 @@ export function safeRedirect(value: unknown) {
 }
 
 export const Route = createFileRoute('/auth')({
-  validateSearch: (s: Record<string, unknown>): { redirect?: string } => (typeof s.redirect === 'string' ? { redirect: s.redirect } : {}),
+  validateSearch: (s: Record<string, unknown>): { redirect?: string } => (typeof s['redirect'] === 'string' ? { redirect: s['redirect'] } : {}),
   head: () => pageHead('Anmelden', 'Bei ParkPulse anmelden oder registrieren, um Demo-Parksessions, Stempel und Gutscheine im eigenen Konto zu speichern.'),
   component: AuthPage,
 });
