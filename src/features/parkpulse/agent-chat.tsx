@@ -31,9 +31,14 @@ import { useDemo } from "./store";
 import { supabase } from "@/integrations/supabase/client";
 import { money } from "./data";
 import type { AgentOffer } from "./agent-rules";
+import { CancellationTerms } from "./cancellation-ui";
+import type { CancellationQuote } from "./cancellation-rules";
 import agentLogo from "@/assets/parkpulse-agent.jpg";
 
 const labels: Record<string, string> = {
+  meine_reservierungen: "Eigene Reservierungen prüfen",
+  stornierung_pruefen: "Stornierungsgebühr prüfen",
+  demo_stornieren: "Bestätigte Demo-Stornierung",
   parkplatzsuche: "Parkhäuser suchen",
   fahrzeugkompatibilitaet: "Fahrzeug und Ausstattung prüfen",
   verfuegbarkeit: "Demo-Verfügbarkeit prüfen",
@@ -189,14 +194,14 @@ function AgentWindow({
   useEffect(() => {
     if (!busy) textarea.current?.focus();
   }, [busy, threadId]);
-  const send = async (text: string, confirmationId?: string) => {
+  const send = async (text: string, confirmationId?: string, cancellationConfirmationId?: string) => {
     if (inFlight.current || busy || locked) return;
     inFlight.current = true;
     setLocalError("");
     try {
       await sendMessage(
         { text },
-        { body: confirmationId ? { threadId, confirmationId } : { threadId } },
+        { body: { threadId, ...(confirmationId ? {confirmationId} : {}), ...(cancellationConfirmationId ? {cancellationConfirmationId} : {}) } },
       );
       setInput("");
     } catch (e) {
@@ -205,6 +210,7 @@ function AgentWindow({
     }
     textarea.current?.focus();
   };
+  const [dismissedQuotes,setDismissedQuotes]=useState<string[]>([]);
   const booked = new Set(
     messages.flatMap((m) =>
       m.parts.flatMap((p) =>
@@ -284,6 +290,7 @@ function AgentWindow({
                                   })}{" "}
                                   · {o.level} / {o.bay}
                                 </p>
+                                <CancellationTerms/>
                                 <Button
                                   disabled={
                                     busy || locked || booked.has(o.id) || Date.now() > o.expiresAt
@@ -308,6 +315,10 @@ function AgentWindow({
                             ))}
                           </div>
                         )}
+                      {p.toolName === 'stornierung_pruefen' && p.state === 'output-available' && p.output !== null && typeof p.output === 'object' && (()=>{
+                        const q=p.output as CancellationQuote;
+                        return <div className="space-y-3 py-3"><p>Parkpreis vor Punkten/Gutscheinen: {money(q.price)}</p><p>Simulierte Stornierungsgebühr ({q.percent} %): <strong>{money(q.feeCents/100)}</strong></p><CancellationTerms/><div className="flex flex-wrap gap-2"><Button disabled={busy||locked||dismissedQuotes.includes(q.id)||Date.now()>q.expiresAt} onClick={()=>{setDismissedQuotes(v=>[...v,q.id]);void send(`Ich bestätige ausdrücklich die Demo-Stornierung der Reservierung ${q.reservationId} für ${money(q.feeCents/100)} simulierte Gebühr.`,undefined,q.id);}}>Stornierung bestätigen · {money(q.feeCents/100)} (Demo)</Button><Button variant="outline" disabled={busy||dismissedQuotes.includes(q.id)} onClick={()=>setDismissedQuotes(v=>[...v,q.id])}>Abbrechen</Button></div></div>;
+                      })()}
                       {p.toolName === "reservierungsstatus" && p.state === "output-available" && (
                         <Button asChild variant="outline">
                           <Link to="/reservierungen">

@@ -28,11 +28,13 @@ import { bookingAllowed, type HeldPosition } from "./reservation-rules";
 import { reservationPrice } from "./map-rules";
 import { earnedPoints } from "./points";
 import { tariffs } from "./tariffs";
+import { validCancellationConfirmation, type CancellationQuote } from "./cancellation-rules";
 
 const bodySchema = z.object({
   threadId: z.string().uuid(),
   messages: z.array(z.unknown()),
   confirmationId: z.string().uuid().optional(),
+  cancellationConfirmationId: z.string().uuid().optional(),
 });
 const tool = (
   name: string,
@@ -67,6 +69,9 @@ const criteriaProperties = {
   priority: { type: "string", enum: ["points", "price", "distance"] },
 };
 const tools = [
+  tool('meine_reservierungen','Lies eigene Reservierungen mit Status und simulierten Gebühren.',obj({})),
+  tool('stornierung_pruefen','Erstelle genaue Gebührenvorschau ohne Stornierung; Oberfläche zeigt Bestätigungsknopf.',obj({id:{type:'string'}})),
+  tool('demo_stornieren','Storniere ausschließlich die separat ausdrücklich bestätigte Gebührenvorschau.',obj({quoteId:{type:'string'}})),
   tool(
     "parkplatzsuche",
     "Suche fiktive Parkhäuser nach Gebiet oder Name; leerer Begriff durchsucht alle.",
@@ -225,6 +230,9 @@ export async function handleAgent(request: Request): Promise<Response> {
       { status: 400 },
     );
   const messages: UIMessage[] = [...history, user.data];
+  const quotes = history.flatMap(m=>m.parts.flatMap(p=>p.type==='dynamic-tool'&&p.toolName==='stornierung_pruefen'&&p.state==='output-available'?[p.output as CancellationQuote]:[]));
+  const authorizedCancellation = quotes.find(q=>q.id===body.cancellationConfirmationId);
+  if(body.cancellationConfirmationId&&!authorizedCancellation)return Response.json({error:'Gebührenvorschau gehört nicht zu diesem Gespräch.'},{status:400});
   const runId = crypto.randomUUID();
   const { supabaseAdmin: admin } = await import("@/integrations/supabase/client.server");
   const { data: lock, error: lockError } = await admin
@@ -307,6 +315,25 @@ export async function handleAgent(request: Request): Promise<Response> {
           });
       };
       const executeTool = async (name: string, args: unknown): Promise<unknown> => {
+        if(['meine_reservierungen','stornierung_pruefen','demo_stornieren','reservierungsstatus'].includes(name)) {
+          const {error}=await admin.rpc('demo_reconcile_no_shows');
+          if(error)throw new Error('Reservierungsstatus konnte nicht aktualisiert werden.');
+        }
+        if(name==='meine_reservierungen'){
+          const {data,error}=await db.from('demo_reservations').select('id,facility_id,level,bay,starts_at,hours,price,reservation_status,fee_cents,fee_percent').eq('user_id',userId).order('created_at',{ascending:false});
+          if(error)throw new Error('Reservierungen konnten nicht geladen werden.');return data;
+        }
+        if(name==='stornierung_pruefen'){
+          const {id}=z.object({id:z.string().uuid()}).parse(args);
+          const {data,error}=await admin.rpc('demo_quote_cancellation',{p_user:userId,p_id:id});
+          if(error)throw new Error('Diese Reservierung kann nicht mehr storniert werden.');return data;
+        }
+        if(name==='demo_stornieren'){
+          const {quoteId}=z.object({quoteId:z.string().uuid()}).parse(args);
+          if(!authorizedCancellation||!validCancellationConfirmation(authorizedCancellation,body.cancellationConfirmationId,Date.now())||quoteId!==authorizedCancellation.id)throw new Error('Keine gültige ausdrückliche Gebührenbestätigung. Bitte nutze den Bestätigungsknopf.');
+          const {data,error}=await admin.rpc('demo_confirm_cancellation',{p_user:userId,p_quote:quoteId});
+          if(error)throw new Error('Gebührenvorschau abgelaufen oder Status geändert. Bitte erneut prüfen.');return data;
+        }
         if (name === "parkplatzsuche") {
           const { query } = z.object({ query: z.string() }).parse(args);
           ids = facilities
@@ -336,7 +363,7 @@ export async function handleAgent(request: Request): Promise<Response> {
           const { id } = z.object({ id: z.string().uuid() }).parse(args);
           const { data, error } = await db
             .from("demo_reservations")
-            .select("id,facility_id,level,bay,starts_at,hours,price,status")
+            .select("id,facility_id,level,bay,starts_at,hours,price,status,reservation_status,fee_cents,fee_percent")
             .eq("id", id)
             .eq("user_id", userId)
             .single();
@@ -439,7 +466,8 @@ export async function handleAgent(request: Request): Promise<Response> {
       };
       try {
         const input = historyInput(messages);
-        const instructions = `Du bist ParkPulse AI Agent. Antworte ausschließlich deutsch. Alle Parkdaten sind fiktiv, keine Live-Verfügbarkeit oder echte Zahlung. Aktuelle Zeit ${new Date().toISOString()}. Die einzige Stadt ist Demostadt (Zeitzone Europe/Berlin); frage nicht nach einer Stadt, wenn keine angegeben ist. Ein fehlendes Gebiet bedeutet alle sechs Parkhäuser. Nutze echte Tools in sinnvoller Reihenfolge: Suche, Fahrzeugkompatibilität, Verfügbarkeit, Preise, Punkte, Angebote vergleichen. Budget ist hart; keine hypothetischen Rabatte abziehen. Bei fehlender Dauer, Starttermin oder Budget gezielt nachfragen. 'Jetzt' bedeutet aktuelle Zeit; nenne den genauen Termin. Fahrzeugprofil darf Standardmaße liefern; bei geänderten Fahrzeugen Maße passend prüfen. Die Oberfläche zeigt die drei Angebotskarten automatisch. Wiederhole keine Vergleichstabelle; begründe kompakt die Rangfolge. Zeige maximal drei Angebote aus angebote_vergleichen, begründe Rangfolge und nenne Preis, Demo-Entfernung, Ausstattung, passende freie Plätze und bedingte Punkte. Keine erfundenen Ergebnisse, keine eigenen Berechnungen. Bei null Treffern Budget nicht überschreiten; frage nach Anpassung. Reservierungen NUR bei Bestätigungsklick; Text allein ist keine Autorisierung. Nach demo_reservieren IMMER reservierungsstatus aufrufen und nur bei booked Erfolg behaupten. Nicht automatisch Alternativen buchen. Autorisiertes Angebot dieser Anfrage: ${authorizedOffer ? JSON.stringify(authorizedOffer) : "KEINES"}. Keine Geheimnisse oder Kontodaten erfragen.`;
+        const cancellationInstructions = `Stornierungsbedingungen: >3h 0%, 2–3h inkl. exakt 2h/3h 25%, 1–<2h inkl. exakt 1h 50%, <1h 100%, No-Show 100%. Grundlage gespeicherter Gesamtparkpreis vor Punkten/Gutscheinen. 15 Minuten Kulanz nach Beginn. Keine echte Abbuchung, keine Punkte/Stempel. Bei Stornierungswunsch meine_reservierungen und stornierung_pruefen verwenden; nie Text als Zustimmung akzeptieren. demo_stornieren nur mit separatem Bestätigungsklick. Danach reservierungsstatus lesen, Erfolg nur bei reservation_status cancelled. Autorisierte Gebührenvorschau: ${authorizedCancellation ? JSON.stringify(authorizedCancellation) : 'KEINE'}.`;
+        const instructions = cancellationInstructions + `Du bist ParkPulse AI Agent. Antworte ausschließlich deutsch. Alle Parkdaten sind fiktiv, keine Live-Verfügbarkeit oder echte Zahlung. Aktuelle Zeit ${new Date().toISOString()}. Die einzige Stadt ist Demostadt (Zeitzone Europe/Berlin); frage nicht nach einer Stadt, wenn keine angegeben ist. Ein fehlendes Gebiet bedeutet alle sechs Parkhäuser. Nutze echte Tools in sinnvoller Reihenfolge: Suche, Fahrzeugkompatibilität, Verfügbarkeit, Preise, Punkte, Angebote vergleichen. Budget ist hart; keine hypothetischen Rabatte abziehen. Bei fehlender Dauer, Starttermin oder Budget gezielt nachfragen. 'Jetzt' bedeutet aktuelle Zeit; nenne den genauen Termin. Fahrzeugprofil darf Standardmaße liefern; bei geänderten Fahrzeugen Maße passend prüfen. Die Oberfläche zeigt die drei Angebotskarten automatisch. Wiederhole keine Vergleichstabelle; begründe kompakt die Rangfolge. Zeige maximal drei Angebote aus angebote_vergleichen, begründe Rangfolge und nenne Preis, Demo-Entfernung, Ausstattung, passende freie Plätze und bedingte Punkte. Keine erfundenen Ergebnisse, keine eigenen Berechnungen. Bei null Treffern Budget nicht überschreiten; frage nach Anpassung. Reservierungen NUR bei Bestätigungsklick; Text allein ist keine Autorisierung. Nach demo_reservieren IMMER reservierungsstatus aufrufen und nur bei booked Erfolg behaupten. Nicht automatisch Alternativen buchen. Autorisiertes Angebot dieser Anfrage: ${authorizedOffer ? JSON.stringify(authorizedOffer) : "KEINES"}. Keine Geheimnisse oder Kontodaten erfragen.`;
         const { data: profile } = await db
           .from("profiles")
           .select("parking_preferences")
@@ -459,7 +487,11 @@ export async function handleAgent(request: Request): Promise<Response> {
               instructions,
               tools,
               tool_choice:
-                authorizedOffer && step === 0
+                authorizedCancellation && step === 0
+                  ? { type: "function", name: "demo_stornieren" }
+                  : authorizedCancellation && step === 1
+                    ? { type: "function", name: "reservierungsstatus" }
+                    : authorizedOffer && step === 0
                   ? { type: "function", name: "demo_reservieren" }
                   : authorizedOffer && step === 1
                     ? { type: "function", name: "reservierungsstatus" }
