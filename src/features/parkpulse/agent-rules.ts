@@ -6,7 +6,7 @@ import { reservationPrice } from './map-rules';
 import { earnedPoints } from './points';
 import { tariffs } from './tariffs';
 
-export const agentCriteria = z.object({ hours: z.number().positive().max(72), startsAt: z.string().datetime(), budget: z.number().nonnegative(), vehicle: z.enum(['car','ev','suv','van','truck']), height: z.number().positive().max(5), width: z.number().positive().max(4), length: z.number().positive().max(15), weight: z.number().positive().max(20000), wallbox: z.boolean(), family: z.boolean(), women: z.boolean(), accessible: z.boolean(), priority: z.enum(['points','price','distance']) });
+export const agentCriteria = z.object({ hours: z.number().positive().max(72), startsAt: z.string().datetime({offset:true}), budget: z.number().nonnegative(), vehicle: z.enum(['car','ev','suv','van','truck']), height: z.number().positive().max(5), width: z.number().positive().max(4), length: z.number().positive().max(15), weight: z.number().positive().max(20000), wallbox: z.boolean(), family: z.boolean(), women: z.boolean(), accessible: z.boolean(), priority: z.enum(['points','price','distance']) });
 export type AgentCriteria = z.infer<typeof agentCriteria>;
 export type AgentOffer = { id: string; facility: string; name: string; level: string; bay: string; startsAt: string; hours: number; price: number; budget: number; points: number; distance: number; available: number; equipment: string[]; filters: ParkingFilters; expiresAt: number };
 export const filtersFromCriteria = (c: AgentCriteria): ParkingFilters => ({ vehicle:c.vehicle,height:c.height,width:c.width,length:c.length,weight:c.weight,needs:{wallbox:c.wallbox,family:c.family,women:c.women,accessible:c.accessible} });
