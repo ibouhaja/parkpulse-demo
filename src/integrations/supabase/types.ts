@@ -92,6 +92,7 @@ export type Database = {
           display_name: string
           id: string
           license_plate: string
+          parking_preferences: Json
           preferred_facility: string
           updated_at: string
         }
@@ -100,6 +101,7 @@ export type Database = {
           display_name?: string
           id: string
           license_plate?: string
+          parking_preferences?: Json
           preferred_facility?: string
           updated_at?: string
         }
@@ -108,6 +110,7 @@ export type Database = {
           display_name?: string
           id?: string
           license_plate?: string
+          parking_preferences?: Json
           preferred_facility?: string
           updated_at?: string
         }
