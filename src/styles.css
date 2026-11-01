@@ -106,3 +106,4 @@
  [data-slot=dialog-content]{max-height:calc(100dvh - 24px);overflow-y:auto;width:calc(100% - 16px)}
  .rewards-popup button{min-height:46px}
 }
+@media(max-width:720px){.reservation-row>div:last-child{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}.reservation-row>div:last-child>*{width:100%}}
