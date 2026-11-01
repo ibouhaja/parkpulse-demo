@@ -1,4 +1,4 @@
-import { Box3, BufferGeometry, Matrix4, Mesh, MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Vector3 } from 'three';
+import { Box3, BufferGeometry, DoubleSide, Matrix4, Mesh, MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Vector3 } from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import type { DemoModel } from './parking-3d-rules';
 
@@ -31,7 +31,7 @@ export function prepareVehicle(source: Object3D, model: DemoModel): VehiclePart[
       let bucket = buckets.get(key);
       if (!bucket) {
         const material = original.clone();
-        if (paint) { material.color.setScalar(1); material.metalness = .65; material.roughness = .23; if (material instanceof MeshPhysicalMaterial) { material.clearcoat = 1; material.clearcoatRoughness = .12; } }
+        if (paint) { material.side = DoubleSide; material.color.setScalar(1); material.metalness = .65; material.roughness = .23; if (material instanceof MeshPhysicalMaterial) { material.clearcoat = 1; material.clearcoatRoughness = .12; } }
         bucket = { parts: [], material, paint }; buckets.set(key, bucket);
       }
       bucket.parts.push(geometry);

@@ -55,13 +55,16 @@ function surface(spots: ParkingSpot[], selected: ParkingPosition | null, colors:
 
 function CarInstances({ part, spots, colors }: { part: VehiclePart; spots: ParkingSpot[]; colors: Palette }) {
   const ref = useRef<InstancedMesh>(null);
+  const invalidate = useThree(state => state.invalidate);
   useEffect(() => {
     const mesh = ref.current; if (!mesh) return;
     const transform = new Object3D();
     spots.forEach((spot, i) => { const p = spotCoordinates(spot.bay); transform.position.set(p.x, .13, p.z); transform.rotation.y = p.yaw; transform.updateMatrix(); mesh.setMatrixAt(i, transform.matrix); if (part.paint) mesh.setColorAt(i, new Color(colors[colorKeys[(Number(spot.bay.slice(1)) + i) % colorKeys.length] ?? 'carSilver'])); });
     mesh.instanceMatrix.needsUpdate = true; if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
     mesh.computeBoundingSphere();
-  }, [spots, colors, part]);
+    part.material.needsUpdate = true;
+    invalidate();
+  }, [spots, colors, part, invalidate]);
   return <instancedMesh ref={ref} args={[part.geometry, part.material, 48]} count={spots.length} castShadow receiveShadow/>;
 }
 
