@@ -10,33 +10,102 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ParksessionRouteImport } from './routes/parksession'
+import { Route as PraemienRouteImport } from './routes/praemien'
+import { Route as SucheRouteImport } from './routes/suche'
+import { Route as VerlaufRouteImport } from './routes/verlauf'
+import { Route as ParkplatzIdRouteImport } from './routes/parkplatz.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ParksessionRoute = ParksessionRouteImport.update({
+  id: '/parksession',
+  path: '/parksession',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PraemienRoute = PraemienRouteImport.update({
+  id: '/praemien',
+  path: '/praemien',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SucheRoute = SucheRouteImport.update({
+  id: '/suche',
+  path: '/suche',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerlaufRoute = VerlaufRouteImport.update({
+  id: '/verlauf',
+  path: '/verlauf',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParkplatzIdRoute = ParkplatzIdRouteImport.update({
+  id: '/parkplatz/$id',
+  path: '/parkplatz/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/parksession': typeof ParksessionRoute
+  '/praemien': typeof PraemienRoute
+  '/suche': typeof SucheRoute
+  '/verlauf': typeof VerlaufRoute
+  '/parkplatz/$id': typeof ParkplatzIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/parksession': typeof ParksessionRoute
+  '/praemien': typeof PraemienRoute
+  '/suche': typeof SucheRoute
+  '/verlauf': typeof VerlaufRoute
+  '/parkplatz/$id': typeof ParkplatzIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/parksession': typeof ParksessionRoute
+  '/praemien': typeof PraemienRoute
+  '/suche': typeof SucheRoute
+  '/verlauf': typeof VerlaufRoute
+  '/parkplatz/$id': typeof ParkplatzIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/parksession'
+    | '/praemien'
+    | '/suche'
+    | '/verlauf'
+    | '/parkplatz/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/parksession'
+    | '/praemien'
+    | '/suche'
+    | '/verlauf'
+    | '/parkplatz/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/parksession'
+    | '/praemien'
+    | '/suche'
+    | '/verlauf'
+    | '/parkplatz/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ParksessionRoute: typeof ParksessionRoute
+  PraemienRoute: typeof PraemienRoute
+  SucheRoute: typeof SucheRoute
+  VerlaufRoute: typeof VerlaufRoute
+  ParkplatzIdRoute: typeof ParkplatzIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +117,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/parksession': {
+      id: '/parksession'
+      path: '/parksession'
+      fullPath: '/parksession'
+      preLoaderRoute: typeof ParksessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/praemien': {
+      id: '/praemien'
+      path: '/praemien'
+      fullPath: '/praemien'
+      preLoaderRoute: typeof PraemienRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/suche': {
+      id: '/suche'
+      path: '/suche'
+      fullPath: '/suche'
+      preLoaderRoute: typeof SucheRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verlauf': {
+      id: '/verlauf'
+      path: '/verlauf'
+      fullPath: '/verlauf'
+      preLoaderRoute: typeof VerlaufRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parkplatz/$id': {
+      id: '/parkplatz/$id'
+      path: '/parkplatz/$id'
+      fullPath: '/parkplatz/$id'
+      preLoaderRoute: typeof ParkplatzIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ParksessionRoute: ParksessionRoute,
+  PraemienRoute: PraemienRoute,
+  SucheRoute: SucheRoute,
+  VerlaufRoute: VerlaufRoute,
+  ParkplatzIdRoute: ParkplatzIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
