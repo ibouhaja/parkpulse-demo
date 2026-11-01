@@ -11,3 +11,5 @@
 
 - ParkPulse uses TanStack file routes with a shared shell and demo provider; keep parking data and local persistence in the feature module to share state consistently across views.
 - Demo persistence uses browser localStorage after hydration only; no server, authentication, payment or external data integrations are needed.
+
+- Session state transitions are pure functions; the provider synchronously saves guarded transitions before navigation, preserving pending checkout and upgrading older local records.
