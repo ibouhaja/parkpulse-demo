@@ -26,3 +26,29 @@ describe('3D-P1', () => {
     for (const model of demoModels) expect(filtersForModel(f, model).length).toBeGreaterThan(0);
   });
 });
+
+describe('3D-Ebenen und Sessionsynchronisierung', () => {
+  for (const level of parkingLevels) {
+    it(`${level}: Wallbox-Kombinationen zeigen tatsächliche Belegungen und sperren belegte Plätze`, () => {
+      const source = createParkingPlan('quartier');
+      for (const need of ['family', 'women', 'accessible'] as const) {
+        const filters = { ...defaultFilters, needs: { ...defaultFilters.needs, wallbox: true, [need]: true } };
+        const spots = sceneSpots(source, level, filters);
+        expect(spots.length).toBeGreaterThanOrEqual(2);
+        for (const spot of spots) { expect(spot.charging?.power).toBeGreaterThan(0); expect(selectFreeSpot(source, spot, filters) !== null).toBe(!spot.occupied && !spot.unknown); }
+      }
+    });
+    it(`${level}: 3D-Auswahl speichert dieselbe Position und schützt sie nach Neuladen und Simulation`, () => {
+      const source = createParkingPlan('quartier'); const spot = sceneSpots(source, level, defaultFilters).find(s => !s.occupied && !s.unknown);
+      if (!spot) throw new Error('Freier Demo-Platz fehlt');
+      const active = transition(initialState, { type: 'start', facilityId: 'quartier', now: 1000, id: '3d-session' });
+      const saved = savePlanPosition(active, 'quartier', source, spot, defaultFilters);
+      const restored = restoreState(JSON.stringify(saved));
+      expect(restored.session).toMatchObject({ level, bay: spot.bay });
+      expect(restored.stamps).toBe(initialState.stamps);
+      const simulated = protectSessionPosition(simulateOccupancy(source, 7), restored.session);
+      expect(sceneSpots(simulated, level, defaultFilters).find(s => s.bay === spot.bay)?.occupied).toBe(true);
+      expect(selectFreeSpot(simulated, spot, defaultFilters)).toBeNull();
+    });
+  }
+});

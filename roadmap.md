@@ -1,5 +1,5 @@
 # 3D-Parkhausplan
-- [ ] P1 mit lizenzierten Fahrzeugen, Kamera und gemeinsamer Auswahl implementieren und prüfen.
+- [x] P1 mit lizenzierten Fahrzeugen, Kamera und gemeinsamer Auswahl implementieren und prüfen.
 - [ ] P2/P3 ergänzen; Demo-Einparken, Filter und Sessionsynchronisierung testen.
 - [ ] Desktop-/Smartphone-Darstellung sowie bestehende Tests prüfen.
 
