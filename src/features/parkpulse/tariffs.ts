@@ -8,7 +8,7 @@ export const tariffs: Record<string, Tariff> = {
   markt: { version: 1, hourlyCents: 299, firstHourCents: 249, eveningCents: 199, dailyCapCents: 1899, shoppingCents: 150, promotionPoints: 452, referencePoints: 1000, offer: 'Shopping-Rabatt bis 1,50 €' },
   nord: { version: 1, hourlyCents: 129, firstHourCents: 79, eveningCents: 89, dailyCapCents: 699, shoppingCents: 0, promotionPoints: 292, referencePoints: 500, offer: 'Erste Stunde 0,79 €' },
 };
-const berlinHour = (time: number) => Number(new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', hourCycle: 'h23' }).format(time));
+const berlinHour = (time: number) => Number(new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', hourCycle: 'h23' }).formatToParts(time).find(p=>p.type==='hour')?.value??0);
 /** Each started hour uses its Berlin start time; daily cap applies per rolling 24-hour parking block. */
 export function tariffFeeCents(tariff: Tariff, startedAt: number, durationMs: number) {
   if (!Number.isFinite(durationMs) || durationMs <= 0) return 0;
