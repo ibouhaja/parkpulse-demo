@@ -1,3 +1,8 @@
+# ParkPulse AI Agent
+- [ ] Echte mehrstufige KI mit Suche, Kompatibilität, Verfügbarkeit, Tarif-/Punkteprüfung und harter Budgetgrenze.
+- [ ] Kontogetrennte Gespräche mit eigenen URLs, Streaming und aufklappbaren tatsächlichen Tool-Schritten.
+- [ ] Ausdrücklich bestätigte, wiederholsichere Demo-Reservierung mit Statusprüfung; drei vollständige Agentenabläufe testen.
+
 # Anmeldung, Präferenzen und Rewards-Pop-up
 - [x] Apple und Gastzugang ergänzen; bestehende E-Mail-/Google-Anmeldung und Bestätigung erhalten. LinkedIn nicht unterstützt; keine Referenzbilder angehängt.
 - [x] Fahrzeugpräferenzen bei Registrierung und im Profil speichern und kontogetrennt auf Kartenfilter anwenden.
