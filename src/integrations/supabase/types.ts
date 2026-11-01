@@ -50,12 +50,18 @@ export type Database = {
       demo_reservations: {
         Row: {
           bay: string
+          cancellation_id: string | null
           created_at: string
           facility_id: string
+          fee_cents: number
+          fee_percent: number
+          grace_minutes: number
           hours: number
           id: string
           level: string
           price: number
+          reservation_status: string
+          resolved_at: string | null
           session_id: string | null
           starts_at: string
           status: string
@@ -64,12 +70,18 @@ export type Database = {
         }
         Insert: {
           bay: string
+          cancellation_id?: string | null
           created_at?: string
           facility_id: string
+          fee_cents?: number
+          fee_percent?: number
+          grace_minutes?: number
           hours: number
           id: string
           level: string
           price: number
+          reservation_status?: string
+          resolved_at?: string | null
           session_id?: string | null
           starts_at: string
           status?: string
@@ -78,12 +90,18 @@ export type Database = {
         }
         Update: {
           bay?: string
+          cancellation_id?: string | null
           created_at?: string
           facility_id?: string
+          fee_cents?: number
+          fee_percent?: number
+          grace_minutes?: number
           hours?: number
           id?: string
           level?: string
           price?: number
+          reservation_status?: string
+          resolved_at?: string | null
           session_id?: string | null
           starts_at?: string
           status?: string
@@ -149,6 +167,47 @@ export type Database = {
         }
         Relationships: []
       }
+      reservation_cancellation_quotes: {
+        Row: {
+          created_at: string
+          expires_at: string
+          fee_cents: number
+          id: string
+          percent: number
+          price: number
+          reservation_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          fee_cents: number
+          id?: string
+          percent: number
+          price: number
+          reservation_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          fee_cents?: number
+          id?: string
+          percent?: number
+          price?: number
+          reservation_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservation_cancellation_quotes_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "demo_reservations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -184,6 +243,14 @@ export type Database = {
         Args: { p_id: string; p_user: string }
         Returns: boolean
       }
+      demo_cancellation_percent: {
+        Args: { p_now: string; p_start: string }
+        Returns: number
+      }
+      demo_confirm_cancellation: {
+        Args: { p_quote: string; p_user: string }
+        Returns: Json
+      }
       demo_held_positions: {
         Args: never
         Returns: {
@@ -192,6 +259,11 @@ export type Database = {
           level: string
         }[]
       }
+      demo_quote_cancellation: {
+        Args: { p_id: string; p_user: string }
+        Returns: Json
+      }
+      demo_reconcile_no_shows: { Args: never; Returns: number }
       demo_save_state: {
         Args: {
           p_arrival?: string
