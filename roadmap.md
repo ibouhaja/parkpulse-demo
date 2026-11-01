@@ -1,3 +1,8 @@
+# Anmeldung, Präferenzen und Rewards-Pop-up
+- [ ] Apple und Gastzugang ergänzen; bestehende E-Mail-/Google-Anmeldung und Bestätigung erhalten. LinkedIn nicht unterstützt; keine Referenzbilder angehängt.
+- [ ] Fahrzeugpräferenzen bei Registrierung und im Profil speichern und kontogetrennt auf Kartenfilter anwenden.
+- [ ] Persönliches Rewards-Pop-up ergänzen; Tests, Speicherung, Anmeldung und Abmeldung prüfen.
+
 # Tarife und ParkPulse-Punkte
 - [x] Unterschiedliche Tarife, Tageslimit, Abend-/Shopping-/Erststundenangebote konsistent berechnen; Altbestände und eingefrorene Gebühren erhalten.
 - [x] Separate Punkte, Vorschau, sichere Gutschrift und idempotente Einlösung mit Verlauf ergänzen; ältere dokumentierte Boni bleiben unverändert und nicht rückwirkend einlösbar.
