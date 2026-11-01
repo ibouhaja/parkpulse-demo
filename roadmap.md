@@ -1,5 +1,5 @@
 # ParkPulse
-- [ ] Replace imported shell with German ParkPulse layout and navigation.
-- [ ] Add six fictional facilities, search, EV filter and detail pages.
-- [ ] Add local-only session, rewards and history.
-- [ ] Verify search/details and rendering in the preview.
+- [x] Replace imported shell with German ParkPulse layout and navigation.
+- [x] Add six fictional facilities, search, EV filter and detail pages.
+- [x] Add local-only session, rewards and history.
+- [x] Verify search/details and rendering in the preview.
