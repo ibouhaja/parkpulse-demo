@@ -95,10 +95,15 @@ export const declineLocalImport = createServerFn({ method: 'POST' })
   });
 
 export const arriveBooking=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator((input:{id:string})=>input).handler(async({context,data})=>{
+  const {supabaseAdmin:reservationAdmin}=await import('@/integrations/supabase/client.server');
+  const {error:deadlineError}=await reservationAdmin.rpc('demo_reconcile_no_shows');
+  if(deadlineError)throw new Error('Reservierungsstatus konnte nicht geprüft werden.');
   for(let attempt=0;attempt<3;attempt++){
     const row=await loadRow(context as Ctx);
     const {data:r,error}=await context.supabase.from('demo_reservations').select('*').eq('id',data.id).eq('user_id',context.userId).maybeSingle();
     if(error||!r)throw new Error('Reservierung wurde nicht gefunden.');
+    if(r.reservation_status==='no_show')throw new Error('Die 15-Minuten-Kulanzfrist ist abgelaufen. Diese Reservierung gilt als No-Show.');
+    if(r.status==='cancelled'||r.status==='completed')throw new Error('Diese Reservierung ist bereits beendet.');
     if(r.status==='arrived'&&row.state.session?.id===r.session_id)return {state:row.state};
     const next=arriveReservation(row.state,r as Reservation,Date.now());
     if(next===row.state)throw new Error('Bitte schließe zuerst deine bestehende Parksession ab.');

@@ -6,6 +6,8 @@ import { createClient } from '@supabase/supabase-js';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { bookingAllowed, type HeldPosition } from './reservation-rules';
 import type { ParkingFilters } from './parking-plan';
+import { z } from 'zod';
+import type { CancellationQuote } from './cancellation-rules';
 
 export const getHeldPositions = createServerFn({method:'GET'}).handler(async () => {
   const key=process.env['SUPABASE_PUBLISHABLE_KEY']; const url=process.env['SUPABASE_URL'];
@@ -16,7 +18,10 @@ export const getHeldPositions = createServerFn({method:'GET'}).handler(async () 
   return (data??[]) as HeldPosition[];
 });
 export const getReservations=createServerFn({method:'GET'}).middleware([requireSupabaseAuth]).handler(async({context})=>{
-  const {data,error}=await context.supabase.from('demo_reservations').select('id,facility_id,level,bay,starts_at,hours,price,status,session_id,tariff').eq('user_id',context.userId).order('created_at',{ascending:false});
+  const {supabaseAdmin}=await import('@/integrations/supabase/client.server');
+  const {error:reconcileError}=await supabaseAdmin.rpc('demo_reconcile_no_shows');
+  if(reconcileError)throw new Error('Reservierungsstatus konnte nicht aktualisiert werden.');
+  const {data,error}=await context.supabase.from('demo_reservations').select('id,facility_id,level,bay,starts_at,hours,price,status,session_id,tariff,reservation_status,grace_minutes,fee_cents,fee_percent,resolved_at').eq('user_id',context.userId).order('created_at',{ascending:false});
   if(error)throw new Error('Reservierungen konnten nicht geladen werden.');
   return data;
 });
@@ -37,9 +42,15 @@ export const bookReservation=createServerFn({method:'POST'}).middleware([require
   if(error)throw new Error('Dieser Stellplatz konnte nicht reserviert werden. Er ist möglicherweise bereits vergeben.');
   return {id:data.id};
 });
-export const cancelReservation=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator((input:{id:string})=>input).handler(async({context,data})=>{
+export const quoteCancellation=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator(z.object({id:z.string().uuid()})).handler(async({context,data})=>{
   const {supabaseAdmin}=await import('@/integrations/supabase/client.server');
-  const {data:changed,error}=await supabaseAdmin.rpc('demo_cancel_booking',{p_user:context.userId,p_id:data.id});
-  if(error)throw new Error('Stornierung fehlgeschlagen. Bitte versuche es erneut.');
-  return {changed};
+  const {data:quote,error}=await supabaseAdmin.rpc('demo_quote_cancellation',{p_user:context.userId,p_id:data.id});
+  if(error)throw new Error('Diese Reservierung kann nicht mehr storniert werden. Bitte aktualisiere den Verlauf.');
+  return quote as unknown as CancellationQuote;
+});
+export const cancelReservation=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator(z.object({quoteId:z.string().uuid(),confirmed:z.literal(true)})).handler(async({context,data})=>{
+  const {supabaseAdmin}=await import('@/integrations/supabase/client.server');
+  const {data:result,error}=await supabaseAdmin.rpc('demo_confirm_cancellation',{p_user:context.userId,p_quote:data.quoteId});
+  if(error)throw new Error('Die Gebührenvorschau ist abgelaufen oder der Status hat sich geändert. Bitte prüfe die Gebühr erneut.');
+  return result;
 });

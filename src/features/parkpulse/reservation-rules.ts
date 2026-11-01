@@ -4,7 +4,7 @@ import { transition } from './session';
 import { createParkingPlan, simulateOccupancy, selectFreeSpot, type ParkingFilters } from './parking-plan';
 import { reservationPrice } from './map-rules';
 
-export type Reservation = { id: string; facility_id: string; level: string; bay: string; starts_at: string; hours: number; price: number; status: 'booked'|'arrived'|'cancelled'|'completed'; session_id: string|null; tariff?: Tariff|null };
+export type Reservation = { id: string; facility_id: string; level: string; bay: string; starts_at: string; hours: number; price: number; status: 'booked'|'arrived'|'cancelled'|'completed'; session_id: string|null; tariff?: Tariff|null; reservation_status?: 'confirmed'|'cancelled'|'checked_in'|'completed'|'no_show'; grace_minutes?: number; fee_cents?: number; fee_percent?: number; resolved_at?: string|null };
 export type HeldPosition = { facility_id: string; level: string; bay: string };
 export function bookingAllowed(facility: string, level: string, bay: string, hours: number, filters: ParkingFilters, held: HeldPosition[], step=0) {
   if(!Number.isInteger(step)||step<0||step>100000)return false;
