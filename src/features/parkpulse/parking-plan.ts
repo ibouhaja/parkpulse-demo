@@ -32,9 +32,8 @@ export function createParkingPlan(facilityId: string): ParkingSpot[] {
   return parkingLevels.flatMap((level, floor) => Array.from({ length: spotsPerLevel }, (_, n) => {
     const types: SpotCategory[] = ['standard', 'ev', 'family', 'women', 'accessible', 'standard', 'van', 'truck'];
     let category = types[n % 8] ?? 'standard';
-    if (category === 'ev' && facility.ev === 0) category = 'standard';
     if ((category === 'van' || category === 'truck') && (!open || floor !== 0)) category = 'standard';
-    const charging = category === 'ev' ? { power: n < 8 ? 11 : n < 16 ? 22 : 50, connector: n < 16 ? 'Typ 2' as const : 'CCS' as const, mode: n < 16 ? 'AC' as const : 'DC' as const } : null;
+    const charging = category === 'ev' || (n >= 24 && ['family', 'women', 'accessible'].includes(category)) ? { power: category !== 'ev' ? n % 2 === 0 ? 11 : 22 : n < 8 ? 11 : n < 16 ? 22 : 50, connector: category !== 'ev' || n < 16 ? 'Typ 2' as const : 'CCS' as const, mode: category !== 'ev' || n < 16 ? 'AC' as const : 'DC' as const } : null;
     return {
       level, bay: `B${String(n + 1).padStart(2, '0')}`,
       occupied: ((n * 17 + floor * 7 + index * 11) % spotsPerLevel) < 17, unknown: false,
@@ -81,8 +80,8 @@ export function matchesSpot(spot: ParkingSpot, filters: ParkingFilters): boolean
   if (filters.vehicle === 'truck' && spot.category !== 'truck') return false;
   if (filters.vehicle === 'van' && !['van', 'truck'].includes(spot.category)) return false;
   if (filters.vehicle !== 'truck' && filters.vehicle !== 'van' && ['van', 'truck'].includes(spot.category)) return false;
-  if (filters.needs.wallbox && (!spot.charging || filters.vehicle !== 'ev')) return false;
-  if (spot.category === 'ev' && filters.vehicle !== 'ev') return false;
+  if (filters.needs.wallbox && !spot.charging) return false;
+  if (spot.category === 'ev' && filters.vehicle !== 'ev' && !filters.needs.wallbox) return false;
   return (!filters.needs.family || spot.category === 'family') && (!filters.needs.women || spot.category === 'women') && (!filters.needs.accessible || spot.accessible);
 }
 
