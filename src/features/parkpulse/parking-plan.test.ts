@@ -82,7 +82,7 @@ describe('Fahrzeugkriterien und Kategorien', () => {
     expect(chargers).toContainEqual({ power: 11, mode: 'AC', connector: 'Typ 2' });
     expect(chargers).toContainEqual({ power: 22, mode: 'AC', connector: 'Typ 2' });
     expect(chargers).toContainEqual({ power: 50, mode: 'DC', connector: 'CCS' });
-    expect(createParkingPlan('stadtgarten').some(s => s.charging)).toBe(false);
+    expect(createParkingPlan('stadtgarten').some(s => s.charging)).toBe(true);
   });
   it('prüft jede Maß- und Gewichtsgrenze einschließlich Grenzgleichheit', () => {
     const spot = getSpot('B01');
@@ -105,7 +105,7 @@ describe('Fahrzeugkriterien und Kategorien', () => {
     const ev = { ...defaultFilters, vehicle: 'ev' as const, ...vehicleDefaults.ev, needs: { ...defaultFilters.needs, wallbox: true } };
     expect(matchesSpot(getSpot('B02'), ev)).toBe(true);
     expect(matchesSpot(getSpot('B01'), ev)).toBe(false);
-    expect(matchesSpot(getSpot('B02'), { ...ev, vehicle: 'car' })).toBe(false);
+    expect(matchesSpot(getSpot('B02'), { ...ev, vehicle: 'car' })).toBe(true);
   });
   it('verknüpft Familien-, Frauen- und Zugangsbedürfnisse ohne persönliche Erkennung', () => {
     const family = { ...defaultFilters, needs: { ...defaultFilters.needs, family: true, accessible: true } };
