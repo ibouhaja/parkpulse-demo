@@ -1,3 +1,8 @@
+# Stornierung und No-Show
+- [ ] Gebührenregeln, 15-Minuten-Demo-Kulanzfrist und atomare, wiederholsichere Statuswechsel ergänzen.
+- [ ] Bedingungen vor Buchung, Gebührenbestätigung, Kontoverlauf und ausdrücklich bestätigte KI-Stornierung ergänzen.
+- [ ] Zeitgrenzen, Gebühren, Neuladen und angemeldeten Ablauf testen.
+
 # ParkPulse AI Agent
 - [x] Echte mehrstufige KI mit Suche, Kompatibilität, Verfügbarkeit, Tarif-/Punkteprüfung und harter Budgetgrenze.
 - [x] Kontogetrennte Gespräche mit eigenen URLs, Streaming und aufklappbaren tatsächlichen Tool-Schritten; mehrere Gespräche und Neuladen geprüft.
