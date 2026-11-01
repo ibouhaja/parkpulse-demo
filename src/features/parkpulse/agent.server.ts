@@ -21,7 +21,7 @@ function historyInput(messages:UIMessage[]):ResponsesInputItem[]{return messages
 function savedOffers(messages:UIMessage[]):AgentOffer[]{return messages.flatMap(m=>m.parts.flatMap(p=>p.type==='dynamic-tool'&&p.toolName==='angebote_vergleichen'&&p.state==='output-available'?z.array(z.custom<AgentOffer>()).parse(p.output):[]));}
 export async function handleAgent(request:Request):Promise<Response>{
   const token=request.headers.get('authorization')?.replace(/^Bearer /,'');const url=process.env['SUPABASE_URL'];const key=process.env['SUPABASE_PUBLISHABLE_KEY'];if(!token||!url||!key)return Response.json({error:'Bitte melde dich an.'},{status:401});
-  const db=createClient<Database>(url,key,{auth:{persistSession:false,autoRefreshToken:false},global:{headers:{Authorization:`Bearer ${token}`},fetch:(input,init)=>{const h=new Headers(init?.headers);h.set('apikey',key);return fetch(input,{...init,headers:h});}});
+  const db=createClient<Database>(url,key,{auth:{persistSession:false,autoRefreshToken:false},global:{headers:{Authorization:`Bearer ${token}`},fetch:(input,init)=>{const h=new Headers(init?.headers);h.set('apikey',key);return fetch(input,{...init,headers:h});}}});
   const {data:claims,error:authError}=await db.auth.getClaims(token);const userId=claims?.claims.sub;if(authError||!userId)return Response.json({error:'Bitte melde dich erneut an.'},{status:401});
   const parsed=bodySchema.safeParse(await request.json());if(!parsed.success)return Response.json({error:'Ungültige Chat-Anfrage.'},{status:400});const body=parsed.data;
   const {data:thread,error}=await db.from('agent_threads').select('*').eq('id',body.threadId).eq('user_id',userId).single();if(error||!thread)return Response.json({error:'Gespräch nicht gefunden.'},{status:404});
