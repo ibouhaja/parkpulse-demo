@@ -21,6 +21,8 @@ import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedReservierungenRouteImport } from './routes/_authenticated/reservierungen'
 import { Route as AuthenticatedVerlaufRouteImport } from './routes/_authenticated/verlauf'
 import { Route as ParkplatzIdRouteImport } from './routes/parkplatz.$id'
+import { Route as AuthenticatedAssistentIndexRouteImport } from './routes/_authenticated/assistent.index'
+import { Route as AuthenticatedAssistentThreadIdRouteImport } from './routes/_authenticated/assistent.$threadId'
 import { Route as ApiPublicAgentRouteImport } from './routes/api/public/agent'
 
 const IndexRoute = IndexRouteImport.update({
@@ -84,6 +86,18 @@ const ParkplatzIdRoute = ParkplatzIdRouteImport.update({
   path: '/parkplatz/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAssistentIndexRoute =
+  AuthenticatedAssistentIndexRouteImport.update({
+    id: '/assistent/',
+    path: '/assistent/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAssistentThreadIdRoute =
+  AuthenticatedAssistentThreadIdRouteImport.update({
+    id: '/assistent/$threadId',
+    path: '/assistent/$threadId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicAgentRoute = ApiPublicAgentRouteImport.update({
   id: '/api/public/agent',
   path: '/api/public/agent',
@@ -102,7 +116,9 @@ export interface FileRoutesByFullPath {
   '/reservierungen': typeof AuthenticatedReservierungenRoute
   '/verlauf': typeof AuthenticatedVerlaufRoute
   '/parkplatz/$id': typeof ParkplatzIdRoute
+  '/assistent/$threadId': typeof AuthenticatedAssistentThreadIdRoute
   '/api/public/agent': typeof ApiPublicAgentRoute
+  '/assistent/': typeof AuthenticatedAssistentIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -116,7 +132,9 @@ export interface FileRoutesByTo {
   '/reservierungen': typeof AuthenticatedReservierungenRoute
   '/verlauf': typeof AuthenticatedVerlaufRoute
   '/parkplatz/$id': typeof ParkplatzIdRoute
+  '/assistent/$threadId': typeof AuthenticatedAssistentThreadIdRoute
   '/api/public/agent': typeof ApiPublicAgentRoute
+  '/assistent': typeof AuthenticatedAssistentIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -132,7 +150,9 @@ export interface FileRoutesById {
   '/_authenticated/reservierungen': typeof AuthenticatedReservierungenRoute
   '/_authenticated/verlauf': typeof AuthenticatedVerlaufRoute
   '/parkplatz/$id': typeof ParkplatzIdRoute
+  '/_authenticated/assistent/$threadId': typeof AuthenticatedAssistentThreadIdRoute
   '/api/public/agent': typeof ApiPublicAgentRoute
+  '/_authenticated/assistent/': typeof AuthenticatedAssistentIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -148,7 +168,9 @@ export interface FileRouteTypes {
     | '/reservierungen'
     | '/verlauf'
     | '/parkplatz/$id'
+    | '/assistent/$threadId'
     | '/api/public/agent'
+    | '/assistent/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -162,7 +184,9 @@ export interface FileRouteTypes {
     | '/reservierungen'
     | '/verlauf'
     | '/parkplatz/$id'
+    | '/assistent/$threadId'
     | '/api/public/agent'
+    | '/assistent'
   id:
     | '__root__'
     | '/'
@@ -177,7 +201,9 @@ export interface FileRouteTypes {
     | '/_authenticated/reservierungen'
     | '/_authenticated/verlauf'
     | '/parkplatz/$id'
+    | '/_authenticated/assistent/$threadId'
     | '/api/public/agent'
+    | '/_authenticated/assistent/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -276,6 +302,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ParkplatzIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/assistent/': {
+      id: '/_authenticated/assistent/'
+      path: '/assistent'
+      fullPath: '/assistent/'
+      preLoaderRoute: typeof AuthenticatedAssistentIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/assistent/$threadId': {
+      id: '/_authenticated/assistent/$threadId'
+      path: '/assistent/$threadId'
+      fullPath: '/assistent/$threadId'
+      preLoaderRoute: typeof AuthenticatedAssistentThreadIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/agent': {
       id: '/api/public/agent'
       path: '/api/public/agent'
@@ -293,6 +333,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
   AuthenticatedReservierungenRoute: typeof AuthenticatedReservierungenRoute
   AuthenticatedVerlaufRoute: typeof AuthenticatedVerlaufRoute
+  AuthenticatedAssistentThreadIdRoute: typeof AuthenticatedAssistentThreadIdRoute
+  AuthenticatedAssistentIndexRoute: typeof AuthenticatedAssistentIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -302,6 +344,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedProfilRoute: AuthenticatedProfilRoute,
   AuthenticatedReservierungenRoute: AuthenticatedReservierungenRoute,
   AuthenticatedVerlaufRoute: AuthenticatedVerlaufRoute,
+  AuthenticatedAssistentThreadIdRoute: AuthenticatedAssistentThreadIdRoute,
+  AuthenticatedAssistentIndexRoute: AuthenticatedAssistentIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

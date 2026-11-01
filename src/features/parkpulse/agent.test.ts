@@ -1,0 +1,14 @@
+import { describe, it, expect } from 'vitest';
+import { compareAgentOffers, validConfirmedOffer, agentSpots, type AgentCriteria } from './agent-rules';
+import { matchesSpot } from './parking-plan';
+const now=Date.UTC(2026,10,1,9);
+const criteria:AgentCriteria={hours:3,startsAt:new Date(now+3600000).toISOString(),budget:5,vehicle:'ev',height:1.7,width:1.9,length:4.7,weight:2400,wallbox:true,family:false,women:false,accessible:false,priority:'points'};
+describe('ParkPulse Agent – verbindliche Angebotsregeln',()=>{
+  it('3 Stunden, Wallbox und höchstens 5 Euro: gibt genau drei passende Angebote nach Punkten zurück',()=>{const offers=compareAgentOffers(criteria,[],now);expect(offers).toHaveLength(3);for(const o of offers){expect(o.price).toBeLessThanOrEqual(5);expect(o.hours).toBe(3);expect(o.equipment.some(e=>e.startsWith('Wallbox'))).toBe(true);expect(o.available).toBeGreaterThan(0);expect(matchesSpot(agentSpots(o.facility,[]).find(s=>s.level===o.level&&s.bay===o.bay)??agentSpots(o.facility,[])[0] as never,o.filters)).toBe(true);}expect(offers[0]?.points).toBeGreaterThanOrEqual(offers[1]?.points??Infinity);});
+  it('ein Budget von 0 Euro produziert keine passenden Angebote und keine Budgetaufweichung',()=>{expect(compareAgentOffers({...criteria,budget:0},[],now)).toEqual([]);});
+  it('Familie und Frauenparkplatz gleichzeitig hat keine passenden Stellplätze',()=>{expect(compareAgentOffers({...criteria,family:true,women:true,budget:100},[],now)).toEqual([]);});
+  it('gesperrte Stellplätze werden niemals empfohlen',()=>{const o=compareAgentOffers(criteria,[],now)[0];if(!o)throw new Error('Testangebot fehlt');const offers=compareAgentOffers(criteria,[{facility_id:o.facility,level:o.level,bay:o.bay}],now);expect(offers.some(x=>x.facility===o.facility&&x.level===o.level&&x.bay===o.bay)).toBe(false);});
+  it('kein Buchungsrecht ohne ausdrückliche passende Bestätigung',()=>{const o=compareAgentOffers(criteria,[],now)[0];if(!o)throw new Error('Testangebot fehlt');expect(validConfirmedOffer(o,undefined,now)).toBe(false);expect(validConfirmedOffer(o,crypto.randomUUID(),now)).toBe(false);expect(validConfirmedOffer(o,o.id,now)).toBe(true);});
+  it('abgelaufene oder über Budget liegende Angebote können nicht bestätigt werden',()=>{const o=compareAgentOffers(criteria,[],now)[0];if(!o)throw new Error('Testangebot fehlt');expect(validConfirmedOffer(o,o.id,now+16*60000)).toBe(false);expect(validConfirmedOffer({...o,budget:0},o.id,now)).toBe(false);});
+  it('Familien-Wallbox und barrierefreier Zugang kombinieren die vorhandenen Regeln',()=>{const offers=compareAgentOffers({...criteria,family:true,accessible:true,budget:100},[],now);expect(offers.length).toBeGreaterThan(0);for(const o of offers){expect(o.equipment).toContain('Familienplatz');expect(o.equipment).toContain('Barrierefreier Zugang');}});
+});
