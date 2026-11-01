@@ -75,7 +75,12 @@ export const importLocalState = createServerFn({ method: 'POST' })
     const row = await loadRow(context as Ctx);
     if (!canImport(row.state, row.import_decision)) throw new Error('Für dieses Konto wurden bereits Daten übernommen oder angelegt.');
     let imported: DemoState;
-    try { imported = restoreState(data.raw); } catch { throw new Error('Die lokalen Demo-Daten sind ungültig.'); }
+    try {
+      imported = restoreState(data.raw);
+      // Browser legacy imports are not a source of trusted new tariffs or redeemable points.
+      imported = {...imported,pointsBalance:0,pointsHistory:[],vouchers:imported.vouchers.filter(v=>v.source!=='points')};
+      if(imported.session){const {tariff: _untrustedTariff,...legacySession}=imported.session;imported={...imported,session:legacySession};}
+    } catch { throw new Error('Die lokalen Demo-Daten sind ungültig.'); }
     const ok = await save(context.userId, row.version, { state: imported as unknown as Json, import_decision: 'imported', imported_at: new Date().toISOString() });
     if (!ok) throw new Error('Gleichzeitige Änderung erkannt. Bitte erneut versuchen.');
     return { state: imported };
