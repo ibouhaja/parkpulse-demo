@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      demo_reservations: {
+        Row: {
+          bay: string
+          created_at: string
+          facility_id: string
+          hours: number
+          id: string
+          level: string
+          price: number
+          session_id: string | null
+          starts_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          bay: string
+          created_at?: string
+          facility_id: string
+          hours: number
+          id: string
+          level: string
+          price: number
+          session_id?: string | null
+          starts_at: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          bay?: string
+          created_at?: string
+          facility_id?: string
+          hours?: number
+          id?: string
+          level?: string
+          price?: number
+          session_id?: string | null
+          starts_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       parking_states: {
         Row: {
           import_decision: string | null
@@ -73,7 +115,39 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      demo_book_spot: {
+        Args: {
+          p_bay: string
+          p_facility: string
+          p_hours: number
+          p_id: string
+          p_level: string
+          p_start: string
+          p_user: string
+        }
+        Returns: string
+      }
+      demo_cancel_booking: {
+        Args: { p_id: string; p_user: string }
+        Returns: boolean
+      }
+      demo_held_positions: {
+        Args: never
+        Returns: {
+          bay: string
+          facility_id: string
+          level: string
+        }[]
+      }
+      demo_save_state: {
+        Args: {
+          p_arrival?: string
+          p_state: Json
+          p_user: string
+          p_version: number
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
