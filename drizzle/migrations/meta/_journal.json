@@ -57,6 +57,13 @@
       "when": 1793611983901,
       "tag": "0007_agent_batch_cancel_reschedule",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793616472931,
+      "tag": "0008_n8n_integration_outbox",
+      "breakpoints": true
     }
   ]
 }
