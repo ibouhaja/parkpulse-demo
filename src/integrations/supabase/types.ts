@@ -47,6 +47,53 @@ export type Database = {
         }
         Relationships: []
       }
+      demo_reminders: {
+        Row: {
+          created_at: string
+          id: string
+          idempotency_key: string
+          message: string
+          reservation_id: string
+          reservation_status: string
+          scheduled_for: string | null
+          source_event_id: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          idempotency_key: string
+          message: string
+          reservation_id: string
+          reservation_status: string
+          scheduled_for?: string | null
+          source_event_id?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          idempotency_key?: string
+          message?: string
+          reservation_id?: string
+          reservation_status?: string
+          scheduled_for?: string | null
+          source_event_id?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demo_reminders_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "demo_reservations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       demo_reservations: {
         Row: {
           bay: string
@@ -106,6 +153,57 @@ export type Database = {
           starts_at?: string
           status?: string
           tariff?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      integration_events: {
+        Row: {
+          attempts: number
+          created_at: string
+          delivery_status: string
+          event_type: string
+          id: string
+          last_error: string | null
+          last_http_status: number | null
+          lease_until: string | null
+          next_attempt_at: string
+          payload: Json
+          previous_reservation_id: string | null
+          reservation_id: string
+          sent_at: string | null
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          delivery_status?: string
+          event_type: string
+          id?: string
+          last_error?: string | null
+          last_http_status?: number | null
+          lease_until?: string | null
+          next_attempt_at?: string
+          payload: Json
+          previous_reservation_id?: string | null
+          reservation_id: string
+          sent_at?: string | null
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          delivery_status?: string
+          event_type?: string
+          id?: string
+          last_error?: string | null
+          last_http_status?: number | null
+          lease_until?: string | null
+          next_attempt_at?: string
+          payload?: Json
+          previous_reservation_id?: string | null
+          reservation_id?: string
+          sent_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -298,6 +396,35 @@ export type Database = {
           p_version: number
         }
         Returns: boolean
+      }
+      n8n_claim_events: {
+        Args: { p_limit: number }
+        Returns: {
+          attempts: number
+          created_at: string
+          delivery_status: string
+          event_type: string
+          id: string
+          last_error: string | null
+          last_http_status: number | null
+          lease_until: string | null
+          next_attempt_at: string
+          payload: Json
+          previous_reservation_id: string | null
+          reservation_id: string
+          sent_at: string | null
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "integration_events"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      n8n_reservation_payload: {
+        Args: { r: Database["public"]["Tables"]["demo_reservations"]["Row"] }
+        Returns: Json
       }
     }
     Enums: {

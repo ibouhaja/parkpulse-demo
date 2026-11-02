@@ -40,6 +40,7 @@ export const bookReservation=createServerFn({method:'POST'}).middleware([require
   const {supabaseAdmin}=await import('@/integrations/supabase/client.server');
   const {error}=await supabaseAdmin.rpc('demo_book_spot_priced',{p_id:data.id,p_user:context.userId,p_facility:data.facility,p_level:data.level,p_bay:data.bay,p_start:new Date(start).toISOString(),p_hours:data.hours,p_price:reservationPrice(data.hours,data.facility,start)??-1,p_tariff:tariffs[data.facility] as unknown as Json});
   if(error)throw new Error('Dieser Stellplatz konnte nicht reserviert werden. Er ist möglicherweise bereits vergeben.');
+  await (await import('./n8n.server')).kickN8n();
   return {id:data.id};
 });
 export const quoteCancellation=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator(z.object({id:z.string().uuid()})).handler(async({context,data})=>{
@@ -52,5 +53,6 @@ export const cancelReservation=createServerFn({method:'POST'}).middleware([requi
   const {supabaseAdmin}=await import('@/integrations/supabase/client.server');
   const {data:result,error}=await supabaseAdmin.rpc('demo_confirm_cancellation',{p_user:context.userId,p_quote:data.quoteId});
   if(error)throw new Error('Die Gebührenvorschau ist abgelaufen oder der Status hat sich geändert. Bitte prüfe die Gebühr erneut.');
+  await (await import('./n8n.server')).kickN8n();
   return result;
 });

@@ -589,6 +589,7 @@ export async function handleAgent(request: Request): Promise<Response> {
               });
               try {
                 const output = await executeTool(call.name, args);
+                if (['demo_reservieren','demo_stornieren','demo_stornierungen_ausfuehren','demo_verschieben'].includes(call.name)) await (await import('./n8n.server')).kickN8n();
                 write({
                   type: "tool-output-available",
                   toolCallId: call.call_id,

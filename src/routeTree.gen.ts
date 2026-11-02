@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SucheRouteImport } from './routes/suche'
+import { Route as AuthenticatedBenachrichtigungenRouteImport } from './routes/_authenticated/benachrichtigungen'
 import { Route as AuthenticatedCheckoutRouteImport } from './routes/_authenticated/checkout'
 import { Route as AuthenticatedParksessionRouteImport } from './routes/_authenticated/parksession'
 import { Route as AuthenticatedPraemienRouteImport } from './routes/_authenticated/praemien'
@@ -24,6 +25,9 @@ import { Route as ParkplatzIdRouteImport } from './routes/parkplatz.$id'
 import { Route as AuthenticatedAssistentIndexRouteImport } from './routes/_authenticated/assistent.index'
 import { Route as AuthenticatedAssistentThreadIdRouteImport } from './routes/_authenticated/assistent.$threadId'
 import { Route as ApiPublicAgentRouteImport } from './routes/api/public/agent'
+import { Route as ApiPublicN8nDispatchRouteImport } from './routes/api/public/n8n/dispatch'
+import { Route as ApiPublicN8nRemindersRouteImport } from './routes/api/public/n8n/reminders'
+import { Route as ApiPublicN8nReservationsIdRouteImport } from './routes/api/public/n8n/reservations.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -49,6 +53,12 @@ const SucheRoute = SucheRouteImport.update({
   path: '/suche',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedBenachrichtigungenRoute =
+  AuthenticatedBenachrichtigungenRouteImport.update({
+    id: '/benachrichtigungen',
+    path: '/benachrichtigungen',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedCheckoutRoute = AuthenticatedCheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
@@ -103,12 +113,29 @@ const ApiPublicAgentRoute = ApiPublicAgentRouteImport.update({
   path: '/api/public/agent',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicN8nDispatchRoute = ApiPublicN8nDispatchRouteImport.update({
+  id: '/api/public/n8n/dispatch',
+  path: '/api/public/n8n/dispatch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicN8nRemindersRoute = ApiPublicN8nRemindersRouteImport.update({
+  id: '/api/public/n8n/reminders',
+  path: '/api/public/n8n/reminders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicN8nReservationsIdRoute =
+  ApiPublicN8nReservationsIdRouteImport.update({
+    id: '/api/public/n8n/reservations/$id',
+    path: '/api/public/n8n/reservations/$id',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/suche': typeof SucheRoute
+  '/benachrichtigungen': typeof AuthenticatedBenachrichtigungenRoute
   '/checkout': typeof AuthenticatedCheckoutRoute
   '/parksession': typeof AuthenticatedParksessionRoute
   '/praemien': typeof AuthenticatedPraemienRoute
@@ -119,12 +146,16 @@ export interface FileRoutesByFullPath {
   '/assistent/$threadId': typeof AuthenticatedAssistentThreadIdRoute
   '/api/public/agent': typeof ApiPublicAgentRoute
   '/assistent/': typeof AuthenticatedAssistentIndexRoute
+  '/api/public/n8n/dispatch': typeof ApiPublicN8nDispatchRoute
+  '/api/public/n8n/reminders': typeof ApiPublicN8nRemindersRoute
+  '/api/public/n8n/reservations/$id': typeof ApiPublicN8nReservationsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/suche': typeof SucheRoute
+  '/benachrichtigungen': typeof AuthenticatedBenachrichtigungenRoute
   '/checkout': typeof AuthenticatedCheckoutRoute
   '/parksession': typeof AuthenticatedParksessionRoute
   '/praemien': typeof AuthenticatedPraemienRoute
@@ -135,6 +166,9 @@ export interface FileRoutesByTo {
   '/assistent/$threadId': typeof AuthenticatedAssistentThreadIdRoute
   '/api/public/agent': typeof ApiPublicAgentRoute
   '/assistent': typeof AuthenticatedAssistentIndexRoute
+  '/api/public/n8n/dispatch': typeof ApiPublicN8nDispatchRoute
+  '/api/public/n8n/reminders': typeof ApiPublicN8nRemindersRoute
+  '/api/public/n8n/reservations/$id': typeof ApiPublicN8nReservationsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -143,6 +177,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/suche': typeof SucheRoute
+  '/_authenticated/benachrichtigungen': typeof AuthenticatedBenachrichtigungenRoute
   '/_authenticated/checkout': typeof AuthenticatedCheckoutRoute
   '/_authenticated/parksession': typeof AuthenticatedParksessionRoute
   '/_authenticated/praemien': typeof AuthenticatedPraemienRoute
@@ -153,6 +188,9 @@ export interface FileRoutesById {
   '/_authenticated/assistent/$threadId': typeof AuthenticatedAssistentThreadIdRoute
   '/api/public/agent': typeof ApiPublicAgentRoute
   '/_authenticated/assistent/': typeof AuthenticatedAssistentIndexRoute
+  '/api/public/n8n/dispatch': typeof ApiPublicN8nDispatchRoute
+  '/api/public/n8n/reminders': typeof ApiPublicN8nRemindersRoute
+  '/api/public/n8n/reservations/$id': typeof ApiPublicN8nReservationsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -161,6 +199,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/suche'
+    | '/benachrichtigungen'
     | '/checkout'
     | '/parksession'
     | '/praemien'
@@ -171,12 +210,16 @@ export interface FileRouteTypes {
     | '/assistent/$threadId'
     | '/api/public/agent'
     | '/assistent/'
+    | '/api/public/n8n/dispatch'
+    | '/api/public/n8n/reminders'
+    | '/api/public/n8n/reservations/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/reset-password'
     | '/suche'
+    | '/benachrichtigungen'
     | '/checkout'
     | '/parksession'
     | '/praemien'
@@ -187,6 +230,9 @@ export interface FileRouteTypes {
     | '/assistent/$threadId'
     | '/api/public/agent'
     | '/assistent'
+    | '/api/public/n8n/dispatch'
+    | '/api/public/n8n/reminders'
+    | '/api/public/n8n/reservations/$id'
   id:
     | '__root__'
     | '/'
@@ -194,6 +240,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/suche'
+    | '/_authenticated/benachrichtigungen'
     | '/_authenticated/checkout'
     | '/_authenticated/parksession'
     | '/_authenticated/praemien'
@@ -204,6 +251,9 @@ export interface FileRouteTypes {
     | '/_authenticated/assistent/$threadId'
     | '/api/public/agent'
     | '/_authenticated/assistent/'
+    | '/api/public/n8n/dispatch'
+    | '/api/public/n8n/reminders'
+    | '/api/public/n8n/reservations/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -214,6 +264,9 @@ export interface RootRouteChildren {
   SucheRoute: typeof SucheRoute
   ParkplatzIdRoute: typeof ParkplatzIdRoute
   ApiPublicAgentRoute: typeof ApiPublicAgentRoute
+  ApiPublicN8nDispatchRoute: typeof ApiPublicN8nDispatchRoute
+  ApiPublicN8nRemindersRoute: typeof ApiPublicN8nRemindersRoute
+  ApiPublicN8nReservationsIdRoute: typeof ApiPublicN8nReservationsIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -252,6 +305,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/suche'
       preLoaderRoute: typeof SucheRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/benachrichtigungen': {
+      id: '/_authenticated/benachrichtigungen'
+      path: '/benachrichtigungen'
+      fullPath: '/benachrichtigungen'
+      preLoaderRoute: typeof AuthenticatedBenachrichtigungenRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/checkout': {
       id: '/_authenticated/checkout'
@@ -323,10 +383,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAgentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/n8n/dispatch': {
+      id: '/api/public/n8n/dispatch'
+      path: '/api/public/n8n/dispatch'
+      fullPath: '/api/public/n8n/dispatch'
+      preLoaderRoute: typeof ApiPublicN8nDispatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/n8n/reminders': {
+      id: '/api/public/n8n/reminders'
+      path: '/api/public/n8n/reminders'
+      fullPath: '/api/public/n8n/reminders'
+      preLoaderRoute: typeof ApiPublicN8nRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/n8n/reservations/$id': {
+      id: '/api/public/n8n/reservations/$id'
+      path: '/api/public/n8n/reservations/$id'
+      fullPath: '/api/public/n8n/reservations/$id'
+      preLoaderRoute: typeof ApiPublicN8nReservationsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedBenachrichtigungenRoute: typeof AuthenticatedBenachrichtigungenRoute
   AuthenticatedCheckoutRoute: typeof AuthenticatedCheckoutRoute
   AuthenticatedParksessionRoute: typeof AuthenticatedParksessionRoute
   AuthenticatedPraemienRoute: typeof AuthenticatedPraemienRoute
@@ -338,6 +420,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedBenachrichtigungenRoute: AuthenticatedBenachrichtigungenRoute,
   AuthenticatedCheckoutRoute: AuthenticatedCheckoutRoute,
   AuthenticatedParksessionRoute: AuthenticatedParksessionRoute,
   AuthenticatedPraemienRoute: AuthenticatedPraemienRoute,
@@ -359,6 +442,9 @@ const rootRouteChildren: RootRouteChildren = {
   SucheRoute: SucheRoute,
   ParkplatzIdRoute: ParkplatzIdRoute,
   ApiPublicAgentRoute: ApiPublicAgentRoute,
+  ApiPublicN8nDispatchRoute: ApiPublicN8nDispatchRoute,
+  ApiPublicN8nRemindersRoute: ApiPublicN8nRemindersRoute,
+  ApiPublicN8nReservationsIdRoute: ApiPublicN8nReservationsIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
