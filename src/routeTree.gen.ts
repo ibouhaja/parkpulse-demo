@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SucheRouteImport } from './routes/suche'
+import { Route as AuthenticatedBenachrichtigungenRouteImport } from './routes/_authenticated/benachrichtigungen'
 import { Route as AuthenticatedCheckoutRouteImport } from './routes/_authenticated/checkout'
 import { Route as AuthenticatedParksessionRouteImport } from './routes/_authenticated/parksession'
 import { Route as AuthenticatedPraemienRouteImport } from './routes/_authenticated/praemien'
@@ -52,6 +53,12 @@ const SucheRoute = SucheRouteImport.update({
   path: '/suche',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedBenachrichtigungenRoute =
+  AuthenticatedBenachrichtigungenRouteImport.update({
+    id: '/benachrichtigungen',
+    path: '/benachrichtigungen',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedCheckoutRoute = AuthenticatedCheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
@@ -128,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/suche': typeof SucheRoute
+  '/benachrichtigungen': typeof AuthenticatedBenachrichtigungenRoute
   '/checkout': typeof AuthenticatedCheckoutRoute
   '/parksession': typeof AuthenticatedParksessionRoute
   '/praemien': typeof AuthenticatedPraemienRoute
@@ -147,6 +155,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/suche': typeof SucheRoute
+  '/benachrichtigungen': typeof AuthenticatedBenachrichtigungenRoute
   '/checkout': typeof AuthenticatedCheckoutRoute
   '/parksession': typeof AuthenticatedParksessionRoute
   '/praemien': typeof AuthenticatedPraemienRoute
@@ -168,6 +177,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/suche': typeof SucheRoute
+  '/_authenticated/benachrichtigungen': typeof AuthenticatedBenachrichtigungenRoute
   '/_authenticated/checkout': typeof AuthenticatedCheckoutRoute
   '/_authenticated/parksession': typeof AuthenticatedParksessionRoute
   '/_authenticated/praemien': typeof AuthenticatedPraemienRoute
@@ -189,6 +199,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/suche'
+    | '/benachrichtigungen'
     | '/checkout'
     | '/parksession'
     | '/praemien'
@@ -208,6 +219,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/suche'
+    | '/benachrichtigungen'
     | '/checkout'
     | '/parksession'
     | '/praemien'
@@ -228,6 +240,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/suche'
+    | '/_authenticated/benachrichtigungen'
     | '/_authenticated/checkout'
     | '/_authenticated/parksession'
     | '/_authenticated/praemien'
@@ -292,6 +305,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/suche'
       preLoaderRoute: typeof SucheRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/benachrichtigungen': {
+      id: '/_authenticated/benachrichtigungen'
+      path: '/benachrichtigungen'
+      fullPath: '/benachrichtigungen'
+      preLoaderRoute: typeof AuthenticatedBenachrichtigungenRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/checkout': {
       id: '/_authenticated/checkout'
@@ -388,6 +408,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedBenachrichtigungenRoute: typeof AuthenticatedBenachrichtigungenRoute
   AuthenticatedCheckoutRoute: typeof AuthenticatedCheckoutRoute
   AuthenticatedParksessionRoute: typeof AuthenticatedParksessionRoute
   AuthenticatedPraemienRoute: typeof AuthenticatedPraemienRoute
@@ -399,6 +420,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedBenachrichtigungenRoute: AuthenticatedBenachrichtigungenRoute,
   AuthenticatedCheckoutRoute: AuthenticatedCheckoutRoute,
   AuthenticatedParksessionRoute: AuthenticatedParksessionRoute,
   AuthenticatedPraemienRoute: AuthenticatedPraemienRoute,
