@@ -169,6 +169,7 @@ export type Database = {
       }
       reservation_cancellation_quotes: {
         Row: {
+          batch_id: string | null
           created_at: string
           expires_at: string
           fee_cents: number
@@ -179,6 +180,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          batch_id?: string | null
           created_at?: string
           expires_at: string
           fee_cents: number
@@ -189,6 +191,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          batch_id?: string | null
           created_at?: string
           expires_at?: string
           fee_cents?: number
@@ -251,6 +254,10 @@ export type Database = {
         Args: { p_quote: string; p_user: string }
         Returns: Json
       }
+      demo_confirm_cancellation_batch: {
+        Args: { p_batch: string; p_user: string }
+        Returns: Json
+      }
       demo_held_positions: {
         Args: never
         Returns: {
@@ -263,7 +270,26 @@ export type Database = {
         Args: { p_id: string; p_user: string }
         Returns: Json
       }
+      demo_quote_cancellation_batch: {
+        Args: { p_ids: string[]; p_user: string }
+        Returns: Json
+      }
       demo_reconcile_no_shows: { Args: never; Returns: number }
+      demo_reschedule: {
+        Args: {
+          p_batch: string
+          p_bay: string
+          p_facility: string
+          p_hours: number
+          p_id: string
+          p_level: string
+          p_price: number
+          p_start: string
+          p_tariff: Json
+          p_user: string
+        }
+        Returns: Json
+      }
       demo_save_state: {
         Args: {
           p_arrival?: string
