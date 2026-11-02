@@ -24,6 +24,9 @@ import { Route as ParkplatzIdRouteImport } from './routes/parkplatz.$id'
 import { Route as AuthenticatedAssistentIndexRouteImport } from './routes/_authenticated/assistent.index'
 import { Route as AuthenticatedAssistentThreadIdRouteImport } from './routes/_authenticated/assistent.$threadId'
 import { Route as ApiPublicAgentRouteImport } from './routes/api/public/agent'
+import { Route as ApiPublicN8nDispatchRouteImport } from './routes/api/public/n8n/dispatch'
+import { Route as ApiPublicN8nRemindersRouteImport } from './routes/api/public/n8n/reminders'
+import { Route as ApiPublicN8nReservationsIdRouteImport } from './routes/api/public/n8n/reservations.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -103,6 +106,22 @@ const ApiPublicAgentRoute = ApiPublicAgentRouteImport.update({
   path: '/api/public/agent',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicN8nDispatchRoute = ApiPublicN8nDispatchRouteImport.update({
+  id: '/api/public/n8n/dispatch',
+  path: '/api/public/n8n/dispatch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicN8nRemindersRoute = ApiPublicN8nRemindersRouteImport.update({
+  id: '/api/public/n8n/reminders',
+  path: '/api/public/n8n/reminders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicN8nReservationsIdRoute =
+  ApiPublicN8nReservationsIdRouteImport.update({
+    id: '/api/public/n8n/reservations/$id',
+    path: '/api/public/n8n/reservations/$id',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -119,6 +138,9 @@ export interface FileRoutesByFullPath {
   '/assistent/$threadId': typeof AuthenticatedAssistentThreadIdRoute
   '/api/public/agent': typeof ApiPublicAgentRoute
   '/assistent/': typeof AuthenticatedAssistentIndexRoute
+  '/api/public/n8n/dispatch': typeof ApiPublicN8nDispatchRoute
+  '/api/public/n8n/reminders': typeof ApiPublicN8nRemindersRoute
+  '/api/public/n8n/reservations/$id': typeof ApiPublicN8nReservationsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -135,6 +157,9 @@ export interface FileRoutesByTo {
   '/assistent/$threadId': typeof AuthenticatedAssistentThreadIdRoute
   '/api/public/agent': typeof ApiPublicAgentRoute
   '/assistent': typeof AuthenticatedAssistentIndexRoute
+  '/api/public/n8n/dispatch': typeof ApiPublicN8nDispatchRoute
+  '/api/public/n8n/reminders': typeof ApiPublicN8nRemindersRoute
+  '/api/public/n8n/reservations/$id': typeof ApiPublicN8nReservationsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -153,6 +178,9 @@ export interface FileRoutesById {
   '/_authenticated/assistent/$threadId': typeof AuthenticatedAssistentThreadIdRoute
   '/api/public/agent': typeof ApiPublicAgentRoute
   '/_authenticated/assistent/': typeof AuthenticatedAssistentIndexRoute
+  '/api/public/n8n/dispatch': typeof ApiPublicN8nDispatchRoute
+  '/api/public/n8n/reminders': typeof ApiPublicN8nRemindersRoute
+  '/api/public/n8n/reservations/$id': typeof ApiPublicN8nReservationsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -171,6 +199,9 @@ export interface FileRouteTypes {
     | '/assistent/$threadId'
     | '/api/public/agent'
     | '/assistent/'
+    | '/api/public/n8n/dispatch'
+    | '/api/public/n8n/reminders'
+    | '/api/public/n8n/reservations/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -187,6 +218,9 @@ export interface FileRouteTypes {
     | '/assistent/$threadId'
     | '/api/public/agent'
     | '/assistent'
+    | '/api/public/n8n/dispatch'
+    | '/api/public/n8n/reminders'
+    | '/api/public/n8n/reservations/$id'
   id:
     | '__root__'
     | '/'
@@ -204,6 +238,9 @@ export interface FileRouteTypes {
     | '/_authenticated/assistent/$threadId'
     | '/api/public/agent'
     | '/_authenticated/assistent/'
+    | '/api/public/n8n/dispatch'
+    | '/api/public/n8n/reminders'
+    | '/api/public/n8n/reservations/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -214,6 +251,9 @@ export interface RootRouteChildren {
   SucheRoute: typeof SucheRoute
   ParkplatzIdRoute: typeof ParkplatzIdRoute
   ApiPublicAgentRoute: typeof ApiPublicAgentRoute
+  ApiPublicN8nDispatchRoute: typeof ApiPublicN8nDispatchRoute
+  ApiPublicN8nRemindersRoute: typeof ApiPublicN8nRemindersRoute
+  ApiPublicN8nReservationsIdRoute: typeof ApiPublicN8nReservationsIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -323,6 +363,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAgentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/n8n/dispatch': {
+      id: '/api/public/n8n/dispatch'
+      path: '/api/public/n8n/dispatch'
+      fullPath: '/api/public/n8n/dispatch'
+      preLoaderRoute: typeof ApiPublicN8nDispatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/n8n/reminders': {
+      id: '/api/public/n8n/reminders'
+      path: '/api/public/n8n/reminders'
+      fullPath: '/api/public/n8n/reminders'
+      preLoaderRoute: typeof ApiPublicN8nRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/n8n/reservations/$id': {
+      id: '/api/public/n8n/reservations/$id'
+      path: '/api/public/n8n/reservations/$id'
+      fullPath: '/api/public/n8n/reservations/$id'
+      preLoaderRoute: typeof ApiPublicN8nReservationsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -359,6 +420,9 @@ const rootRouteChildren: RootRouteChildren = {
   SucheRoute: SucheRoute,
   ParkplatzIdRoute: ParkplatzIdRoute,
   ApiPublicAgentRoute: ApiPublicAgentRoute,
+  ApiPublicN8nDispatchRoute: ApiPublicN8nDispatchRoute,
+  ApiPublicN8nRemindersRoute: ApiPublicN8nRemindersRoute,
+  ApiPublicN8nReservationsIdRoute: ApiPublicN8nReservationsIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
