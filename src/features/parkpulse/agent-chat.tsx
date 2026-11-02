@@ -29,11 +29,10 @@ import { Shimmer } from "@/components/ai-elements/shimmer";
 import { agentThread, agentThreads, newAgentThread } from "./agent.functions";
 import { useDemo } from "./store";
 import { supabase } from "@/integrations/supabase/client";
-import { money } from "./data";
+import { money, facilities } from "./data";
 import type { AgentOffer } from "./agent-rules";
 import { CancellationTerms } from "./cancellation-ui";
 import type { CancellationQuote, CancellationBatchQuote, RescheduleOffer } from "./cancellation-rules";
-import { facilities } from "./data";
 import agentLogo from "@/assets/parkpulse-agent.jpg";
 
 const labels: Record<string, string> = {

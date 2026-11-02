@@ -109,3 +109,7 @@
 @media(max-width:720px){.reservation-row>div:last-child{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}.reservation-row>div:last-child>*{width:100%}}
 @media(max-width:720px){.parking-3d-tools{flex-wrap:wrap;overflow:visible}.parking-3d-tools>div{flex-wrap:wrap;gap:8px}.parking-3d-tools button{flex-shrink:0;min-width:46px}.reservation-row>div:last-child>button,.reservation-row>div:last-child>[data-slot=button]{border:1px solid var(--border)}}
 @media(max-width:720px){.parking-3d-tools>div>button:last-child{flex:1 1 100%;width:auto!important;min-height:50px}.parking-3d-tools>div>button[data-slot=button]{height:46px;width:46px}.parking-3d-tools>div>button:last-child{width:100%!important}}
+.agent-conversation{height:calc(100dvh - 330px);min-height:320px}
+.agent-composer{position:sticky;bottom:0;z-index:5}
+.agent-batch{display:grid;gap:10px;padding:12px 0}.agent-batch ul{display:grid;gap:8px}.agent-batch li{display:flex;justify-content:space-between;gap:12px;border:1px solid var(--border);border-radius:8px;padding:10px 12px;background:var(--card);font-size:13px}.agent-batch small{color:var(--muted-foreground)}.agent-batch-total{font-size:15px}
+@media(max-width:720px){.agent-composer{bottom:calc(64px + env(safe-area-inset-bottom))}.agent-batch li{flex-direction:column}.agent-batch button{min-height:48px;flex:1}}
