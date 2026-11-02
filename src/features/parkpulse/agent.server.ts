@@ -17,6 +17,7 @@ import {
   agentCriteria,
   agentSpots,
   compareAgentOffers,
+  agentDefaultFilters,
   filtersFromCriteria,
   validConfirmedOffer,
   type AgentCriteria,
@@ -29,7 +30,6 @@ import { reservationPrice } from "./map-rules";
 import { earnedPoints } from "./points";
 import { tariffs } from "./tariffs";
 import { validCancellationConfirmation, validBatchConfirmation, validRescheduleConfirmation, type CancellationQuote, type CancellationBatchQuote, type RescheduleOffer } from "./cancellation-rules";
-import { agentDefaultFilters } from "./agent-rules";
 
 const bodySchema = z.object({
   threadId: z.string().uuid(),
