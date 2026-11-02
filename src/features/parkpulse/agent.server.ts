@@ -28,13 +28,16 @@ import { bookingAllowed, type HeldPosition } from "./reservation-rules";
 import { reservationPrice } from "./map-rules";
 import { earnedPoints } from "./points";
 import { tariffs } from "./tariffs";
-import { validCancellationConfirmation, type CancellationQuote } from "./cancellation-rules";
+import { validCancellationConfirmation, validBatchConfirmation, validRescheduleConfirmation, type CancellationQuote, type CancellationBatchQuote, type RescheduleOffer } from "./cancellation-rules";
+import { agentDefaultFilters } from "./agent-rules";
 
 const bodySchema = z.object({
   threadId: z.string().uuid(),
   messages: z.array(z.unknown()),
   confirmationId: z.string().uuid().optional(),
   cancellationConfirmationId: z.string().uuid().optional(),
+  batchConfirmationId: z.string().uuid().optional(),
+  rescheduleConfirmationId: z.string().uuid().optional(),
 });
 const tool = (
   name: string,
@@ -70,8 +73,12 @@ const criteriaProperties = {
 };
 const tools = [
   tool('meine_reservierungen','Lies eigene Reservierungen mit Status und simulierten Gebühren.',obj({})),
-  tool('stornierung_pruefen','Erstelle genaue Gebührenvorschau ohne Stornierung; Oberfläche zeigt Bestätigungsknopf.',obj({id:{type:'string'}})),
-  tool('demo_stornieren','Storniere ausschließlich die separat ausdrücklich bestätigte Gebührenvorschau.',obj({quoteId:{type:'string'}})),
+  tool('stornierungen_pruefen','Erstelle für eine oder mehrere eigene bestätigte Reservierungen eine gemeinsame Gebührenvorschau (pro Reservierung und gesamt) ohne zu stornieren; die Oberfläche zeigt Bestätigen/Abbrechen.',obj({ids:{type:'array',items:{type:'string'}}})),
+  tool('demo_stornierungen_ausfuehren','Storniere ausschließlich die per separatem Bestätigungsklick autorisierte Sammel-Gebührenvorschau; alles oder nichts.',obj({batchId:{type:'string'}})),
+  tool('verschiebung_pruefen','Prüfe, ob eine eigene bestätigte Reservierung auf neuen Start (ISO) und Dauer verschoben werden kann; erzeugt Stornogebühr der alten und Preis der neuen Reservierung, ohne etwas zu ändern.',obj({id:{type:'string'},startsAt:{type:'string'},hours:{type:'number'}})),
+  tool('demo_verschieben','Verschiebe ausschließlich das per separatem Bestätigungsklick autorisierte Verschiebungsangebot.',obj({offerId:{type:'string'}})),
+  tool('stornierung_pruefen','Veraltet: Einzel-Gebührenvorschau. Nutze stornierungen_pruefen.',obj({id:{type:'string'}})),
+  tool('demo_stornieren','Veraltet: nur für ältere bestätigte Einzel-Vorschauen.',obj({quoteId:{type:'string'}})),
   tool(
     "parkplatzsuche",
     "Suche fiktive Parkhäuser nach Gebiet oder Name; leerer Begriff durchsucht alle.",
@@ -233,6 +240,11 @@ export async function handleAgent(request: Request): Promise<Response> {
   const quotes = history.flatMap(m=>m.parts.flatMap(p=>p.type==='dynamic-tool'&&p.toolName==='stornierung_pruefen'&&p.state==='output-available'?[p.output as CancellationQuote]:[]));
   const authorizedCancellation = quotes.find(q=>q.id===body.cancellationConfirmationId);
   if(body.cancellationConfirmationId&&!authorizedCancellation)return Response.json({error:'Gebührenvorschau gehört nicht zu diesem Gespräch.'},{status:400});
+  const outputs = <T,>(tool: string) => history.flatMap(m=>m.parts.flatMap(p=>p.type==='dynamic-tool'&&p.toolName===tool&&p.state==='output-available'&&p.output?[p.output as T]:[]));
+  const authorizedBatch = body.batchConfirmationId ? outputs<CancellationBatchQuote>('stornierungen_pruefen').find(q=>q.batchId===body.batchConfirmationId) : undefined;
+  if(body.batchConfirmationId&&!authorizedBatch)return Response.json({error:'Gebührenvorschau gehört nicht zu diesem Gespräch.'},{status:400});
+  const authorizedReschedule = body.rescheduleConfirmationId ? outputs<RescheduleOffer>('verschiebung_pruefen').find(o=>o.id===body.rescheduleConfirmationId) : undefined;
+  if(body.rescheduleConfirmationId&&!authorizedReschedule)return Response.json({error:'Verschiebungsangebot gehört nicht zu diesem Gespräch.'},{status:400});
   const runId = crypto.randomUUID();
   const { supabaseAdmin: admin } = await import("@/integrations/supabase/client.server");
   const { data: lock, error: lockError } = await admin
@@ -315,7 +327,7 @@ export async function handleAgent(request: Request): Promise<Response> {
           });
       };
       const executeTool = async (name: string, args: unknown): Promise<unknown> => {
-        if(['meine_reservierungen','stornierung_pruefen','demo_stornieren','reservierungsstatus'].includes(name)) {
+        if(['meine_reservierungen','stornierung_pruefen','demo_stornieren','reservierungsstatus','stornierungen_pruefen','demo_stornierungen_ausfuehren','verschiebung_pruefen','demo_verschieben'].includes(name)) {
           const {error}=await admin.rpc('demo_reconcile_no_shows');
           if(error)throw new Error('Reservierungsstatus konnte nicht aktualisiert werden.');
         }
@@ -327,6 +339,43 @@ export async function handleAgent(request: Request): Promise<Response> {
           const {id}=z.object({id:z.string().uuid()}).parse(args);
           const {data,error}=await admin.rpc('demo_quote_cancellation',{p_user:userId,p_id:id});
           if(error)throw new Error('Diese Reservierung kann nicht mehr storniert werden.');return data;
+        }
+        if(name==='stornierungen_pruefen'){
+          const {ids}=z.object({ids:z.array(z.string().uuid()).min(1).max(50)}).parse(args);
+          const {data,error}=await admin.rpc('demo_quote_cancellation_batch',{p_user:userId,p_ids:[...new Set(ids)]});
+          if(error)throw new Error('Mindestens eine Reservierung existiert nicht in deinem Konto oder ist nicht mehr stornierbar. Es wurde nichts geändert.');return data;
+        }
+        if(name==='demo_stornierungen_ausfuehren'){
+          const {batchId}=z.object({batchId:z.string().uuid()}).parse(args);
+          if(!authorizedBatch||batchId!==authorizedBatch.batchId||!validBatchConfirmation(authorizedBatch,body.batchConfirmationId,Date.now()))throw new Error('Keine gültige ausdrückliche Bestätigung. Bitte nutze den Bestätigungsknopf einer aktuellen Vorschau.');
+          const {data,error}=await admin.rpc('demo_confirm_cancellation_batch',{p_user:userId,p_batch:batchId});
+          if(error)throw new Error('Vorschau abgelaufen oder ein Status hat sich geändert. Es wurde nichts storniert; bitte erneut prüfen.');return data;
+        }
+        if(name==='verschiebung_pruefen'){
+          const a=z.object({id:z.string().uuid(),startsAt:z.string(),hours:z.number().positive().max(72)}).parse(args);
+          const start=Date.parse(a.startsAt);
+          if(!Number.isFinite(start)||start<Date.now())throw new Error('Der neue Termin muss in der Zukunft liegen.');
+          const {data:old,error:oldError}=await db.from('demo_reservations').select('id,facility_id,level,bay,reservation_status').eq('id',a.id).eq('user_id',userId).maybeSingle();
+          if(oldError||!old)throw new Error('Diese Reservierung gibt es in deinem Konto nicht.');
+          if(old.reservation_status!=='confirmed')throw new Error('Nur bestätigte Reservierungen können verschoben werden.');
+          const price=reservationPrice(a.hours,old.facility_id,start);
+          if(price===null)throw new Error('Für diese Dauer gibt es keinen Demo-Tarif.');
+          await refreshHeld();
+          const others=held.filter(h=>!(h.facility_id===old.facility_id&&h.level===old.level&&h.bay===old.bay));
+          const ok=(level:string,bay:string)=>bookingAllowed(old.facility_id,level,bay,a.hours,agentDefaultFilters,others);
+          const spot=ok(old.level,old.bay)?{level:old.level,bay:old.bay}:agentSpots(old.facility_id,others).find(s=>!s.occupied&&!s.unknown&&ok(s.level,s.bay));
+          if(!spot)throw new Error('Im gleichen Parkhaus ist kein passender Demo-Stellplatz frei. Es wurde nichts geändert.');
+          const {data:cancellation,error}=await admin.rpc('demo_quote_cancellation_batch',{p_user:userId,p_ids:[old.id]});
+          if(error||!cancellation)throw new Error('Die alte Reservierung ist nicht mehr stornierbar.');
+          const c=cancellation as unknown as CancellationBatchQuote;
+          return {id:crypto.randomUUID(),reservationId:old.id,cancellation:c,facility:old.facility_id,level:spot.level,bay:spot.bay,startsAt:new Date(start).toISOString(),hours:a.hours,price,expiresAt:c.expiresAt} satisfies RescheduleOffer;
+        }
+        if(name==='demo_verschieben'){
+          const {offerId}=z.object({offerId:z.string().uuid()}).parse(args);
+          const o=authorizedReschedule;
+          if(!o||offerId!==o.id||!validRescheduleConfirmation(o,body.rescheduleConfirmationId,Date.now()))throw new Error('Keine gültige ausdrückliche Bestätigung. Bitte nutze den Bestätigungsknopf eines aktuellen Angebots.');
+          const {data,error}=await admin.rpc('demo_reschedule',{p_user:userId,p_batch:o.cancellation.batchId,p_id:o.id,p_facility:o.facility,p_level:o.level,p_bay:o.bay,p_start:o.startsAt,p_hours:o.hours,p_price:o.price,p_tariff:tariffs[o.facility] as unknown as Json});
+          if(error)throw new Error('Verschieben nicht möglich (Platz oder Status geändert). Es wurde nichts geändert.');return data;
         }
         if(name==='demo_stornieren'){
           const {quoteId}=z.object({quoteId:z.string().uuid()}).parse(args);
@@ -466,7 +515,7 @@ export async function handleAgent(request: Request): Promise<Response> {
       };
       try {
         const input = historyInput(messages);
-        const cancellationInstructions = `Stornierungsbedingungen: >3h 0%, 2–3h inkl. exakt 2h/3h 25%, 1–<2h inkl. exakt 1h 50%, <1h 100%, No-Show 100%. Grundlage gespeicherter Gesamtparkpreis vor Punkten/Gutscheinen. 15 Minuten Kulanz nach Beginn. Keine echte Abbuchung, keine Punkte/Stempel. Bei Stornierungswunsch meine_reservierungen und stornierung_pruefen verwenden; nie Text als Zustimmung akzeptieren. demo_stornieren nur mit separatem Bestätigungsklick. Danach reservierungsstatus lesen, Erfolg nur bei reservation_status cancelled. Autorisierte Gebührenvorschau: ${authorizedCancellation ? JSON.stringify(authorizedCancellation) : 'KEINE'}.`;
+        const cancellationInstructions = `Stornierungsbedingungen: mehr als 2h vor Beginn kostenlos, 1–2h inkl. exakt 2h und exakt 1h 50%, <1h 100%, No-Show 100%. Verschieben = Stornierung der alten Reservierung nach diesen Regeln plus neue Reservierung zum aktuellen Tarif. Reservierungsverwaltung: Für Anzeigen/Suchen/Erklären immer meine_reservierungen nutzen und nur echte Daten nennen (Zeiten in Europe/Berlin). Für eine, mehrere, alle zukünftigen oder alle Reservierungen eines Tages: passende bestätigte IDs aus meine_reservierungen wählen und EINMAL stornierungen_pruefen mit allen IDs aufrufen; die Oberfläche zeigt Liste, Gebühr je Reservierung und Gesamtkosten sowie die Frage 'Möchtest du diese Reservierungen wirklich stornieren?'. Gibt es keine passenden bestätigten Reservierungen, sage das klar und erfinde nichts. demo_stornierungen_ausfuehren nur mit separatem Bestätigungsklick; danach meine_reservierungen lesen und das tatsächliche Ergebnis melden. Zum Verschieben verschiebung_pruefen; demo_verschieben nur per Bestätigungsklick, danach reservierungsstatus der neuen ID lesen. Autorisierte Sammelvorschau: ${authorizedBatch?JSON.stringify(authorizedBatch):'KEINE'}. Autorisiertes Verschiebungsangebot: ${authorizedReschedule?JSON.stringify(authorizedReschedule):'KEINES'}. Grundlage gespeicherter Gesamtparkpreis vor Punkten/Gutscheinen. 15 Minuten Kulanz nach Beginn. Keine echte Abbuchung, keine Punkte/Stempel. Bei Stornierungswunsch meine_reservierungen und stornierung_pruefen verwenden; nie Text als Zustimmung akzeptieren. demo_stornieren nur mit separatem Bestätigungsklick. Danach reservierungsstatus lesen, Erfolg nur bei reservation_status cancelled. Autorisierte Gebührenvorschau: ${authorizedCancellation ? JSON.stringify(authorizedCancellation) : 'KEINE'}.`;
         const instructions = cancellationInstructions + `Du bist ParkPulse AI Agent. Antworte ausschließlich deutsch. Alle Parkdaten sind fiktiv, keine Live-Verfügbarkeit oder echte Zahlung. Aktuelle Zeit ${new Date().toISOString()}. Die einzige Stadt ist Demostadt (Zeitzone Europe/Berlin); frage nicht nach einer Stadt, wenn keine angegeben ist. Ein fehlendes Gebiet bedeutet alle sechs Parkhäuser. Nutze echte Tools in sinnvoller Reihenfolge: Suche, Fahrzeugkompatibilität, Verfügbarkeit, Preise, Punkte, Angebote vergleichen. Budget ist hart; keine hypothetischen Rabatte abziehen. Bei fehlender Dauer, Starttermin oder Budget gezielt nachfragen. 'Jetzt' bedeutet aktuelle Zeit; nenne den genauen Termin. Fahrzeugprofil darf Standardmaße liefern; bei geänderten Fahrzeugen Maße passend prüfen. Die Oberfläche zeigt die drei Angebotskarten automatisch. Wiederhole keine Vergleichstabelle; begründe kompakt die Rangfolge. Zeige maximal drei Angebote aus angebote_vergleichen, begründe Rangfolge und nenne Preis, Demo-Entfernung, Ausstattung, passende freie Plätze und bedingte Punkte. Keine erfundenen Ergebnisse, keine eigenen Berechnungen. Bei null Treffern Budget nicht überschreiten; frage nach Anpassung. Reservierungen NUR bei Bestätigungsklick; Text allein ist keine Autorisierung. Nach demo_reservieren IMMER reservierungsstatus aufrufen und nur bei booked Erfolg behaupten. Nicht automatisch Alternativen buchen. Autorisiertes Angebot dieser Anfrage: ${authorizedOffer ? JSON.stringify(authorizedOffer) : "KEINES"}. Keine Geheimnisse oder Kontodaten erfragen.`;
         const { data: profile } = await db
           .from("profiles")
@@ -487,7 +536,15 @@ export async function handleAgent(request: Request): Promise<Response> {
               instructions,
               tools,
               tool_choice:
-                authorizedCancellation && step === 0
+                authorizedBatch && step === 0
+                  ? { type: "function", name: "demo_stornierungen_ausfuehren" }
+                  : authorizedBatch && step === 1
+                    ? { type: "function", name: "meine_reservierungen" }
+                  : authorizedReschedule && step === 0
+                    ? { type: "function", name: "demo_verschieben" }
+                  : authorizedReschedule && step === 1
+                    ? { type: "function", name: "reservierungsstatus" }
+                  : authorizedCancellation && step === 0
                   ? { type: "function", name: "demo_stornieren" }
                   : authorizedCancellation && step === 1
                     ? { type: "function", name: "reservierungsstatus" }
