@@ -1,2 +1,2 @@
-- [ ] Agent: Chat-Eingabe, Sammelstornierung, Verschieben, neue Stornoregeln (in Arbeit)
-- [ ] n8n: Architektur-Analyse und Integrationsplan erklären (nur Plan, nichts bauen)
+- [x] Agent: Chat-Eingabe, Sammelstornierung, Verschieben, neue Stornoregeln
+- [x] n8n: Architektur-Analyse und Integrationsplan erklären (nur Plan, nichts bauen)
