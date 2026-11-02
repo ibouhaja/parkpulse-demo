@@ -31,7 +31,6 @@ describe('Stornierung und No-Show', () => {
     expect(validCancellationConfirmation(q,'q',start+1)).toBe(false);
     expect(validCancellationConfirmation({...q,feeCents:0},'q',start)).toBe(false);
   });
-  });
   const item=(id:string,price:number,percent:number)=>({id,reservationId:'r'+id,facilityId:'quartier',level:'P1',bay:'B01',startsAt:r.starts_at,hours:2,price,percent,feeCents:Math.round(Math.round(price*100)*percent/100)});
   it('Sammelstornierung summiert Gebühren je Reservierung', () => {
     const items=[item('a',9.99,0),item('b',9.99,50),item('c',4,100)];
