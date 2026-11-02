@@ -50,6 +50,13 @@
       "when": 1793536355440,
       "tag": "0006_reservation_no_show_scheduler",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793611983901,
+      "tag": "0007_agent_batch_cancel_reschedule",
+      "breakpoints": true
     }
   ]
 }

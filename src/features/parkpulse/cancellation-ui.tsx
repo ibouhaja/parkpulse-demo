@@ -11,13 +11,12 @@ export function CancellationTerms() {
   return <div className="space-y-2 text-xs text-muted-foreground">
     <h4 className="font-semibold text-foreground">Stornierungsbedingungen · Demo</h4>
     <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1">
-      <dt>Mehr als 3 Stunden vor Beginn</dt><dd>0 %</dd>
-      <dt>2 bis 3 Stunden vor Beginn</dt><dd>25 %</dd>
-      <dt>1 bis unter 2 Stunden vor Beginn</dt><dd>50 %</dd>
+      <dt>Mehr als 2 Stunden vor Beginn</dt><dd>kostenlos</dd>
+      <dt>1 bis 2 Stunden vor Beginn</dt><dd>50 %</dd>
       <dt>Weniger als 1 Stunde vor Beginn</dt><dd>100 %</dd>
       <dt>Nicht erschienen (No-Show)</dt><dd>100 %</dd>
     </dl>
-    <p>Genau 2 und 3 Stunden: 25 %. Genau 1 Stunde: 50 %. Grundlage ist der angezeigte Gesamtparkpreis vor Bonuspunkten und Gutscheinen.</p>
+    <p>Genau 2 Stunden und genau 1 Stunde: 50 %. Verschieben gilt als Stornierung der alten Reservierung. Grundlage ist der angezeigte Gesamtparkpreis vor Bonuspunkten und Gutscheinen.</p>
     <p>Demo-Kulanzfrist: 15 Minuten nach Beginn. Ohne Check-in folgt No-Show. Keine Punkte oder Treuestempel bei Stornierung oder No-Show. Nur simulierte Gebühren, keine echte Abbuchung.</p>
   </div>;
 }
