@@ -3,7 +3,7 @@ import { defaultPreferences,normalizePreferences } from '@/features/parkpulse/pr
 import type { Json } from '@/integrations/supabase/types';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useState, type FormEvent } from 'react';
-import { Save } from 'lucide-react';
+import { Save, CircleParking, Gift, History, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { facilities } from '@/features/parkpulse/data';
@@ -48,6 +48,7 @@ function Profile() {
     if (!error) await refreshProfile();setBusy(false);
   };
   return <><PageHeading title="Dein Profil." subtitle="Nur du kannst diese Angaben sehen und bearbeiten. Bitte nur fiktive Kennzeichen eingeben." eyebrow="MEIN KONTO"/>
+    <nav className="profile-shortcuts" aria-label="Mein ParkPulse">{[{to:'/parksession',label:'Parksession',icon:CircleParking},{to:'/praemien',label:'Rewards & Gutscheine',icon:Gift},{to:'/verlauf',label:'Parkverlauf',icon:History},{to:'/benachrichtigungen',label:'Benachrichtigungen',icon:Bell}].map(item=><Button asChild variant="outline" key={item.to}><Link to={item.to}><item.icon/>{item.label}</Link></Button>)}</nav>
     <section className="mb-6 space-y-2"><h2 className="font-semibold">Reservierungsverlauf · Demo-Gebühren</h2><p>{resolvedReservations.length} Stornierungen / No-Shows · {money(resolvedReservations.reduce((sum,r)=>sum+(r.fee_cents??0),0)/100)} simulierte Gebühren · keine echte Abbuchung</p><Button asChild variant="outline"><Link to="/reservierungen">Reservierungen und Gebühren ansehen</Link></Button></section>
     <div className="session-page"><div className="active-panel text-left">{!loaded ? <p>Profil wird geladen …</p> :
       <form onSubmit={submit} className="space-y-4">
