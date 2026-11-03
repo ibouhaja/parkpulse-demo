@@ -131,3 +131,4 @@
  .is-map-page .city-marker{min-width:84px;max-width:96px}.is-map-page .city-marker>span{font-size:8px;gap:3px}.is-map-page .city-marker>span svg{width:9px;height:9px}.is-map-page .sheet-actions{position:sticky;bottom:0;background:var(--card);padding:8px 0 0;z-index:2}
  .is-map-page .sheet-actions>a:last-child{font-size:12px!important}.is-map-page .sheet-actions>a:last-child:after{content:none}.is-map-page .sheet-actions{grid-template-columns:1fr}.is-map-page .sheet-actions>a:last-child{display:none}
 }
+@media(max-width:720px){.is-map-page .sheet-actions{grid-template-columns:minmax(0,1fr) 46px}.is-map-page .sheet-actions>a:last-child{display:flex;font-size:0!important}.is-map-page .sheet-actions>a:last-child:after{content:'P';font-size:21px}.is-map-page .city-marker strong{font-size:14px}}
