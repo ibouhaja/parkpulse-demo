@@ -1,4 +1,4 @@
 - [x] Agent: Chat-Eingabe, Sammelstornierung, Verschieben, neue Stornoregeln
 - [x] n8n: Architektur-Analyse und Integrationsplan erklären (nur Plan, nichts bauen)
-- [ ] Mobile map redesign, navigation and accessible Demo information; verify iPhone/Android layouts.
+- [x] Mobile map redesign, navigation and accessible Demo information; verify iPhone/Android layouts.
 - [ ] n8n connection and end-to-end delivery verification — awaiting secure webhook URL and credentials.
