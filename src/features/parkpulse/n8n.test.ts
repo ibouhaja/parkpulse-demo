@@ -38,6 +38,23 @@ describe('n8n Demo-Integration', () => {
     expect(body.demo).toBe(true);
     expect(body.reservation.status).toBe('cancelled');
   });
+  it('Webhook enthält Status, Garagenname, Start- und Endzeit', () => {
+    const body = JSON.parse(webhookBody({
+      id: 'e2', event_type: 'reservation.confirmed', reservation_id: 'r2', previous_reservation_id: null,
+      payload: { reservation: { status: 'confirmed', facilityId: 'quartier', startsAt: '2026-11-10T08:00:00.000Z', hours: 2.5 } },
+      created_at: '2026-11-02T10:00:00Z', attempts: 1,
+    }));
+    expect(body.status).toBe('confirmed');
+    expect(body.facilityName).toBe('Parkhaus am Quartier');
+    expect(body.startsAt).toBe('2026-11-10T08:00:00.000Z');
+    expect(body.endsAt).toBe('2026-11-10T10:30:00.000Z');
+  });
+  it('Webhook ohne Reservierungsdaten liefert null-Felder', () => {
+    const body = JSON.parse(webhookBody({ id: 'e3', event_type: 'reservation.no_show', reservation_id: 'r3', previous_reservation_id: null, payload: {}, created_at: '2026-11-02T10:00:00Z', attempts: 1 }));
+    expect(body.status).toBeNull();
+    expect(body.facilityName).toBeNull();
+    expect(body.endsAt).toBeNull();
+  });
   it('nur HTTPS-Webhook-URLs', () => {
     expect(validWebhookUrl('https://n8n.example.com/webhook/x')).toBe(true);
     expect(validWebhookUrl('http://n8n.example.com/webhook/x')).toBe(false);
