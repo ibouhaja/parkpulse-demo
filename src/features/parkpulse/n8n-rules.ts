@@ -1,4 +1,5 @@
 // Pure, runtime-agnostic rules for the n8n demo integration (Web Crypto only, works on Workers).
+import { facilities } from './data';
 export const N8N_MAX_ATTEMPTS = 8;
 export const N8N_TIMEOUT_MS = 5000;
 
@@ -14,6 +15,11 @@ export function deliveryOutcome(status: number | null, attempts: number): 'sent'
 }
 export type OutboxEvent = { id: string; event_type: string; reservation_id: string; previous_reservation_id: string | null; payload: unknown; created_at: string; attempts: number };
 export function webhookBody(e: OutboxEvent) {
+  const r = ((e.payload as { reservation?: Record<string, unknown> })?.reservation ?? {}) as Record<string, unknown>;
+  const startsAt = typeof r['startsAt'] === 'string' ? (r['startsAt'] as string) : null;
+  const hours = Number(r['hours'] ?? 0);
+  const endsAt = startsAt && Number.isFinite(hours) ? new Date(Date.parse(startsAt) + hours * 3600000).toISOString() : null;
+  const facilityName = facilities.find(f => f.id === r['facilityId'])?.name ?? null;
   return JSON.stringify({
     eventId: e.id,
     type: e.event_type,
@@ -23,6 +29,10 @@ export function webhookBody(e: OutboxEvent) {
     notice: 'Demo – fiktive Parkdaten, keine Live-Verfügbarkeit, keine echte Zahlung.',
     reservationId: e.reservation_id,
     previousReservationId: e.previous_reservation_id,
+    status: r['status'] ?? null,
+    facilityName,
+    startsAt,
+    endsAt,
     ...(e.payload as object),
   });
 }

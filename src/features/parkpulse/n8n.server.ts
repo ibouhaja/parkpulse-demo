@@ -20,7 +20,7 @@ export async function dispatchN8nEvents(limit = 10): Promise<{ configured: boole
           signal: AbortSignal.timeout(N8N_TIMEOUT_MS),
           headers: {
             'Content-Type': 'application/json',
-            'X-ParkPulse-Auth': secret!,
+            'X-ParkPulse-Secret': secret!,
             'X-ParkPulse-Event-Id': e.id,
             'X-ParkPulse-Timestamp': timestamp,
             'X-ParkPulse-Signature': `sha256=${await hmacHex(secret!, `${timestamp}.${body}`)}`,
