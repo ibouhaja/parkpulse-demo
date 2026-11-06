@@ -277,22 +277,21 @@ function AgentWindow({
                                   <h3>{o.name}</h3>
                                 </div>
                                 <strong className="agent-offer-price">
-                                  {money(o.price)} <small>für {o.hours} Stunden</small>
+                                  {money(o.price, lang)} <small>{t("für")} {o.hours} {t("Stunden")}</small>
                                 </strong>
                                 <p>
                                   <MapPin size={14} />
-                                  {o.distance.toLocaleString("de-DE")} km · Demo-Entfernung
+                                  {o.distance.toLocaleString(locale)} {t("km · Demo-Entfernung")}
                                 </p>
                                 <p>
-                                  {o.equipment.join(" · ") || "Standardstellplatz"} · {o.available}{" "}
-                                  passende freie Plätze
+                                  {o.equipment.join(" · ") || t("Standardstellplatz")} · {o.available}{" "}
+                                  {t("passende freie Plätze")}
                                 </p>
                                 <p>
-                                  {o.points.toLocaleString("de-DE")} mögliche Punkte bei positiver
-                                  Zahlung ohne Gutschein
+                                  {o.points.toLocaleString(locale)} {t("mögliche Punkte bei positiver Zahlung ohne Gutschein")}
                                 </p>
                                 <p>
-                                  {new Date(o.startsAt).toLocaleString("de-DE", {
+                                  {new Date(o.startsAt).toLocaleString(locale, {
                                     timeZone: "Europe/Berlin",
                                   })}{" "}
                                   · {o.level} / {o.bay}
@@ -304,7 +303,9 @@ function AgentWindow({
                                   }
                                   onClick={() =>
                                     void send(
-                                      `Ich bestätige ausdrücklich die Demo-Reservierung: ${o.name}, ${o.level}/${o.bay}, ${new Date(o.startsAt).toLocaleString("de-DE", { timeZone: "Europe/Berlin" })}, ${o.hours} Stunden für ${money(o.price)}.`,
+                                      lang === "en"
+                                        ? `I explicitly confirm the demo reservation: ${o.name}, ${o.level}/${o.bay}, ${new Date(o.startsAt).toLocaleString(locale, { timeZone: "Europe/Berlin" })}, ${o.hours} hours for ${money(o.price, lang)}.`
+                                        : `Ich bestätige ausdrücklich die Demo-Reservierung: ${o.name}, ${o.level}/${o.bay}, ${new Date(o.startsAt).toLocaleString(locale, { timeZone: "Europe/Berlin" })}, ${o.hours} Stunden für ${money(o.price, lang)}.`,
                                       o.id,
                                     )
                                   }
@@ -312,10 +313,10 @@ function AgentWindow({
                                   {booked.has(o.id) ? (
                                     <>
                                       <Check />
-                                      Reservierungsstatus geprüft
+                                      {t("Reservierungsstatus geprüft")}
                                     </>
                                   ) : (
-                                    "Demo-Reservierung bestätigen"
+                                    t("Demo-Reservierung bestätigen")
                                   )}
                                 </Button>
                               </article>
@@ -324,32 +325,32 @@ function AgentWindow({
                         )}
                       {p.toolName === 'stornierung_pruefen' && p.state === 'output-available' && p.output !== null && typeof p.output === 'object' && (()=>{
                         const q=p.output as CancellationQuote;
-                        return <div className="space-y-3 py-3"><p>Parkpreis vor Punkten/Gutscheinen: {money(q.price)}</p><p>Simulierte Stornierungsgebühr ({q.percent} %): <strong>{money(q.feeCents/100)}</strong></p><CancellationTerms/><div className="flex flex-wrap gap-2"><Button disabled={busy||locked||dismissedQuotes.includes(q.id)||Date.now()>q.expiresAt} onClick={()=>{setDismissedQuotes(v=>[...v,q.id]);void send(`Ich bestätige ausdrücklich die Demo-Stornierung der Reservierung ${q.reservationId} für ${money(q.feeCents/100)} simulierte Gebühr.`,undefined,q.id);}}>Stornierung bestätigen · {money(q.feeCents/100)} (Demo)</Button><Button variant="outline" disabled={busy||dismissedQuotes.includes(q.id)} onClick={()=>setDismissedQuotes(v=>[...v,q.id])}>Abbrechen</Button></div></div>;
+                        return <div className="space-y-3 py-3"><p>{t("Parkpreis vor Punkten/Gutscheinen:")} {money(q.price, lang)}</p><p>{t("Simulierte Stornierungsgebühr")} ({q.percent} %): <strong>{money(q.feeCents/100, lang)}</strong></p><CancellationTerms/><div className="flex flex-wrap gap-2"><Button disabled={busy||locked||dismissedQuotes.includes(q.id)||Date.now()>q.expiresAt} onClick={()=>{setDismissedQuotes(v=>[...v,q.id]);void send(lang === "en" ? `I explicitly confirm the demo cancellation of reservation ${q.reservationId} for a simulated fee of ${money(q.feeCents/100, lang)}.` : `Ich bestätige ausdrücklich die Demo-Stornierung der Reservierung ${q.reservationId} für ${money(q.feeCents/100, lang)} simulierte Gebühr.`,undefined,q.id);}}>{t("Stornierung bestätigen")} · {money(q.feeCents/100, lang)} ({t("Demo")})</Button><Button variant="outline" disabled={busy||dismissedQuotes.includes(q.id)} onClick={()=>setDismissedQuotes(v=>[...v,q.id])}>{t("Abbrechen")}</Button></div></div>;
                       })()}
                       {p.toolName === 'stornierungen_pruefen' && p.state === 'output-available' && p.output !== null && typeof p.output === 'object' && (()=>{
                         const q=p.output as CancellationBatchQuote;
                         const done=dismissedQuotes.includes(q.batchId);
                         return <div className="agent-batch" data-testid="cancel-batch">
-                          <ul>{q.items.map(i=><li key={i.id}><span><strong>{facilityName(i.facilityId)}</strong> · {i.level}/{i.bay}<br/><small>{when(i.startsAt)} · {i.hours} Std. · Preis {money(i.price)}</small></span><span>{i.percent===0?'kostenlos':`${i.percent} %`} · <strong>{money(i.feeCents/100)}</strong></span></li>)}</ul>
-                          <p className="agent-batch-total">Gesamte simulierte Stornogebühr: <strong>{money(q.totalFeeCents/100)}</strong></p>
-                          <p>Möchtest du {q.items.length===1?'diese Reservierung':`diese ${q.items.length} Reservierungen`} wirklich stornieren?</p>
-                          <div className="flex flex-wrap gap-2"><Button disabled={busy||locked||done||Date.now()>q.expiresAt} onClick={()=>{setDismissedQuotes(v=>[...v,q.batchId]);void send(`Ich bestätige ausdrücklich die Demo-Stornierung von ${q.items.length} Reservierung(en) für insgesamt ${money(q.totalFeeCents/100)} simulierte Gebühr.`,undefined,undefined,{batchConfirmationId:q.batchId});}}>Ja, stornieren · {money(q.totalFeeCents/100)} (Demo)</Button><Button variant="outline" disabled={busy||done} onClick={()=>setDismissedQuotes(v=>[...v,q.batchId])}>Abbrechen</Button></div>
-                          {Date.now()>q.expiresAt&&!done&&<small>Vorschau abgelaufen – bitte den Agenten erneut fragen.</small>}
+                          <ul>{q.items.map(i=><li key={i.id}><span><strong>{facilityName(i.facilityId)}</strong> · {i.level}/{i.bay}<br/><small>{when(i.startsAt, locale)} · {i.hours} {t("Std.")} · {t("Preis")} {money(i.price, lang)}</small></span><span>{i.percent===0?t("kostenlos"):`${i.percent} %`} · <strong>{money(i.feeCents/100, lang)}</strong></span></li>)}</ul>
+                          <p className="agent-batch-total">{t("Gesamte simulierte Stornogebühr:")} <strong>{money(q.totalFeeCents/100, lang)}</strong></p>
+                          <p>{lang === "en" ? `Do you really want to cancel ${q.items.length===1?"this reservation":`these ${q.items.length} reservations`}?` : `Möchtest du ${q.items.length===1?"diese Reservierung":`diese ${q.items.length} Reservierungen`} wirklich stornieren?`}</p>
+                          <div className="flex flex-wrap gap-2"><Button disabled={busy||locked||done||Date.now()>q.expiresAt} onClick={()=>{setDismissedQuotes(v=>[...v,q.batchId]);void send(lang === "en" ? `I explicitly confirm the demo cancellation of ${q.items.length} reservation(s) for a total simulated fee of ${money(q.totalFeeCents/100, lang)}.` : `Ich bestätige ausdrücklich die Demo-Stornierung von ${q.items.length} Reservierung(en) für insgesamt ${money(q.totalFeeCents/100, lang)} simulierte Gebühr.`,undefined,undefined,{batchConfirmationId:q.batchId});}}>{t("Ja, stornieren")} · {money(q.totalFeeCents/100, lang)} ({t("Demo")})</Button><Button variant="outline" disabled={busy||done} onClick={()=>setDismissedQuotes(v=>[...v,q.batchId])}>{t("Abbrechen")}</Button></div>
+                          {Date.now()>q.expiresAt&&!done&&<small>{t("Vorschau abgelaufen – bitte den Agenten erneut fragen.")}</small>}
                         </div>;
                       })()}
                       {p.toolName === 'verschiebung_pruefen' && p.state === 'output-available' && p.output !== null && typeof p.output === 'object' && (()=>{
                         const o=p.output as RescheduleOffer; const fee=o.cancellation.totalFeeCents; const done=dismissedQuotes.includes(o.id);
                         return <div className="agent-batch" data-testid="reschedule-offer">
-                          <p>Neu: <strong>{facilityName(o.facility)}</strong> · {o.level}/{o.bay} · {when(o.startsAt)} · {o.hours} Std. · {money(o.price)}</p>
-                          <p>Stornogebühr der alten Reservierung ({o.cancellation.items[0]?.percent ?? 0} %): <strong>{money(fee/100)}</strong></p>
-                          <p className="agent-batch-total">Gesamt (Demo): <strong>{money(o.price+fee/100)}</strong></p>
-                          <div className="flex flex-wrap gap-2"><Button disabled={busy||locked||done||Date.now()>o.expiresAt} onClick={()=>{setDismissedQuotes(v=>[...v,o.id]);void send(`Ich bestätige ausdrücklich die Demo-Verschiebung auf ${when(o.startsAt)} (${o.level}/${o.bay}) für ${money(o.price)} plus ${money(fee/100)} Stornogebühr.`,undefined,undefined,{rescheduleConfirmationId:o.id});}}>Verschiebung bestätigen (Demo)</Button><Button variant="outline" disabled={busy||done} onClick={()=>setDismissedQuotes(v=>[...v,o.id])}>Abbrechen</Button></div>
+                          <p>{t("Neu:")} <strong>{facilityName(o.facility)}</strong> · {o.level}/{o.bay} · {when(o.startsAt, locale)} · {o.hours} {t("Std.")} · {money(o.price, lang)}</p>
+                          <p>{t("Stornogebühr der alten Reservierung")} ({o.cancellation.items[0]?.percent ?? 0} %): <strong>{money(fee/100, lang)}</strong></p>
+                          <p className="agent-batch-total">{t("Gesamt (Demo):")} <strong>{money(o.price+fee/100, lang)}</strong></p>
+                          <div className="flex flex-wrap gap-2"><Button disabled={busy||locked||done||Date.now()>o.expiresAt} onClick={()=>{setDismissedQuotes(v=>[...v,o.id]);void send(lang === "en" ? `I explicitly confirm the demo rescheduling to ${when(o.startsAt, locale)} (${o.level}/${o.bay}) for ${money(o.price, lang)} plus ${money(fee/100, lang)} cancellation fee.` : `Ich bestätige ausdrücklich die Demo-Verschiebung auf ${when(o.startsAt, locale)} (${o.level}/${o.bay}) für ${money(o.price, lang)} plus ${money(fee/100, lang)} Stornogebühr.`,undefined,undefined,{rescheduleConfirmationId:o.id});}}>{t("Verschiebung bestätigen (Demo)")}</Button><Button variant="outline" disabled={busy||done} onClick={()=>setDismissedQuotes(v=>[...v,o.id])}>{t("Abbrechen")}</Button></div>
                         </div>;
                       })()}
                       {p.toolName === "reservierungsstatus" && p.state === "output-available" && (
                         <Button asChild variant="outline">
                           <Link to="/reservierungen">
-                            Meine Demo-Reservierungen
+                            {t("Meine Demo-Reservierungen")}
                             <ArrowRight />
                           </Link>
                         </Button>
@@ -360,7 +361,7 @@ function AgentWindow({
               </MessageContent>
             </Message>
           ))}
-          {status === "submitted" && <Shimmer>Der Agent prüft deine Anfrage …</Shimmer>}
+          {status === "submitted" && <Shimmer>{t("Der Agent prüft deine Anfrage …")}</Shimmer>}
         </ConversationContent>
         <ConversationScrollButton />
       </Conversation>
@@ -371,15 +372,14 @@ function AgentWindow({
       )}
       {locked && (
         <p role="alert" className="agent-error">
-          Die letzte Anfrage ist noch offen oder wurde unterbrochen. Bitte prüfe deine
-          Reservierungen und beginne ein neues Gespräch.
+          {t("Die letzte Anfrage ist noch offen oder wurde unterbrochen. Bitte prüfe deine Reservierungen und beginne ein neues Gespräch.")}
         </p>
       )}
       <PromptInput className="agent-composer" onSubmit={({ text }) => send(text)}>
         <PromptInputTextarea
           ref={textarea}
-          aria-label="Nachricht an ParkPulse AI Agent"
-          placeholder="Frag ParkPulse, was ich für dich tun kann …"
+          aria-label={t("Nachricht an ParkPulse AI Agent")}
+          placeholder={t("Frag ParkPulse, was ich für dich tun kann …")}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           disabled={locked}
@@ -388,7 +388,7 @@ function AgentWindow({
           <PromptInputSubmit
             status={status}
             onStop={() => void stop()}
-            aria-label={busy ? "Antwort stoppen" : "Nachricht senden"}
+            aria-label={busy ? t("Antwort stoppen") : t("Nachricht senden")}
             disabled={locked || (!busy && !input.trim())}
           />
         </PromptInputFooter>
@@ -398,4 +398,4 @@ function AgentWindow({
 }
 
 const facilityName=(id:string)=>facilities.find(f=>f.id===id)?.name??id;
-const when=(iso:string)=>new Date(iso).toLocaleString("de-DE",{timeZone:"Europe/Berlin",dateStyle:"short",timeStyle:"short"});
+const when=(iso:string, locale:string="de-DE")=>new Date(iso).toLocaleString(locale,{timeZone:"Europe/Berlin",dateStyle:"short",timeStyle:"short"});
