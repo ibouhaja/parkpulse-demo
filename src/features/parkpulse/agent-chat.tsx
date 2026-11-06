@@ -162,6 +162,7 @@ function AgentWindow({
   locked: boolean;
 }) {
   const { userId } = useDemo();
+  const { t, lang, locale } = useI18n();
   const qc = useQueryClient();
   const textarea = useRef<HTMLTextAreaElement>(null);
   const [input, setInput] = useState("");
@@ -207,12 +208,12 @@ function AgentWindow({
     try {
       await sendMessage(
         { text },
-        { body: { threadId, ...(confirmationId ? {confirmationId} : {}), ...(cancellationConfirmationId ? {cancellationConfirmationId} : {}), ...extra } },
+        { body: { threadId, lang, ...(confirmationId ? {confirmationId} : {}), ...(cancellationConfirmationId ? {cancellationConfirmationId} : {}), ...extra } },
       );
       setInput("");
     } catch (e) {
       inFlight.current = false;
-      setLocalError(e instanceof Error ? e.message : "Nachricht konnte nicht gesendet werden.");
+      setLocalError(e instanceof Error ? e.message : t("Nachricht konnte nicht gesendet werden."));
     }
     textarea.current?.focus();
   };
@@ -238,8 +239,8 @@ function AgentWindow({
           {messages.length === 0 && (
             <div className="agent-empty">
               <img src={agentLogo} width={64} height={64} alt="" />
-              <h2>Hallo, ich bin dein ParkPulse Agent.</h2>
-              <p>Was brauchst du für deinen nächsten Parkplatz?</p>
+              <h2>{t("Hallo, ich bin dein ParkPulse Agent.")}</h2>
+              <p>{t("Was brauchst du für deinen nächsten Parkplatz?")}</p>
             </div>
           )}
           {messages.map((m) => (
@@ -254,7 +255,7 @@ function AgentWindow({
                         <ToolHeader
                           type="dynamic-tool"
                           toolName={p.toolName}
-                          title={labels[p.toolName] ?? p.toolName}
+                          title={t(labels[p.toolName] ?? p.toolName)}
                           state={p.state}
                         />
                         <ToolContent>
