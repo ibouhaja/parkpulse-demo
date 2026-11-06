@@ -33,6 +33,7 @@ import { money, facilities } from "./data";
 import type { AgentOffer } from "./agent-rules";
 import { CancellationTerms } from "./cancellation-ui";
 import type { CancellationQuote, CancellationBatchQuote, RescheduleOffer } from "./cancellation-rules";
+import { useI18n } from "./i18n";
 import agentLogo from "@/assets/parkpulse-agent.jpg";
 
 const labels: Record<string, string> = {
@@ -54,6 +55,7 @@ const labels: Record<string, string> = {
 };
 export function AgentPage({ threadId }: { threadId?: string }) {
   const { userId } = useDemo();
+  const { t } = useI18n();
   const list = useServerFn(agentThreads);
   const get = useServerFn(agentThread);
   const create = useServerFn(newAgentThread);
@@ -84,7 +86,7 @@ export function AgentPage({ threadId }: { threadId?: string }) {
       await qc.invalidateQueries({ queryKey: ["agent-threads", userId] });
       window.location.assign(`/assistent/${row.id}`);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Gespräch konnte nicht geöffnet werden.");
+      setError(e instanceof Error ? e.message : t("Gespräch konnte nicht geöffnet werden."));
     } finally {
       setBusy(false);
     }
@@ -97,15 +99,15 @@ export function AgentPage({ threadId }: { threadId?: string }) {
           <div className="eyebrow">DEIN PARKPULSE</div>
           <h1>ParkPulse AI Agent</h1>
         </div>
-        <span className="demo-pill">ECHTE KI · DEMO-PARKDATEN</span>
+        <span className="demo-pill">{t("ECHTE KI · DEMO-PARKDATEN")}</span>
       </div>
       <div className="agent-workspace">
         <aside className="agent-threads">
           <Button onClick={() => void newThread()} disabled={busy}>
             <Plus />
-            Neues Gespräch
+            {t("Neues Gespräch")}
           </Button>
-          <nav aria-label="Gespräche">
+          <nav aria-label={t("Gespräche")}>
             {threads.data?.map((t) => (
               <Button key={t.id} variant={t.id === threadId ? "secondary" : "ghost"} asChild>
                 <Link to="/assistent/$threadId" params={{ threadId: t.id }}>
@@ -125,14 +127,14 @@ export function AgentPage({ threadId }: { threadId?: string }) {
           {!threadId ? (
             <div className="agent-empty">
               <img src={agentLogo} width={80} height={80} alt="" />
-              <h2>Wo möchtest du parken?</h2>
+              <h2>{t("Wo möchtest du parken?")}</h2>
               <Button onClick={() => void newThread()} disabled={busy}>
-                Gespräch beginnen
+                {t("Gespräch beginnen")}
                 <ArrowRight />
               </Button>
             </div>
           ) : current.isPending ? (
-            <Shimmer>Gespräch wird geladen …</Shimmer>
+            <Shimmer>{t("Gespräch wird geladen …")}</Shimmer>
           ) : current.error ? (
             <p role="alert">{current.error.message}</p>
           ) : (
