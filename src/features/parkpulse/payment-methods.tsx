@@ -1,9 +1,10 @@
 import { siBitcoin, siKlarna, siPaypal, siVisa } from 'simple-icons';
 import type { PayMethod } from './data';
+import { useI18n } from './i18n';
 
 // Brand marks from Simple Icons, shown unmodified in their official brand colour for
 // identification only. ParkPulse is not affiliated with these brands; all payments are simulated.
-export const demoMethods = [
+const demoMethodDefs = [
   { id: 'paypal', name: 'PayPal', icon: siPaypal, hint: 'Simuliert · kein Konto' },
   { id: 'klarna', name: 'Klarna', icon: siKlarna, hint: 'Simuliert · keine Prüfung' },
   { id: 'visa', name: 'Visa', icon: siVisa, hint: 'Simuliert · keine Kartendaten' },
@@ -11,7 +12,7 @@ export const demoMethods = [
 ] as const satisfies readonly { id: PayMethod; name: string; icon: { path: string; hex: string; title: string }; hint: string }[];
 
 export function BrandLogo({ method, size = 32 }: { method: PayMethod; size?: number }) {
-  const m = demoMethods.find((d) => d.id === method);
+  const m = demoMethodDefs.find((d) => d.id === method);
   if (!m) return null;
   return (
     <svg role="img" aria-label={`${m.icon.title}-Logo`} viewBox="0 0 24 24" width={size} height={size} fill={`#${m.icon.hex}`}>
@@ -21,9 +22,10 @@ export function BrandLogo({ method, size = 32 }: { method: PayMethod; size?: num
 }
 
 export function PaymentTiles({ value, onChange }: { value: PayMethod | null; onChange: (m: PayMethod) => void }) {
+  const { t } = useI18n();
   return (
-    <div role="radiogroup" aria-label="Zahlungsmethode (Demo)" className="grid grid-cols-2 gap-3">
-      {demoMethods.map((m) => {
+    <div role="radiogroup" aria-label={t('Zahlungsmethode (Demo)')} className="grid grid-cols-2 gap-3">
+      {demoMethodDefs.map((m) => {
         const active = value === m.id;
         return (
           <button
@@ -36,7 +38,7 @@ export function PaymentTiles({ value, onChange }: { value: PayMethod | null; onC
           >
             <span className="flex h-12 w-full items-center justify-center rounded bg-background"><BrandLogo method={m.id} /></span>
             <strong className="text-sm">{m.name}</strong>
-            <span className="text-[11px] text-muted-foreground">{m.hint}</span>
+            <span className="text-[11px] text-muted-foreground">{t(m.hint)}</span>
           </button>
         );
       })}
