@@ -47,6 +47,9 @@ const en: Record<string, string> = {
   'Weniger suchen. Mehr ankommen.': 'Less searching. More arriving.',
   'Alle Daten sind fiktiv.': 'All data is fictional.',
   'Sprache wählen': 'Choose language',
+  'Konto': 'Account',
+  'Rewards-Punktestand': 'Rewards points balance',
+  'ParkPulse-Punktestand': 'ParkPulse points balance',
   // Shared
   'DEIN PARKPULSE': 'YOUR PARKPULSE',
   'Demostadt, Deutschland': 'Demostadt, Germany',
@@ -541,7 +544,6 @@ const en: Record<string, string> = {
   'Demo-Zahlbetrag:': 'Demo amount paid:',
   'Zahlart:': 'Payment method:',
   'Kostenlos': 'Free',
-  'Keine echte Zahlung': 'No real payment',
   // Profile page
   'Anzeigename, fiktives Kennzeichen und bevorzugtes Parkhaus in deinem ParkPulse-Konto.': 'Display name, fictional license plate and preferred parking garage in your ParkPulse account.',
   'Dein Profil.': 'Your profile.',
@@ -710,7 +712,6 @@ const en: Record<string, string> = {
   'Mit dem ParkPulse AI Agent fiktive Parkangebote vergleichen und bestätigte Demo-Reservierungen durchführen.': 'Compare fictional parking offers with the ParkPulse AI Agent and make confirmed demo reservations.',
   'AI Agent – Parkplatzgespräch': 'AI Agent – parking conversation',
   'Persönliches ParkPulse-Agentengespräch mit echten Werkzeugaufrufen und fiktiven Parkplatzangeboten.': 'Personal ParkPulse agent conversation with real tool calls and fictional parking offers.',
-  'Meine Demo-Reservierungen': 'My demo reservations',
   'Meine ParkPulse-Punkte und Stempel': 'My ParkPulse points and stamps',
   'Deine Demo-Parksession wird sicher in deinem Konto gespeichert. Alle Angaben sind fiktiv.': 'Your demo parking session is stored safely in your account. All details are fictional.',
 };

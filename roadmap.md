@@ -1,7 +1,7 @@
 # Roadmap
 
-- [ ] Gast-Modus: freundlicher Anmeldedialog bei Konto-Funktionen (Karte/Reservierung), Gast-Button verifiziert
-- [ ] i18n-Infrastruktur: LanguageProvider (DE Standard, localStorage), t(), DE|EN-Switcher im Header
-- [ ] Alle UI-Texte zweisprachig: Shell, Auth, Karte, Suche, Filter, Details, Plan, Session, Checkout, Reservierungen, Prämien, Verlauf, Profil, Benachrichtigungen, Assistent, Dialoge
-- [ ] AI-Agent antwortet in der gewählten Sprache
-- [ ] Tests: i18n-Unit-Tests, Browser-Tests (Gast, Sprachwechsel, Persistenz, mobil)
+- [x] Gast-Modus: Gast-Button verifiziert (funktionierte bereits), freundlicher Anmeldedialog bei Konto-Funktionen (Karte, Detailseite)
+- [x] i18n-Infrastruktur: LanguageProvider (DE Standard, localStorage), t(), DE|EN-Switcher im Header
+- [x] Alle UI-Texte zweisprachig: Shell, Auth, Karte, Suche, Filter, Details, Plan, 3D, Session, Checkout, Reservierungen, Prämien, Verlauf, Profil, Benachrichtigungen, Assistent, Dialoge
+- [x] AI-Agent antwortet in der gewählten Sprache (lang im Request, System-Prompt)
+- [x] Tests: i18n-Unit-Tests (10), Browser-Tests (Gast, Dialog, Sprachwechsel, Persistenz, mobil, angemeldete Seiten)
