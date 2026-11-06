@@ -11,12 +11,13 @@ export function findFacilities(query: string, evOnly: boolean, sort = 'distance'
   const term = query.trim().toLocaleLowerCase('de');
   return facilities.filter(p => (!evOnly || p.ev > 0) && `${p.name} ${p.area} ${p.address}`.toLocaleLowerCase('de').includes(term)).sort((a,b) => sort === 'price' ? a.price-b.price : a.distance-b.distance);
 }
-export const money = (value: number) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(value);
+export const money = (value: number, lang: 'de' | 'en' = 'de') => new Intl.NumberFormat(lang === 'en' ? 'en-GB' : 'de-DE', { style: 'currency', currency: 'EUR' }).format(value);
 export type Session = { id: string; facilityId: string; facilityName: string; startedAt: number; effectiveDemoTime: number; demoOffsetMs: number; level: string; bay: string; status: 'active' | 'checkout-pending'; endedAt?: number; finalDurationMs?: number; finalFee?: number; discount?: 'none' | 'SHOP2' | 'voucher' | 'shopping'; voucherId?: string | undefined; tariff?: import('./tariffs').Tariff };
 export type HistoryEntry = { id: string; facilityId: string; date: string; minutes: number; cost: number; session?: Session; level?: string; bay?: string; receiptId?: string; originalFee?: number; discountAmount?: number; stampEarned?: boolean; bonusPoints?: number; pointsBalance?: number; pointsHistory?: import('./points').PointEntry[] };
 export type Voucher = { id: string; value: number; earnedSessionId: string; usedSessionId?: string; source?: 'points'; pointsSpent?: number };
 export type PayMethod = 'card' | 'paypal' | 'klarna' | 'visa' | 'bitcoin';
 export const payMethodLabel: Record<PayMethod, string> = { card: 'Demo-Karte', paypal: 'PayPal', klarna: 'Klarna', visa: 'Visa', bitcoin: 'Bitcoin (BTC)' };
+export const payMethodLabelEn: Record<PayMethod, string> = { card: 'Demo card', paypal: 'PayPal', klarna: 'Klarna', visa: 'Visa', bitcoin: 'Bitcoin (BTC)' };
 export type Receipt = { id: string; sessionId: string; date: string; originalFee: number; discountAmount: number; payable: number; discount: string; payment: 'success' | 'free'; method?: PayMethod; level: string; bay: string };
 export type DemoState = { session: Session | null; history: HistoryEntry[]; stamps: number; vouchers: Voucher[]; shop2Used: boolean; receipts: Receipt[]; schemaVersion: 2; bonusPoints?: number; pointsBalance?: number; pointsHistory?: import('./points').PointEntry[] };
 export const initialState: DemoState = { session: null, stamps: 5, vouchers: [], shop2Used: false, receipts: [], schemaVersion: 2, pointsBalance: 0, pointsHistory: [], history: [

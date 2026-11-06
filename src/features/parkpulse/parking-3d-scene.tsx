@@ -11,7 +11,8 @@ import compact from '@/assets/models/parkpulse-fleet-hatchback.glb.asset.json';
 import sedan from '@/assets/models/parkpulse-real-sedan.glb.asset.json';
 import suv from '@/assets/models/parkpulse-showroom-suv.glb.asset.json';
 import van from '@/assets/models/parkpulse-fleet-van.glb.asset.json';
-import { cameraPose, demoModels, demoModelLabels, parkingPose, PARKING_ANIMATION_SECONDS, sceneSpots, spotCoordinates, type CameraView, type DemoModel } from './parking-3d-rules';
+import { cameraPose, demoModels, demoModelLabels, demoModelLabelsEn, parkingPose, PARKING_ANIMATION_SECONDS, sceneSpots, spotCoordinates, type CameraView, type DemoModel } from './parking-3d-rules';
+import { useI18n } from './i18n';
 import { parkingLevels, type ParkingSpot, type ParkingPosition, type ParkingFilters, type ParkingLevel } from './parking-plan';
 
 const urls = { compact: compact.url, sedan: sedan.url, suv: suv.url, van: van.url };
@@ -139,7 +140,7 @@ function Floor({ spots, selected, colors, onSelect }: { spots: ParkingSpot[]; se
 class SceneBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   override state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
-  override render() { return this.state.failed ? <p role="alert" className="parking-3d-error">Die 3D-Ansicht konnte nicht geladen werden. Bitte nutze den 2D-Parkhausplan oder lade die Seite neu.</p> : this.props.children; }
+  override render() { return this.state.failed ? <p role="alert" className="parking-3d-error">{typeof document !== 'undefined' && document.documentElement.lang === 'en' ? 'The 3D view could not be loaded. Please use the 2D garage plan or reload the page.' : 'Die 3D-Ansicht konnte nicht geladen werden. Bitte nutze den 2D-Parkhausplan oder lade die Seite neu.'}</p> : this.props.children; }
 }
 
 export default function Parking3DScene(props: Props) {
@@ -147,12 +148,14 @@ export default function Parking3DScene(props: Props) {
   const [expanded, setExpanded] = useState(false); const [reset, setReset] = useState(0);
   const [building, setBuilding] = useState(false);
   const wrapper = useRef<HTMLDivElement>(null);
+  const { t, lang } = useI18n();
+  const modelLabels = lang === 'en' ? demoModelLabelsEn : demoModelLabels;
   useEffect(() => { const css = getComputedStyle(document.documentElement); const values = {} as Palette; for (const key of ['concrete', 'ink', 'free', 'occupied', 'selected', 'unknown', 'paint', 'steel', 'wallbox', 'sky', ...colorKeys] as (keyof Palette)[]) values[key] = css.getPropertyValue(`--scene-${key}`).trim(); setColors(values); setReduced(window.matchMedia('(prefers-reduced-motion: reduce)').matches); }, []);
   const ownSpot = props.selected ?? props.saved;
   const floors = building ? parkingLevels : [props.level];
   return <div className={`parking-3d ${expanded ? 'is-expanded' : ''}`}>
-    <div className="parking-3d-tools"><label>Dein Demo-Fahrzeug<select aria-label="Dein Demo-Fahrzeug" value={props.model} onChange={e => props.onModel(e.target.value as DemoModel)}>{demoModels.map(m => <option key={m} value={m}>{demoModelLabels[m]}</option>)}</select></label><div><Button variant={building ? 'default' : 'outline'} size="icon" title="Gesamtes Parkhaus / einzelne Ebene" aria-label="Gesamtes Parkhaus" aria-pressed={building} onClick={() => setBuilding(b => !b)}><Building2/></Button><Button variant={view === 'bird' ? 'default' : 'outline'} size="icon" title="Vogelperspektive" aria-label="Vogelperspektive" onClick={() => { setView('bird'); setBuilding(false); setReset(r => r + 1); }}><Eye/></Button><Button variant={view === 'driver' ? 'default' : 'outline'} size="icon" title="Fahrerperspektive" aria-label="Fahrerperspektive" onClick={() => { setView('driver'); setBuilding(false); setReset(r => r + 1); }}><CarFront/></Button><Button variant="outline" size="icon" title="Ansicht zurücksetzen" aria-label="Ansicht zurücksetzen" onClick={() => { setView('isometric'); setBuilding(false); setReset(r => r + 1); }}><RotateCcw/></Button><Button variant="outline" size="icon" title={expanded ? 'Ansicht verkleinern' : 'Ansicht vergrößern'} aria-label={expanded ? 'Ansicht verkleinern' : 'Ansicht vergrößern'} onClick={() => setExpanded(e => !e)}>{expanded ? <Minimize/> : <Maximize/>}</Button><Button variant="outline" disabled={!props.selected} onClick={() => setRun(r => r + 1)}><Play/>Einparken (Demo)</Button></div></div>
-    <div className="parking-3d-canvas" ref={wrapper} data-scene-ready={ready ? 'true' : undefined} aria-label={`Interaktiver 3D-Parkhausplan ${props.level}`}>
+    <div className="parking-3d-tools"><label>{t('Dein Demo-Fahrzeug')}<select aria-label={t('Dein Demo-Fahrzeug')} value={props.model} onChange={e => props.onModel(e.target.value as DemoModel)}>{demoModels.map(m => <option key={m} value={m}>{modelLabels[m]}</option>)}</select></label><div><Button variant={building ? 'default' : 'outline'} size="icon" title={t('Gesamtes Parkhaus / einzelne Ebene')} aria-label={t('Gesamtes Parkhaus')} aria-pressed={building} onClick={() => setBuilding(b => !b)}><Building2/></Button><Button variant={view === 'bird' ? 'default' : 'outline'} size="icon" title={t('Vogelperspektive')} aria-label={t('Vogelperspektive')} onClick={() => { setView('bird'); setBuilding(false); setReset(r => r + 1); }}><Eye/></Button><Button variant={view === 'driver' ? 'default' : 'outline'} size="icon" title={t('Fahrerperspektive')} aria-label={t('Fahrerperspektive')} onClick={() => { setView('driver'); setBuilding(false); setReset(r => r + 1); }}><CarFront/></Button><Button variant="outline" size="icon" title={t('Ansicht zurücksetzen')} aria-label={t('Ansicht zurücksetzen')} onClick={() => { setView('isometric'); setBuilding(false); setReset(r => r + 1); }}><RotateCcw/></Button><Button variant="outline" size="icon" title={expanded ? t('Ansicht verkleinern') : t('Ansicht vergrößern')} aria-label={expanded ? t('Ansicht verkleinern') : t('Ansicht vergrößern')} onClick={() => setExpanded(e => !e)}>{expanded ? <Minimize/> : <Maximize/>}</Button><Button variant="outline" disabled={!props.selected} onClick={() => setRun(r => r + 1)}><Play/>{t('Einparken (Demo)')}</Button></div></div>
+    <div className="parking-3d-canvas" ref={wrapper} data-scene-ready={ready ? 'true' : undefined} aria-label={lang === 'en' ? `Interactive 3D garage plan ${props.level}` : `Interaktiver 3D-Parkhausplan ${props.level}`}>
       <SceneBoundary>{colors && <Canvas shadows frameloop="demand" dpr={[1, 1.5]} camera={{ position: [16, 23, 26], fov: 54, near: .1, far: 200 }} gl={{ antialias: true }}>
         <color attach="background" args={[colors.sky]}/><hemisphereLight args={[colors.paint, colors.steel, 1.2]}/><directionalLight position={[12, 28, 20]} intensity={2.5} castShadow shadow-mapSize={[1024,1024]} shadow-camera-left={-30} shadow-camera-right={30} shadow-camera-top={26} shadow-camera-bottom={-26} shadow-normalBias={.025}/>
         <Environment resolution={128}><Lightformer intensity={2} position={[0, 15, 0]} scale={[40, 30, 1]}/><Lightformer intensity={1} position={[-25, 5, 0]} rotation-y={Math.PI / 2} scale={[40, 10, 1]}/></Environment>

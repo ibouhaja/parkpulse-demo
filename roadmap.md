@@ -1,4 +1,7 @@
-- [x] Agent: Chat-Eingabe, Sammelstornierung, Verschieben, neue Stornoregeln
-- [x] n8n: Architektur-Analyse und Integrationsplan erklären (nur Plan, nichts bauen)
-- [x] Mobile map redesign, navigation and accessible Demo information; verify iPhone/Android layouts.
-- [ ] n8n connection and end-to-end delivery verification — awaiting secure webhook URL and credentials.
+# Roadmap
+
+- [ ] Gast-Modus: freundlicher Anmeldedialog bei Konto-Funktionen (Karte/Reservierung), Gast-Button verifiziert
+- [ ] i18n-Infrastruktur: LanguageProvider (DE Standard, localStorage), t(), DE|EN-Switcher im Header
+- [ ] Alle UI-Texte zweisprachig: Shell, Auth, Karte, Suche, Filter, Details, Plan, Session, Checkout, Reservierungen, Prämien, Verlauf, Profil, Benachrichtigungen, Assistent, Dialoge
+- [ ] AI-Agent antwortet in der gewählten Sprache
+- [ ] Tests: i18n-Unit-Tests, Browser-Tests (Gast, Sprachwechsel, Persistenz, mobil)

@@ -3,6 +3,7 @@ import { matchesSpot, type ParkingFilters, type ParkingLevel, type ParkingSpot }
 export const demoModels = ['compact', 'sedan', 'suv', 'van'] as const;
 export type DemoModel = typeof demoModels[number];
 export const demoModelLabels: Record<DemoModel, string> = { compact: 'Kleinwagen', sedan: 'Limousine', suv: 'SUV', van: 'Transporter' };
+export const demoModelLabelsEn: Record<DemoModel, string> = { compact: 'Compact car', sedan: 'Sedan', suv: 'SUV', van: 'Van' };
 export const demoModelDimensions = {
   compact: { vehicle: 'car', height: 1.5, length: 3.8, width: 1.7, weight: 1500 },
   sedan: { vehicle: 'car', height: 1.6, length: 4.5, width: 1.8, weight: 2000 },

@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { DemoProvider } from "@/features/parkpulse/store";
+import { LanguageProvider } from "@/features/parkpulse/i18n";
 import { ParkShell } from "@/features/parkpulse/shell";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
@@ -129,7 +130,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <DemoProvider><ParkShell><Outlet /></ParkShell></DemoProvider> breaks all child routes. */}
-      <DemoProvider><ParkShell><Outlet /></ParkShell></DemoProvider>
+      <LanguageProvider><DemoProvider><ParkShell><Outlet /></ParkShell></DemoProvider></LanguageProvider>
     </QueryClientProvider>
   );
 }

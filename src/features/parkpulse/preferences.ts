@@ -1,5 +1,6 @@
 import { defaultFilters, vehicleDefaults, type ParkingFilters, type Needs } from './parking-plan';
 export const preferenceVehicles = { car:'PKW', ev:'Elektroauto', suv:'SUV', van:'Transporter', camper:'Wohnmobil' } as const;
+export const preferenceVehiclesEn: Record<keyof typeof preferenceVehicles, string> = { car:'Car', ev:'Electric car', suv:'SUV', van:'Van', camper:'Motorhome' };
 export type Preferences = { vehicle: keyof typeof preferenceVehicles; height: number; width: number; needs: Needs };
 export function vehiclePreferences(vehicle: Preferences['vehicle']): Preferences {
  const preset=vehicle==='camper'?{height:3.1,width:2.3}:vehicleDefaults[vehicle];
