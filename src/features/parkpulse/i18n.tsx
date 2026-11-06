@@ -47,6 +47,9 @@ const en: Record<string, string> = {
   'Weniger suchen. Mehr ankommen.': 'Less searching. More arriving.',
   'Alle Daten sind fiktiv.': 'All data is fictional.',
   'Sprache wählen': 'Choose language',
+  'Konto': 'Account',
+  'Rewards-Punktestand': 'Rewards points balance',
+  'ParkPulse-Punktestand': 'ParkPulse points balance',
   // Shared
   'DEIN PARKPULSE': 'YOUR PARKPULSE',
   'Demostadt, Deutschland': 'Demostadt, Germany',
