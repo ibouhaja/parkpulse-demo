@@ -2,6 +2,7 @@ import type { Reservation } from './reservation-rules';
 
 export const NO_SHOW_GRACE_MINUTES = 15;
 export const reservationStatusLabels = { confirmed: 'Bestätigt', cancelled: 'Storniert', checked_in: 'Eingecheckt', completed: 'Abgeschlossen', no_show: 'No-Show' };
+export const reservationStatusLabelsEn: Record<keyof typeof reservationStatusLabels, string> = { confirmed: 'Confirmed', cancelled: 'Cancelled', checked_in: 'Checked in', completed: 'Completed', no_show: 'No-show' };
 export type ReservationStatus = keyof typeof reservationStatusLabels;
 export function reservationStatus(r: Reservation): ReservationStatus {
   return r.reservation_status ?? ({ booked: 'confirmed', arrived: 'checked_in', cancelled: 'cancelled', completed: 'completed' } as const)[r.status];

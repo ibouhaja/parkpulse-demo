@@ -26,7 +26,10 @@ export function tariffFeeCents(tariff: Tariff, startedAt: number, durationMs: nu
   }
   return total;
 }
-export function tariffDescription(t: Tariff) {
-  const eur = (c: number) => (c / 100).toLocaleString('de-DE', { minimumFractionDigits: 2 });
-  return t.version === 0 ? '2,00 € je angefangene Stunde · Bestandstarif' : `${eur(t.hourlyCents)} €/h · erste Stunde ${eur(t.firstHourCents)} € · abends 18–06 Uhr ${eur(t.eveningCents)} €/h · max. ${eur(t.dailyCapCents)} € je 24 h`;
+export function tariffDescription(t: Tariff, lang: 'de' | 'en' = 'de') {
+  const eur = (c: number) => (c / 100).toLocaleString(lang === 'en' ? 'en-GB' : 'de-DE', { minimumFractionDigits: 2 });
+  if (t.version === 0) return lang === 'en' ? '€2.00 per started hour · standard tariff' : '2,00 € je angefangene Stunde · Bestandstarif';
+  return lang === 'en'
+    ? `€${eur(t.hourlyCents)}/h · first hour €${eur(t.firstHourCents)} · evenings 6pm–6am €${eur(t.eveningCents)}/h · max. €${eur(t.dailyCapCents)} per 24 h`
+    : `${eur(t.hourlyCents)} €/h · erste Stunde ${eur(t.firstHourCents)} € · abends 18–06 Uhr ${eur(t.eveningCents)} €/h · max. ${eur(t.dailyCapCents)} € je 24 h`;
 }
